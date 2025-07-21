@@ -87,60 +87,6 @@ $credit_requis = (int)$covoiturage['prix'];
     </header>
 
     <main>
-    <!-- MANUEL UTILISATEUR - Bloc d'aide -->
-    <section class="user-manual" style="background:#f8f9fa;border-radius:14px;padding:32px;margin-bottom:32px;box-shadow:0 2px 12px rgba(0,184,148,0.08);max-width:800px;margin:32px auto 0 auto;">
-        <h2 style="color:#00b894;margin-top:0;margin-bottom:18px;font-size:2em;">📖 Manuel Utilisateur - EcoRide</h2>
-        <ul style="margin-bottom:18px;">
-            <li><strong>1. Présentation de l’application</strong></li>
-            <li><strong>2. Comptes de test</strong></li>
-            <li><strong>3. Parcours Visiteur</strong></li>
-            <li><strong>4. Parcours Utilisateur</strong></li>
-            <li><strong>5. FAQ</strong></li>
-        </ul>
-        <h3>1. Présentation de l’application</h3>
-        <p>EcoRide est une plateforme de covoiturage qui privilégie les déplacements écologiques et économiques.</p>
-        <ul>
-            <li>🔍 Rechercher des trajets partagés</li>
-            <li>🚗 S’inscrire et se connecter</li>
-            <li>💚 Favoriser les véhicules écologiques</li>
-            <li>⭐ Noter et commenter les conducteurs</li>
-        </ul>
-        <p><strong>Fonctionnalités principales :</strong></p>
-        <ul>
-            <li>Recherche avancée : Par ville, date, prix, durée</li>
-            <li>Système de crédits : 20 crédits offerts à l’inscription</li>
-            <li>Multi-rôles : Passager, chauffeur</li>
-        </ul>
-        <h3>2. Comptes de test</h3>
-        <ul>
-            <li>👤 Utilisateur Standard : <br>Email : user@ecoride.fr | Mot de passe : password | Crédits : 15 | Rôle : Utilisateur</li>
-            <li>👑 Administrateur : <br>Email : admin@ecoride.fr | Mot de passe : password | Rôle : Administrateur</li>
-            <li>🛡️ Modérateur : <br>Email : modo@ecoride.fr | Mot de passe : password | Rôle : Modérateur</li>
-        </ul>
-        <h3>3. Parcours Visiteur</h3>
-        <ul>
-            <li>🏠 Page d’accueil : <a href="../../pages/index.php">Accueil EcoRide</a></li>
-            <li>🔍 Rechercher un trajet : <a href="../../pages/covoiturages.php">Covoiturages</a></li>
-            <li>📋 Détails d’un trajet : Bouton "Détails" sur chaque trajet</li>
-            <li>📝 Créer un compte : <a href="../../pages/register.php">Créer un compte</a></li>
-        </ul>
-        <h3>4. Parcours Utilisateur</h3>
-        <ul>
-            <li>🔐 Se connecter : <a href="../../pages/login_secure.php">Connexion</a></li>
-            <li>👤 Espace personnel : <a href="../../pages/profil.php">Profil</a></li>
-            <li>🎫 Participer à un trajet : Recherche, Détails, Participer, Confirmation</li>
-        </ul>
-        <h3>5. FAQ</h3>
-        <ul>
-            <li><strong>Q :</strong> Combien coûte un trajet ?<br><strong>R :</strong> Le prix est fixé par le chauffeur. La plateforme prélève 2 crédits par trajet.</li>
-            <li><strong>Q :</strong> Comment obtenir des crédits ?<br><strong>R :</strong> 20 crédits offerts à l’inscription. Ensuite, en proposant des trajets.</li>
-            <li><strong>Q :</strong> Puis-je annuler ma participation ?<br><strong>R :</strong> Oui, tant que le trajet n’a pas commencé. Les crédits sont remboursés.</li>
-            <li><strong>Q :</strong> Comment noter un conducteur ?<br><strong>R :</strong> Après un trajet terminé, un formulaire de notation apparaît dans "Mes trajets".</li>
-            <li><strong>Q :</strong> Qu’est-ce qu’un trajet écologique ?<br><strong>R :</strong> Un trajet effectué avec un véhicule électrique.</li>
-            <li><strong>Q :</strong> Comment signaler un problème ?<br><strong>R :</strong> Lors de la notation, cocher "Signaler un problème" et décrire la situation.</li>
-        </ul>
-        <p style="font-size:13px;color:#636e72;margin-top:24px;">Version du manuel : 1.0<br>Date de création : 15 juillet 2025<br>Dernière mise à jour : 20 juillet 2025</p>
-    </section>
         <section class="detail-container" style="max-width:800px;margin:0 auto;padding:20px;">
             <div class="detail-card" style="background:white;border-radius:12px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
                 <!-- Filtres avancés -->
