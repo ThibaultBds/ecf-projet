@@ -98,14 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="index.php" class="forgot-link">Retour à l'accueil</a>
             </div>
 
-            <div style="margin-top:20px;padding:15px;background:#e3f2fd;border-radius:8px;text-align:center;">
-                <strong>Comptes de test :</strong><br>
-                <small>
-                    Admin: admin@ecoride.fr / password<br>
-                    Modo: modo@ecoride.fr / password<br>
-                    User: user@ecoride.fr / password
-                </small>
-            </div>
         </div>
     </main>
 

@@ -1,9 +1,8 @@
 <?php
 session_start();
 
-// Nouveau système d'import
-use function useClass;
-require_once 'config/autoload.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/autoload.php';
+// Charge la config + helpers BDD (fonction getDatabase)
 useClass('Database');
 
 // Vérifier l'authentification et le rôle
@@ -110,7 +109,7 @@ if ($_POST && isset($_POST['action'])) {
     <meta charset="UTF-8">
     <title>Administration - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/Ecoridegit/frontend/public/assets/css/style.css">
+    <link rel="stylesheet" href="/ecoride/frontend/public/assets/css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
@@ -260,7 +259,7 @@ if ($_POST && isset($_POST['action'])) {
     </form>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/Ecoridegit/frontend/public/assets/js/navbar.js"></script>
+    <script src="/ecoride/frontend/public/assets/js/navbar.js"></script>
     <script>
         function suspendUser(id) {
             if (confirm('Êtes-vous sûr de vouloir suspendre cet utilisateur ?')) {
@@ -332,7 +331,3 @@ if ($_POST && isset($_POST['action'])) {
     </script>
 </body>
 </html>
-</html>
-
-
-

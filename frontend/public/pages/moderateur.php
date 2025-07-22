@@ -1,12 +1,11 @@
 <?php
 session_start();
 
-// Nouveau système d'import
-use function useClass;
-require_once 'config/autoload.php';
+// Bon chemin pour l'autoloader
+require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/autoload.php';
 useClass('Database');
 
-// Vérifier l'authentification et le rôle
+// Vérification du rôle
 if (!isset($_SESSION['user']) || !in_array($_SESSION['user']['type'], ['Moderateur', 'Administrateur'])) {
     header("Location: login_secure.php");
     exit();
@@ -14,7 +13,7 @@ if (!isset($_SESSION['user']) || !in_array($_SESSION['user']['type'], ['Moderate
 
 $user = $_SESSION['user'];
 
-// Récupérer les avis en attente depuis la BDD
+// Récupérer les avis en attente et signalements
 try {
     $pdo = getDatabase();
     $stmt = $pdo->query("
@@ -29,7 +28,6 @@ try {
     ");
     $avis_en_attente = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Récupérer les signalements
     $stmt = $pdo->query("SELECT r.*, u.pseudo as user_pseudo FROM reports r JOIN users u ON r.user_id = u.id WHERE r.status = 'ouvert' ORDER BY r.created_at DESC");
     $signalements = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -39,7 +37,7 @@ try {
     $error = "Erreur lors du chargement des données.";
 }
 
-// Traitement des actions
+// Traitement des actions de modération
 $message = '';
 if (isset($_GET['action']) && isset($_GET['id']) && isset($pdo)) {
     try {
@@ -55,15 +53,11 @@ if (isset($_GET['action']) && isset($_GET['id']) && isset($pdo)) {
             $stmt->execute([$user['id'], $id]);
             $message = "Avis rejeté.";
         }
-        
-        // Log de l'activité
+        // Log activité
         $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)");
         $stmt->execute([$user['id'], 'Modération avis', "Action: $action, Avis ID: $id", $_SERVER['REMOTE_ADDR'] ?? '']);
-        
-        // Recharger les avis
         header('Location: moderateur.php?msg=' . urlencode($message));
         exit();
-        
     } catch (Exception $e) {
         $error = "Erreur lors du traitement : " . $e->getMessage();
     }
@@ -79,10 +73,13 @@ if (isset($_GET['msg'])) {
     <meta charset="UTF-8">
     <title>Modération - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/Ecoridegit/frontend/public/assets/css/style.css">
+    <!-- BON CHEMIN CSS -->
+    <link rel="stylesheet" href="/ecoride/frontend/public/assets/css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
+    <!-- NAVBAR PAR JS (ou place ici le HTML de la nav si tu veux une nav statique) -->
+    <nav id="main-navbar"></nav>
     <header class="container-header">
         <h1>
             <a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
@@ -150,13 +147,11 @@ if (isset($_GET['msg'])) {
                                     <span style="font-size:14px;color:#636e72;"><?= $avis['note'] ?>/5</span>
                                 </div>
                             </div>
-
                             <div style="background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:15px;">
                                 <p style="margin:0;color:#2d3436;font-style:italic;">
                                     "<?= htmlspecialchars($avis['commentaire']) ?>"
                                 </p>
                             </div>
-
                             <div style="display:flex;justify-content:flex-end;gap:10px;">
                                 <button onclick="rejectReview(<?= $avis['id'] ?>)"
                                         style="background:#e74c3c;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;">
@@ -196,14 +191,14 @@ if (isset($_GET['msg'])) {
         </div>
     </main>
 
-    <script src="/Ecoridegit/frontend/public/assets/js/navbar.js"></script>
+    <!-- BON CHEMIN JS NAVBAR -->
+    <script src="/ecoride/frontend/public/assets/js/navbar.js"></script>
     <script>
         function approveReview(id) {
             if (confirm('Approuver cet avis ?')) {
                 window.location.href = '?action=approve&id=' + id;
             }
         }
-
         function rejectReview(id) {
             if (confirm('Rejeter cet avis ? Cette action est irréversible.')) {
                 window.location.href = '?action=reject&id=' + id;
@@ -212,6 +207,3 @@ if (isset($_GET['msg'])) {
     </script>
 </body>
 </html>
-
-
-
