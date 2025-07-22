@@ -1,44 +1,74 @@
-# 🌿 EcoRide
+# 🌿 EcoRide – Plateforme de covoiturage écologique
 
-**EcoRide** est une plateforme web de covoiturage écologique développée en PHP, JavaScript et CSS, avec une architecture MVC légère.  
-Ce projet est réalisé dans le cadre du Titre Professionnel Développeur Web & Web Mobile (TP DWWM).
+**EcoRide** est une plateforme web de covoiturage écologique permettant de partager des trajets facilement tout en favorisant une mobilité durable.  
+Projet réalisé par Brandès Thibault dans le cadre du Titre Professionnel Développeur Web & Web Mobile (TP DWWM).
 
 ---
 
 ## 🗂️ Sommaire
 
 1. Présentation  
-2. Technologies utilisées  
-3. Installation locale  
-4. Configuration  
-5. Structure du projet  
-6. Fonctionnalités principales  
-7. Base de données  
-8. Documentation  
-9. Auteur
+2. Accès à l’application  
+3. Preuves de fonctionnement  
+4. Difficultés rencontrées  
+5. Technologies utilisées  
+6. Installation locale  
+7. Accès local  
+8. Comptes de test  
+9. Problèmes connus / Limitations  
+10. Structure du projet  
+11. Documentation  
+12. Contact
 
 ---
 
-## 1. 🌱 Présentation
+## 1. Présentation
 
 EcoRide facilite le partage de trajets entre particuliers pour encourager une mobilité plus durable.  
 Les utilisateurs peuvent rechercher, proposer et réserver des trajets selon des critères écologiques et sociaux (animaux, fumeur, type de véhicule, etc.).
 
 ---
 
-## 2. 💻 Technologies utilisées
+## 2. Accès à l’application
 
-- PHP 8.x (PDO)
-- HTML5, CSS3 (Flexbox, Bootstrap)
-- JavaScript (vanilla)
-- MySQL / MariaDB
-- Chart.js (statistiques)
-- Google Material Icons
-- Serveur local : XAMPP (Windows)
+- **Démo en ligne (Heroku)** :  
+  [https://ecoride-heroku-b5554d0a41a1.herokuapp.com/pages/index.php](https://ecoride-heroku-b5554d0a41a1.herokuapp.com/pages/index.php)
+
+- **Accès local après installation** :  
+  [http://localhost/ecoride/frontend/public/pages/index.php](http://localhost/ecoride/frontend/public/pages/index.php)
+
+> Utilisez le lien qui correspond à votre environnement de test ou de démonstration.
 
 ---
 
-## 3. 🛠️ Installation locale
+## 3. Preuves de fonctionnement
+
+Toutes les fonctionnalités principales sont démontrées par des captures d’écran, disponibles dans le PDF “preuves de fonctionnement” (`/docs/PREUVES_FONCTIONNEMENT.pdf`).  
+Ce document fait foi en cas d’impossibilité de test direct.
+
+---
+
+## 4. Difficultés rencontrées (base de données)
+
+- **Import de la base de données** : certaines contraintes techniques sur les hébergeurs (Heroku/JawsDB, etc.) empêchent l’import sans erreurs.
+- **Adaptation du script SQL** : Le script fonctionne en local (phpMyAdmin/XAMPP) mais peut nécessiter des adaptations ailleurs.
+- **Conséquence** : Les preuves de fonctionnement sont apportées via screenshots.
+
+---
+
+## 5. 💻 Technologies utilisées
+
+- PHP 8.x (PDO orienté objet)
+- HTML5, CSS3 (Flexbox, Bootstrap)
+- JavaScript (vanilla JS)
+- MySQL / MariaDB
+- Chart.js (statistiques)
+- Google Material Icons
+- Serveur local : XAMPP (Windows)
+
+---
+
+## 6. 🛠️ Installation locale
 
 ### Prérequis
 
@@ -49,37 +79,75 @@ Les utilisateurs peuvent rechercher, proposer et réserver des trajets selon des
 
 1. **Cloner le dépôt**
    ```
-   git clone https://github.com/[TON-USERNAME]/ecoride.git
+   git clone https://github.com/ThibaultBds/ecf-projet.git
    ```
 2. **Placer le dossier dans XAMPP**
-   - Copier le dossier dans `c:\xampp\htdocs\ecoride`
+   - Copier le dossier dans `C:\xampp\htdocs\ecoride`
 3. **Créer la base de données**
    - Ouvrir phpMyAdmin
-   - Importer `SQL/schema.sql` puis `SQL/fixtures.sql`
+   - Importer **`SQL/ecoride.sql`**
 4. **Configurer la connexion**
-   - Modifier `backend/config/database.php` avec vos identifiants MySQL
+   - Modifier `config.php` (ou `backend/config/database.php`) avec vos identifiants MySQL locaux :  
+     ```
+     $host = 'localhost';
+     $dbname = 'ecoride';
+     $username = 'root';
+     $password = '';
+     ```
 5. **Lancer le serveur**
    - Démarrer Apache et MySQL via XAMPP
-   - Accéder à l’application via [http://localhost/ecoride/frontend/](http://localhost/ecoride/frontend/)
+   - Accéder à l’application via [http://localhost/ecoride/frontend/public/pages/index.php](http://localhost/ecoride/frontend/public/pages/index.php)
 
 ---
 
-## 4. ⚙️ Configuration
+## 7. Accès local
 
-- Adapter les paramètres de connexion dans `backend/config/database.php`
-- Vérifier l’inclusion de l’autoloader et des fichiers d’authentification dans `backend/config/autoload.php`
-- Personnaliser les variables d’environnement si besoin
+Une fois installé, l’application est accessible à l’adresse suivante :  
+[http://localhost/ecoride/frontend/public/pages/index.php](http://localhost/ecoride/frontend/public/pages/index.php)
 
 ---
 
-## 5. 🧱 Structure du projet
+## 8. Comptes de test
+
+Utilisez les identifiants suivants pour tester les différents rôles dans l’application :
+
+- **Utilisateur Standard**
+  - Email : user@ecoride.fr
+  - Mot de passe : password
+  - Rôle : Utilisateur
+
+- **Administrateur**
+  - Email : admin@ecoride.fr
+  - Mot de passe : password
+  - Rôle : Administrateur
+
+- **Modérateur**
+  - Email : modo@ecoride.fr
+  - Mot de passe : password
+  - Rôle : Modérateur
+
+> Ces identifiants sont ceux de la base locale de développement et des captures d’écran.
+
+---
+
+## 9. Problèmes connus / Limitations
+
+- Import SQL impossible sur certains hébergeurs (Heroku/JawsDB).
+- Les preuves de fonctionnement sont fournies par captures d’écran.
+- Le dossier `vendor/` n’est pas inclus : lancer `composer install` après clonage si besoin.
+- L’application peut nécessiter des adaptations selon l’hébergeur.
+
+---
+
+## 10. Structure du projet
 
 ```
 ecoride/
 ├── backend/      # Code PHP (logique serveur, API)
 ├── frontend/     # HTML, CSS, JS, images
 ├── SQL/          # Fichiers SQL (base de données)
-├── docs/         # Documentation PDF (technique, charte, manuel, gestion projet)
+│   └── ecoride.sql
+├── docs/         # Documentation PDF (technique, manuel, preuves)
 ├── script/       # Scripts divers
 ├── docker/       # Fichiers Docker (optionnel)
 └── README.md     # Ce fichier
@@ -87,40 +155,20 @@ ecoride/
 
 ---
 
-## 6. ✨ Fonctionnalités principales
+## 11. Documentation
 
-- Authentification sécurisée (inscription, connexion, gestion des sessions)
-- Recherche de trajets avec filtres (prix, durée, note, impact écologique)
-- Gestion des trajets (proposer, démarrer, annuler, historique)
-- Gestion des véhicules et préférences (fumeur, animaux, bagages)
-- Avis et notation (notation des trajets, commentaires)
-- Modération (validation des avis, gestion des signalements)
-- Administration (gestion des utilisateurs, statistiques dynamiques)
+- Manuel d’utilisation : `docs/Manuel Utilisateur.pdf`
+- Documentation technique : `docs/Documentation_Technique.pdf`
+- Preuves de fonctionnement : `docs/PREUVES_FONCTIONNEMENT.pdf`
+- Charte graphique : `docs/Charte_Graphique.pdf`
+- Remarques sur la base de données : `docs/Remarque sur la base de données (1).pdf`
 
 ---
 
-## 7. 🗃️ Base de données
+## 12. Contact
 
-- Tables principales : `users`, `trips`, `trip_participants`, `vehicles`, `reviews`, `reports`
-- Scripts SQL :
-  - `SQL/schema.sql` : structure de la base
-  - `SQL/fixtures.sql` : données de démonstration
-
----
-
-## 8. 📄 Documentation
-
-- Manuel d’utilisation : `docs/manuel_utilisation.pdf`
-- Charte graphique : `docs/charte_graphique.pdf`
-- Documentation technique : `docs/documentation_technique.pdf`
-- Gestion de projet : `docs/gestion_projet.pdf`
-
----
-
-## 9. 👤 Auteur
-
-Développé par Brandès Thibault
-Date : 20 juillet 2025  
+Auteur : Brandès Thibault  
+Date : 22 juillet 2025  
 Formation : TP Développeur Web & Web Mobile
 
 ---
