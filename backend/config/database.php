@@ -31,21 +31,24 @@ class Database {
         $localPort = 3306;
 
         // === HEROKU/JAWSDB (automatique si variable d'env présente) ===
-        $url = getenv('JAWSDB_URL');
-        if ($url) {
-            $dbparts = parse_url($url);
-            $this->host = $dbparts['host'];
-            $this->username = $dbparts['user'];
-            $this->password = $dbparts['pass'];
-            $this->dbName = ltrim($dbparts['path'], '/');
-            $this->port = isset($dbparts['port']) ? $dbparts['port'] : 3306;
-        } else {
-            $this->host = $localHost;
-            $this->dbName = $localDbName;
-            $this->username = $localUser;
-            $this->password = $localPassword;
-            $this->port = $localPort;
-        }
+       $herokuUrl = getenv('JAWSDB_URL') ?: getenv('CLEARDB_DATABASE_URL');
+
+if ($herokuUrl) {
+    $dbparts = parse_url($herokuUrl);
+    $this->host = $dbparts['host'];
+    $this->username = $dbparts['user'];
+    $this->password = $dbparts['pass'];
+    $this->dbName = ltrim($dbparts['path'], '/');
+    $this->port = isset($dbparts['port']) ? $dbparts['port'] : 3306;
+} else {
+    // Local (XAMPP)
+    $this->host = 'localhost';
+    $this->dbName = 'ecoride';
+    $this->username = 'root';
+    $this->password = '';
+    $this->port = 3306;
+}
+
     }
 
     public function getConnection() {
