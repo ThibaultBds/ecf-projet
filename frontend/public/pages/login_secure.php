@@ -28,8 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 LIMIT 1
             ");
             $stmt->execute([$email]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
             if ($user && password_verify($password, $user['password'])) {
                 session_regenerate_id(true);
                 $_SESSION['user'] = [
@@ -46,9 +44,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Email ou mot de passe incorrect.';
             }
         } catch (Throwable $e) {
-            $error = 'Erreur technique. Veuillez réessayer.';
-            // error_log('[LOGIN] '.$e->getMessage()); // décommente si besoin
-        }
+    // LOG dans les erreurs serveur (XAMPP/Heroku)
+    error_log('[LOGIN][ERR] '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine());
+
+    // Optionnel: log utile si ça vient de la DB
+    // error_log('[LOGIN][TRACE] '.$e->getTraceAsString());
+
+    // Message générique pour l'utilisateur
+    $error = 'Erreur technique. Veuillez réessayer.';
+}
+
     }
 }
 ?>
