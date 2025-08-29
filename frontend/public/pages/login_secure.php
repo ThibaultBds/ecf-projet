@@ -32,11 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 WHERE email = ? AND status = 'actif'
                 LIMIT 1
             ");
-            $stmt->execute([$email]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            var_dump($user);
-exit;
-var_dump(password_verify("test1234", $user['password']));
+$stmt->execute([$email]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Debug : afficher ce qui est trouvé et tester le mot de passe
+var_dump($user);
+if ($user) {
+    var_dump(password_verify("test1234", $user['password']));
+}
 exit;
 
 
