@@ -34,6 +34,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            var_dump($user);
+exit;
+var_dump(password_verify("test1234", $user['password']));
+exit;
+
 
             if ($user && password_verify($password, $user['password'])) {
                 // Sécurité anti-fixation
