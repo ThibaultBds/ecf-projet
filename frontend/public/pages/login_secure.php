@@ -1,21 +1,17 @@
 <?php
 session_start();
 
-// Charger l’autoloader et la DB
 require_once __DIR__ . '/../../../backend/config/autoload.php';
 useClass('Database');
 
 $error = '';
 
-// Si déjà connecté, rediriger
 if (isset($_SESSION['user']) && !empty($_SESSION['user']['id'])) {
     header('Location: profil.php');
     exit();
 }
 
-// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // normalisation douce
     $email    = strtolower(trim($_POST['email'] ?? ''));
     $password = $_POST['password'] ?? '';
 
@@ -25,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo = getDatabase();
 
-            // Récup explicite des colonnes utiles (inclut le rôle)
             $stmt = $pdo->prepare("
                 SELECT id, email, password, pseudo, role, credits, status
                 FROM users
@@ -35,31 +30,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // 🔹 DEBUG pour vérifier le login
-            var_dump("Mot de passe tapé :", $password);
-            var_dump("Hash en base :", $user['password'] ?? null);
-            if ($user) {
-                var_dump("Résultat password_verify :", password_verify($password, $user['password']));
-            } else {
-                var_dump("Aucun utilisateur trouvé pour cet email.");
-            }
-            exit;
-            // 🔹 Fin debug
-
             if ($user && password_verify($password, $user['password'])) {
-                // Sécurité anti-fixation
                 session_regenerate_id(true);
-
-                // Stocke le rôle (et alias 'type' pour compat front existant)
                 $_SESSION['user'] = [
                     'id'      => (int)$user['id'],
                     'email'   => $user['email'],
                     'pseudo'  => $user['pseudo'],
-                    'role'    => $user['role'],      // 'Utilisateur' | 'Moderateur' | 'Administrateur'
-                    'type'    => $user['role'],      // compat avec ton JS existant
+                    'role'    => $user['role'],
+                    'type'    => $user['role'],   // compat front
                     'credits' => (int)$user['credits']
                 ];
-
                 header('Location: profil.php');
                 exit();
             } else {
@@ -67,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } catch (Throwable $e) {
             $error = 'Erreur technique. Veuillez réessayer.';
-            // error_log('[LOGIN] '.$e->getMessage());
+            // error_log('[LOGIN] '.$e->getMessage()); // décommente si besoin
         }
     }
 }
@@ -85,4 +65,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <header class="container-header">
     <h1>
         <a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
-            <span class="m
+            <span class="material-icons">eco</span> EcoRide
+        </a>
+    </h1>
+</header>
+
+<script>
+window.ecorideUser = <?php
+    if (isset($_SESSION['user'])) {
+        echo json_encode([
+            'email'  => $_SESSION['user']['email'],
+            'pseudo' => $_SESSION['user']['pseudo'],
+            'role'   => $_SESSION['user']['role'],
+            'type'   => $_SESSION['user']['type'],
+        ], JSON_UNESCAPED_UNICODE);
+    } else { echo 'null'; }
+?>;
+</script>
+
+<main>
+    <div class="login-container">
+        <h2 class="title-login">Connexion</h2>
+
+        <?php if (!empty($error)): ?>
+            <div class="message-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+        <?php endif; ?>
+
+        <form method="POST" class="form-connexion" novalidate>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required autocomplete="email"
+                   value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                   placeholder="votre@email.com">
+
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password"
+                   placeholder="Votre mot de passe">
+
+            <button type="submit">Se connecter</button>
+        </form>
+
+        <div class="login-links">
+            <a href="register.php" class="forgot-link">Créer un compte</a>
+            <span class="sep">|</span>
+            <a href="index.php" class="forgot-link">Retour à l'accueil</a>
+        </div>
+    </div>
+</main>
+
+<script src="../assets/js/navbar.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.ecorideUser) { renderMenu(window.ecorideUser); }
+    else { renderMenu(); }
+});
+</script>
+</body>
+</html>
