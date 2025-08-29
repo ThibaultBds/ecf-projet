@@ -2,14 +2,13 @@
 session_start();
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/autoload.php';
-// Charge la config + helpers BDD (fonction getDatabase)
 useClass('Database');
 
-// Vérifier l'authentification et le rôle
-if (!isset($_SESSION['user']) || $_SESSION['user']['type'] !== 'Administrateur') {
-    header("Location: login_secure.php");
-    exit();
-}
+// Charger le guard
+require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/guard.php';
+
+// Vérifie que seul un administrateur peut accéder
+requireRole(['Administrateur']);
 
 $user = $_SESSION['user'];
 
