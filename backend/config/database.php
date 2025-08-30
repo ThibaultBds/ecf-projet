@@ -36,8 +36,8 @@ class Database {
 if ($herokuUrl) {
     $dbparts = parse_url($herokuUrl);
     $this->host = $dbparts['host'];
-    $this->username = $dbparts['admin@ecoride.com'];
-    $this->password = $dbparts['test1234'];
+    $this->username = $dbparts['user'];
+    $this->password = $dbparts['pass'];
     $this->dbName = ltrim($dbparts['path'], '/');
     $this->port = isset($dbparts['port']) ? $dbparts['port'] : 3306;
 } else {
