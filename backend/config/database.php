@@ -22,13 +22,12 @@ class Database {
     private $port;
     private $conn;
 
-    public function __construct() {
-        // === CONFIGURATION LOCALE (à modifier si besoin) ===
-        $localHost = '127.0.0.1';
-        $localDbName = 'ecoride';
-        $localUser = 'root';
-        $localPassword = 'inm1YgIMPZ4R4JH)';
-        $localPort = 3306;
+   $this->host = '127.0.0.1';
+$this->dbName = 'ecoride';
+$this->username = 'ecoride';
+$this->password = 'ecoride123';
+$this->port = 3306;
+
 
         // === HEROKU/JAWSDB (automatique si variable d'env présente) ===
        $herokuUrl = getenv('JAWSDB_URL') ?: getenv('CLEARDB_DATABASE_URL');
