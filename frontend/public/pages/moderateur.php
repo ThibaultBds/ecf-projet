@@ -4,7 +4,7 @@ session_start();
 require_once __DIR__ . '/../../../backend/config/autoload.php';
 useClass('Database');
 
-require_once __DIR__ . '/../../backend/config/guard.php';
+require_once __DIR__ . '/../../../backend/config/guard.php';
 requireRole(['Moderateur','Administrateur']); // accès modo + admin
 
 $user = $_SESSION['user'];

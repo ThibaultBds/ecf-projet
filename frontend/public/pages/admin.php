@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../../backend/config/autoload.php';
 useClass('Database');
 
 // Charger le guard
-require_once __DIR__ . '/../../backend/config/guard.php';
+require_once __DIR__ . '/../../../backend/config/guard.php';
 requireRole(['Administrateur']); // accès réservé admin
 
 $user = $_SESSION['user'];
