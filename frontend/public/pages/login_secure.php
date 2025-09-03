@@ -29,7 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo = getDatabase();
 
-            // Récupère l'utilisateur actif par email
             $stmt = $pdo->prepare("
                 SELECT id, email, password, pseudo, role, credits, status
                 FROM users
@@ -40,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user && password_verify($password, $user['password'])) {
-                // Normaliser le rôle pour la logique d'app
+                // Normaliser rôle
                 $roleNorm = strtolower(trim($user['role'] ?? ''));
                 if ($roleNorm === 'administrateur') $roleNorm = 'admin';
                 if ($roleNorm === 'modérateur' || $roleNorm === 'moderateur') $roleNorm = 'moderateur';
@@ -51,12 +50,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'id'      => (int)$user['id'],
                     'email'   => $user['email'],
                     'pseudo'  => $user['pseudo'],
-                    'role'    => $user['role'], // valeur brute DB (affichage éventuel)
-                    'type'    => $roleNorm,     // valeur normalisée: admin|moderateur|utilisateur
+                    'role'    => $user['role'],
+                    'type'    => $roleNorm,
                     'credits' => (int)$user['credits'],
                 ];
 
-                // Redirection selon rôle dédié
                 if ($roleNorm === 'admin') {
                     header('Location: admin.php');
                 } elseif ($roleNorm === 'moderateur') {
@@ -69,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Email ou mot de passe incorrect.';
             }
         } catch (Throwable $e) {
-            error_log('[LOGIN][ERR] ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            error_log('[LOGIN][ERR] ' . $e->getMessage());
             $error = 'Erreur technique. Veuillez réessayer.';
         }
     }
@@ -103,25 +101,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="POST" class="form-connexion" novalidate>
             <label for="email">Email</label>
-            <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                autocomplete="email"
-                value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                placeholder="votre@email.com"
-            >
+            <input type="email" id="email" name="email" required
+                   value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                   placeholder="votre@email.com">
 
             <label for="password">Mot de passe</label>
-            <input
-                type="password"
-                id="password"
-                name="password"
-                required
-                autocomplete="current-password"
-                placeholder="Votre mot de passe"
-            >
+            <input type="password" id="password" name="password" required placeholder="Votre mot de passe">
 
             <button type="submit">Se connecter</button>
         </form>
@@ -133,5 +118,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </main>
+
+<!-- Nav dynamique -->
+<script>
+window.ecorideUser = <?php
+    echo !empty($_SESSION['user'])
+        ? json_encode($_SESSION['user'], JSON_UNESCAPED_UNICODE)
+        : 'null';
+?>;
+</script>
+<script src="../assets/js/navbar.js"></script>
+<script>
+if (typeof renderMenu === 'function') renderMenu(window.ecorideUser);
+</script>
 </body>
 </html>
