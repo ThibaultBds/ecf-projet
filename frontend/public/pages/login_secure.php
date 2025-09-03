@@ -6,8 +6,8 @@ useClass('Database');
 
 $error = '';
 
-// Déjà connecté → on redirige vers le profil
-if (isset($_SESSION['user']) && !empty($_SESSION['user']['id'])) {
+// Déjà connecté → profil
+if (!empty($_SESSION['user']['id'])) {
     header('Location: profil.php');
     exit();
 }
@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo = getDatabase();
 
+            // Récupère l'utilisateur actif par email
             $stmt = $pdo->prepare("
                 SELECT id, email, password, pseudo, role, credits, status
                 FROM users
@@ -31,34 +32,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // DEBUG LOGS (visible dans les logs PHP / heroku logs)
-            error_log('LOGIN DEBUG - Email saisi: '.$email);
-            if ($user) {
-                error_log('LOGIN DEBUG - Utilisateur trouvé: id='.$user['id'].' / email='.$user['email']);
-                error_log('LOGIN DEBUG - Hash en DB: '.$user['password']);
-                $check = password_verify($password, $user['password']);
-                error_log('LOGIN DEBUG - Vérification du mot de passe: '.($check ? 'OK' : 'FAIL'));
-            } else {
-                error_log('LOGIN DEBUG - Aucun utilisateur trouvé avec cet email');
-            }
-
             if ($user && password_verify($password, $user['password'])) {
+                // Normaliser rôle
+                $roleRaw  = strtolower(trim($user['role'] ?? ''));
+                if ($roleRaw === 'administrateur') $roleRaw = 'admin';
+                if ($roleRaw === 'modérateur' || $roleRaw === 'moderateur') $roleRaw = 'moderateur';
+                if ($roleRaw === '' || $roleRaw === 'utilisateur') $roleRaw = 'utilisateur';
+
                 session_regenerate_id(true);
-
-                // Normaliser le rôle pour que le front détecte bien l'admin
-                $roleRaw  = strtolower(trim($user['role']));
-                $roleNorm = ($roleRaw === 'administrateur') ? 'admin' : $roleRaw;
-
                 $_SESSION['user'] = [
                     'id'      => (int)$user['id'],
                     'email'   => $user['email'],
                     'pseudo'  => $user['pseudo'],
-                    'role'    => $user['role'],   // valeur brute DB (pour affichage)
-                    'type'    => $roleNorm,       // valeur normalisée (pour logique front)
+                    'role'    => $user['role'], // valeur brute DB
+                    'type'    => $roleRaw,      // valeur normalisée pour la logique
                     'credits' => (int)$user['credits'],
                 ];
 
-                // Reviens sur la page profil (une seule page qui gère l'UI admin selon le rôle)
                 header('Location: profil.php');
                 exit();
             } else {
@@ -73,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <title>Connexion - EcoRide</title>
@@ -81,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../assets/css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
-
 <body>
 <header class="container-header">
     <h1>
@@ -90,22 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </a>
     </h1>
 </header>
-
-<script>
-    // Expose l'utilisateur au front pour le menu/affichage conditionnel
-    window.ecorideUser = <?php
-        if (isset($_SESSION['user'])) {
-            echo json_encode([
-                'email'  => $_SESSION['user']['email'],
-                'pseudo' => $_SESSION['user']['pseudo'],
-                'role'   => $_SESSION['user']['role'],
-                'type'   => $_SESSION['user']['type'], // 'admin' si Administrateur en DB
-            ], JSON_UNESCAPED_UNICODE);
-        } else {
-            echo 'null';
-        }
-    ?>;
-</script>
 
 <main>
     <div class="login-container">
@@ -117,13 +89,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="POST" class="form-connexion" novalidate>
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" required autocomplete="email"
-                   value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                   placeholder="votre@email.com">
+            <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                autocomplete="email"
+                value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                placeholder="votre@email.com"
+            >
 
             <label for="password">Mot de passe</label>
-            <input type="password" id="password" name="password" required autocomplete="current-password"
-                   placeholder="Votre mot de passe">
+            <input
+                type="password"
+                id="password"
+                name="password"
+                required
+                autocomplete="current-password"
+                placeholder="Votre mot de passe"
+            >
 
             <button type="submit">Se connecter</button>
         </form>
@@ -135,16 +119,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </main>
-
-<script src="../assets/js/navbar.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (window.ecorideUser) {
-            renderMenu(window.ecorideUser); // ton menu doit checker user.type === 'admin'
-        } else {
-            renderMenu();
-        }
-    });
-</script>
 </body>
 </html>
