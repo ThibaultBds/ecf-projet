@@ -24,7 +24,7 @@ class Database {
 
     public function __construct() {
         // === CONFIGURATION LOCALE (à modifier si besoin) ===
-        $localHost = 'localhost';
+        $localHost = '127.0.0.1';
         $localDbName = 'ecoride';
         $localUser = 'root';
         $localPassword = 'inm1YgIMPZ4R4JH)';
