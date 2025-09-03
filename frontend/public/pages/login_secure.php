@@ -6,9 +6,16 @@ useClass('Database');
 
 $error = '';
 
-// Déjà connecté → profil
+// Déjà connecté → redirige selon le rôle
 if (!empty($_SESSION['user']['id'])) {
-    header('Location: profil.php');
+    $t = $_SESSION['user']['type'] ?? '';
+    if ($t === 'admin') {
+        header('Location: admin.php');
+    } elseif ($t === 'moderateur') {
+        header('Location: modo.php');
+    } else {
+        header('Location: profil.php');
+    }
     exit();
 }
 
@@ -33,23 +40,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user && password_verify($password, $user['password'])) {
-                // Normaliser rôle
-                $roleRaw  = strtolower(trim($user['role'] ?? ''));
-                if ($roleRaw === 'administrateur') $roleRaw = 'admin';
-                if ($roleRaw === 'modérateur' || $roleRaw === 'moderateur') $roleRaw = 'moderateur';
-                if ($roleRaw === '' || $roleRaw === 'utilisateur') $roleRaw = 'utilisateur';
+                // Normaliser le rôle pour la logique d'app
+                $roleNorm = strtolower(trim($user['role'] ?? ''));
+                if ($roleNorm === 'administrateur') $roleNorm = 'admin';
+                if ($roleNorm === 'modérateur' || $roleNorm === 'moderateur') $roleNorm = 'moderateur';
+                if ($roleNorm === '' || $roleNorm === 'utilisateur') $roleNorm = 'utilisateur';
 
                 session_regenerate_id(true);
                 $_SESSION['user'] = [
                     'id'      => (int)$user['id'],
                     'email'   => $user['email'],
                     'pseudo'  => $user['pseudo'],
-                    'role'    => $user['role'], // valeur brute DB
-                    'type'    => $roleRaw,      // valeur normalisée pour la logique
+                    'role'    => $user['role'], // valeur brute DB (affichage éventuel)
+                    'type'    => $roleNorm,     // valeur normalisée: admin|moderateur|utilisateur
                     'credits' => (int)$user['credits'],
                 ];
 
-                header('Location: profil.php');
+                // Redirection selon rôle dédié
+                if ($roleNorm === 'admin') {
+                    header('Location: admin.php');
+                } elseif ($roleNorm === 'moderateur') {
+                    header('Location: modo.php');
+                } else {
+                    header('Location: profil.php');
+                }
                 exit();
             } else {
                 $error = 'Email ou mot de passe incorrect.';

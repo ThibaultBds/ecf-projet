@@ -7,6 +7,17 @@ useClass('Database');
 require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/guard.php';
 requireLogin(); // accès réservé aux utilisateurs connectés
 
+// Si admin/modo → redirige vers la bonne page dédiée
+$type = $_SESSION['user']['type'] ?? 'utilisateur';
+if ($type === 'admin') {
+    header('Location: admin.php');
+    exit;
+}
+if ($type === 'moderateur') {
+    header('Location: modo.php');
+    exit;
+}
+
 $user = $_SESSION['user'];
 
 try {
@@ -33,13 +44,6 @@ try {
     $myTrips = [];
     $error = "Erreur lors du chargement du profil.";
 }
-
-// Normalisation rôle
-$role = strtolower(trim($userData['role'] ?? ''));
-$type = $_SESSION['user']['type'] ?? 'utilisateur';
-
-$isAdmin = ($type === 'admin');
-$isModo  = ($type === 'moderateur');
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -72,33 +76,6 @@ $isModo  = ($type === 'moderateur');
         <p><strong>Statut :</strong> <?= htmlspecialchars($userData['status']) ?></p>
         <p><strong>Crédits :</strong> <?= (int)$userData['credits'] ?></p>
     </div>
-
-    <?php if ($isAdmin): ?>
-        <section class="admin-panel">
-            <h3>Zone Administrateur</h3>
-            <ul>
-                <li><a href="manage_users.php">👥 Gérer les utilisateurs</a></li>
-                <li><a href="manage_trips.php">🚗 Gérer les trajets</a></li>
-                <li><a href="reports.php">📊 Rapports</a></li>
-            </ul>
-        </section>
-    <?php elseif ($isModo): ?>
-        <section class="modo-panel">
-            <h3>Zone Modérateur</h3>
-            <ul>
-                <li><a href="review_trips.php">👀 Vérifier les trajets</a></li>
-                <li><a href="moderate_reviews.php">✍️ Modérer les avis</a></li>
-            </ul>
-        </section>
-    <?php else: ?>
-        <section class="user-panel">
-            <h3>Espace Utilisateur</h3>
-            <ul>
-                <li><a href="create_trip.php">➕ Créer un trajet</a></li>
-                <li><a href="my_bookings.php">📅 Mes réservations</a></li>
-            </ul>
-        </section>
-    <?php endif; ?>
 
     <h3>Vos derniers trajets</h3>
     <?php if (!$myTrips): ?>
