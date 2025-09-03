@@ -8,10 +8,11 @@ $error = '';
 
 // Déjà connecté → redirige selon le rôle
 if (!empty($_SESSION['user']['id'])) {
-    $t = $_SESSION['user']['type'] ?? '';
-    if ($t === 'admin') {
+    $roleNorm = strtolower(trim($_SESSION['user']['role'] ?? 'utilisateur'));
+
+    if ($roleNorm === 'administrateur') {
         header('Location: admin.php');
-    } elseif ($t === 'moderateur') {
+    } elseif ($roleNorm === 'moderateur' || $roleNorm === 'modérateur') {
         header('Location: moderateur.php');
     } else {
         header('Location: profil.php');
@@ -40,8 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($user && password_verify($password, $user['password'])) {
                 // Normaliser rôle
-                $roleNorm = strtolower(trim($user['role'] ?? ''));
-                if ($roleNorm === 'administrateur') $roleNorm = 'admin';
+                $roleNorm = strtolower(trim($user['role'] ?? 'utilisateur'));
+                if ($roleNorm === 'administrateur') $roleNorm = 'administrateur';
                 if ($roleNorm === 'modérateur' || $roleNorm === 'moderateur') $roleNorm = 'moderateur';
                 if ($roleNorm === '' || $roleNorm === 'utilisateur') $roleNorm = 'utilisateur';
 
@@ -50,12 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'id'      => (int)$user['id'],
                     'email'   => $user['email'],
                     'pseudo'  => $user['pseudo'],
-                    'role'    => $user['role'],
+                    'role'    => ucfirst($roleNorm),
                     'type'    => $roleNorm,
                     'credits' => (int)$user['credits'],
                 ];
 
-                if ($roleNorm === 'admin') {
+                if ($roleNorm === 'administrateur') {
                     header('Location: admin.php');
                 } elseif ($roleNorm === 'moderateur') {
                     header('Location: moderateur.php');
