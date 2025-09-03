@@ -4,10 +4,12 @@
  * Compatible Heroku JawsDB & local XAMPP/MAMP
  *
  * Si tu testes en local :
- * - Par défaut : host = localhost, user = root, mdp = (vide), base = ecoride
- * - Tu peux modifier juste ces variables en haut du fichier si besoin.
+ * - Par défaut ci-dessous (à ADAPTER) :
+ *     host = 127.0.0.1, user = ecoride, mdp = ecoride123, base = ecoride, port = 3306
+ * - Ou mets user = root et ton mot de passe root si tu préfères.
  *
- * Si tu déploies sur Heroku/JawsDB, la config est récupérée automatiquement via la variable d'environnement JAWSDB_URL.
+ * En prod Heroku/JawsDB :
+ * - La config est récupérée automatiquement via JAWSDB_URL ou CLEARDB_DATABASE_URL.
  */
 
 class DatabaseConnectionException extends Exception {}
@@ -22,32 +24,24 @@ class Database {
     private $port;
     private $conn;
 
-   $this->host = '127.0.0.1';
-$this->dbName = 'ecoride';
-$this->username = 'ecoride';
-$this->password = 'ecoride123';
-$this->port = 3306;
-
+    public function __construct() {
+        // === CONFIGURATION LOCALE (MODIFIE ICI SI BESOIN) ===
+        $this->host     = '127.0.0.1';     // ou 'localhost'
+        $this->dbName   = 'ecoride';
+        $this->username = 'ecoride';       // mets 'root' si tu utilises root
+        $this->password = 'ecoride123';    // mets le mdp root si tu utilises root
+        $this->port     = 3306;
 
         // === HEROKU/JAWSDB (automatique si variable d'env présente) ===
-       $herokuUrl = getenv('JAWSDB_URL') ?: getenv('CLEARDB_DATABASE_URL');
-
-if ($herokuUrl) {
-    $dbparts = parse_url($herokuUrl);
-    $this->host = $dbparts['host'];
-    $this->username = $dbparts['user'];
-    $this->password = $dbparts['pass'];
-    $this->dbName = ltrim($dbparts['path'], '/');
-    $this->port = isset($dbparts['port']) ? $dbparts['port'] : 3306;
-} else {
-    // Local (XAMPP)
-    $this->host = 'localhost';
-    $this->dbName = 'ecoride';
-    $this->username = 'root';
-    $this->password = '';
-    $this->port = 3306;
-}
-
+        $herokuUrl = getenv('JAWSDB_URL') ?: getenv('CLEARDB_DATABASE_URL');
+        if ($herokuUrl) {
+            $dbparts        = parse_url($herokuUrl);
+            $this->host     = $dbparts['host'] ?? $this->host;
+            $this->username = $dbparts['user'] ?? $this->username;
+            $this->password = $dbparts['pass'] ?? $this->password;
+            $this->dbName   = isset($dbparts['path']) ? ltrim($dbparts['path'], '/') : $this->dbName;
+            $this->port     = isset($dbparts['port']) ? (int)$dbparts['port'] : $this->port;
+        }
     }
 
     public function getConnection() {
@@ -55,12 +49,12 @@ if ($herokuUrl) {
         try {
             $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbName};charset=utf8mb4";
             $options = [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false
+                PDO::ATTR_EMULATE_PREPARES   => false,
             ];
             $this->conn = new PDO($dsn, $this->username, $this->password, $options);
-        } catch(PDOException $exception) {
+        } catch (PDOException $exception) {
             throw new DatabaseConnectionException(
                 "ERREUR DB : " . $exception->getMessage() .
                 ". Vérifie dans backend/config/database.php que tes identifiants sont bons (voir commentaires en haut du fichier) !"
@@ -128,10 +122,10 @@ function getTripById($id) {
     try {
         $pdo = getDatabase();
         $stmt = $pdo->prepare("SELECT t.*, u.pseudo as conducteur, v.marque, v.modele, v.energie
-                              FROM trips t
-                              JOIN users u ON t.chauffeur_id = u.id
-                              JOIN vehicles v ON t.vehicle_id = v.id
-                              WHERE t.id = ? LIMIT 1");
+                               FROM trips t
+                               JOIN users u ON t.chauffeur_id = u.id
+                               JOIN vehicles v ON t.vehicle_id = v.id
+                               WHERE t.id = ? LIMIT 1");
         $stmt->execute([$id]);
         return $stmt->fetch();
     } catch (Exception $e) {
@@ -164,6 +158,7 @@ function createTrip($chauffeur_id, $vehicle_id, $ville_depart, $ville_arrivee, $
         $stmt->execute([$vehicle_id]);
         $vehicleData = $stmt->fetch();
         $is_ecological = ($vehicleData && strtolower($vehicleData['energie']) === 'electrique') ? 1 : 0;
+
         $stmt = $pdo->prepare("
             INSERT INTO trips (chauffeur_id, vehicle_id, ville_depart, ville_arrivee, date_depart, prix, places_totales, places_restantes, is_ecological, description, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'planifie')
@@ -204,4 +199,3 @@ function createDefaultVehicle($user_id, $places = 4) {
         return false;
     }
 }
-?>
