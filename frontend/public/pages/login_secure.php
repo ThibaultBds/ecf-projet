@@ -6,8 +6,8 @@ useClass('Database');
 
 $error = '';
 
+// Déjà connecté → on redirige vers le profil
 if (isset($_SESSION['user']) && !empty($_SESSION['user']['id'])) {
-    // Déjà connecté → on redirige
     header('Location: profil.php');
     exit();
 }
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // DEBUG LOGS
+            // DEBUG LOGS (visible dans les logs PHP / heroku logs)
             error_log('LOGIN DEBUG - Email saisi: '.$email);
             if ($user) {
                 error_log('LOGIN DEBUG - Utilisateur trouvé: id='.$user['id'].' / email='.$user['email']);
@@ -45,25 +45,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user && password_verify($password, $user['password'])) {
                 session_regenerate_id(true);
 
-                // Normaliser rôle (important si en DB = "Administrateur")
-                $roleRaw = strtolower(trim($user['role']));
+                // Normaliser le rôle pour que le front détecte bien l'admin
+                $roleRaw  = strtolower(trim($user['role']));
                 $roleNorm = ($roleRaw === 'administrateur') ? 'admin' : $roleRaw;
 
                 $_SESSION['user'] = [
                     'id'      => (int)$user['id'],
                     'email'   => $user['email'],
                     'pseudo'  => $user['pseudo'],
-                    'role'    => $user['role'],   // valeur brute DB
-                    'type'    => $roleNorm,       // valeur normalisée pour le front
-                    'credits' => (int)$user['credits']
+                    'role'    => $user['role'],   // valeur brute DB (pour affichage)
+                    'type'    => $roleNorm,       // valeur normalisée (pour logique front)
+                    'credits' => (int)$user['credits'],
                 ];
 
-                // Redirection selon rôle
-                if ($roleNorm === 'admin') {
-                    header('Location: /admin/dashboard.php'); // adapte si besoin
-                } else {
-                    header('Location: profil.php');
-                }
+                // Reviens sur la page profil (une seule page qui gère l'UI admin selon le rôle)
+                header('Location: profil.php');
                 exit();
             } else {
                 $error = 'Email ou mot de passe incorrect.';
@@ -96,13 +92,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </header>
 
 <script>
+    // Expose l'utilisateur au front pour le menu/affichage conditionnel
     window.ecorideUser = <?php
         if (isset($_SESSION['user'])) {
             echo json_encode([
                 'email'  => $_SESSION['user']['email'],
                 'pseudo' => $_SESSION['user']['pseudo'],
                 'role'   => $_SESSION['user']['role'],
-                'type'   => $_SESSION['user']['type'],
+                'type'   => $_SESSION['user']['type'], // 'admin' si Administrateur en DB
             ], JSON_UNESCAPED_UNICODE);
         } else {
             echo 'null';
@@ -143,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (window.ecorideUser) {
-            renderMenu(window.ecorideUser);
+            renderMenu(window.ecorideUser); // ton menu doit checker user.type === 'admin'
         } else {
             renderMenu();
         }
