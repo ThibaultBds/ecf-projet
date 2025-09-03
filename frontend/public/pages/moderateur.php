@@ -5,14 +5,20 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/autoload.php';
 useClass('Database');
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/guard.php';
-requireRole(['Moderateur','Administrateur']); // <= accès modo + admin
+
+/**
+ * Autoriser si:
+ *  - rôle brut DB = "Moderateur" OU "Administrateur"
+ *  - OU type normalisé en session = "moderateur" OU "admin"
+ */
+requireRole(['Moderateur', 'Administrateur', 'moderateur', 'admin']);
 
 $user = $_SESSION['user'];
 
 try {
     $pdo = getDatabase();
 
-    // Exemple : derniers reports ouverts/en cours
+    // Derniers reports ouverts/en cours
     $stmt = $pdo->query("
         SELECT r.id, r.type, r.message, r.status, r.created_at, u.email AS reporter
         FROM reports r
@@ -24,6 +30,7 @@ try {
     $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (Throwable $e) {
+    error_log('[MODO][ERR] ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
     $reports = [];
     $error = "Erreur lors du chargement des signalements.";
 }
@@ -34,7 +41,8 @@ try {
   <meta charset="UTF-8" />
   <title>Modération - EcoRide</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/ecoride/frontend/public/assets/css/style.css" />
+  <!-- chemins relatifs -->
+  <link rel="stylesheet" href="../assets/css/style.css" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
@@ -97,5 +105,8 @@ try {
     </div>
   </div>
 </main>
+
+<!-- Si tu as un navbar.js local -->
+<script src="../assets/js/navbar.js"></script>
 </body>
 </html>
