@@ -27,7 +27,7 @@ class Database {
         $localHost = 'localhost';
         $localDbName = 'ecoride';
         $localUser = 'root';
-        $localPassword = '';
+        $localPassword = 'inm1YgIMPZ4R4JH)';
         $localPort = 3306;
 
         // === HEROKU/JAWSDB (automatique si variable d'env présente) ===
