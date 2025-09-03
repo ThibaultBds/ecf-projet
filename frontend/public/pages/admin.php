@@ -93,7 +93,7 @@ if ($_POST && isset($_POST['action'])) {
     <meta charset="UTF-8">
     <title>Administration - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/ecoride/frontend/public/assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
