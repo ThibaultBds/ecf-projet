@@ -12,7 +12,7 @@ if (!empty($_SESSION['user']['id'])) {
     if ($t === 'admin') {
         header('Location: admin.php');
     } elseif ($t === 'moderateur') {
-        header('Location: modo.php');
+        header('Location: moderateur.php');
     } else {
         header('Location: profil.php');
     }
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($roleNorm === 'admin') {
                     header('Location: admin.php');
                 } elseif ($roleNorm === 'moderateur') {
-                    header('Location: modo.php');
+                    header('Location: moderateur.php');
                 } else {
                     header('Location: profil.php');
                 }
