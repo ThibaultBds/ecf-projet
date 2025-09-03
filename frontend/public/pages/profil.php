@@ -1,10 +1,10 @@
 <?php
 session_start();
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/autoload.php';
+require_once __DIR__ . '/../../backend/config/autoload.php';
 useClass('Database');
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/guard.php';
+require_once __DIR__ . '/../../backend/config/guard.php';
 requireLogin();
 
 $type = $_SESSION['user']['type'] ?? 'utilisateur';

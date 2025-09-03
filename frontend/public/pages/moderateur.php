@@ -1,10 +1,10 @@
 <?php
 session_start();
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/autoload.php';
+require_once __DIR__ . '/../../backend/config/autoload.php';
 useClass('Database');
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/guard.php';
+require_once __DIR__ . '/../../backend/config/guard.php';
 requireRole(['Moderateur','Administrateur']); // accès modo + admin
 
 $user = $_SESSION['user'];
@@ -37,7 +37,7 @@ try {
 <body>
 <header class="container-header">
   <h1>
-    <a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
+    <a href="/ecoride/frontend/public/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
       <span class="material-icons">gavel</span> Modération EcoRide
     </a>
   </h1>
@@ -74,7 +74,7 @@ try {
   <?php endif; ?>
 
   <div style="margin-top:16px;">
-    <a href="profil.php">← Retour au profil</a>
+    <a href="/ecoride/frontend/public/profil.php">← Retour au profil</a>
   </div>
 </main>
 
