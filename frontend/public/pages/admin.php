@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/autoload.php';
+require_once __DIR__ . '/../../backend/config/autoload.php';
 useClass('Database');
 
 // Charger le guard
-require_once $_SERVER['DOCUMENT_ROOT'] . '/ecoride/backend/config/guard.php';
+require_once __DIR__ . '/../../backend/config/guard.php';
 requireRole(['Administrateur']); // accès réservé admin
 
 $user = $_SESSION['user'];
