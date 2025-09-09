@@ -95,7 +95,7 @@ if ($_POST && isset($_POST['action'])) {
     <title>Administration - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Chemin vers les assets publics depuis /frontend/private/admin/ -->
-    <link rel="stylesheet" href="../../public/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
