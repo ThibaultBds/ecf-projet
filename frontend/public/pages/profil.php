@@ -11,10 +11,10 @@ requireLogin();
 $type = $_SESSION['user']['type'] ?? ($_SESSION['user']['role'] ?? 'utilisateur');
 // Redirections éventuelles si tu sépares les dashboards
 if ($type === 'admin' || (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Administrateur')) {
-    header('Location: admin.php'); exit;
+    header('Location: /admin.php'); exit;
 }
 if ($type === 'moderateur' || (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Moderateur')) {
-    header('Location: modo.php'); exit;
+    header('Location: /moderateur.php'); exit;
 }
 
 // Unification pour le front
@@ -49,14 +49,15 @@ try {
 <head>
     <meta charset="UTF-8">
     <title>Profil - EcoRide</title>
-    <!-- Chemin vers les assets publics depuis /frontend/private/user/ -->
-    <link rel="stylesheet" href="../../public/assets/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS absolu -->
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
 <header class="container-header">
     <h1>
-        <a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
+        <a href="/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
             <span class="material-icons">eco</span> EcoRide
         </a>
     </h1>
@@ -95,11 +96,11 @@ try {
         </ul>
     <?php endif; ?>
 
-    <p><a href="index.php">← Retour à l’accueil</a></p>
+    <p><a href="/index.php">← Retour à l’accueil</a></p>
 </main>
 
-<!-- Chemin JS public depuis /frontend/private/user/ -->
-<script src="../../public/assets/js/navbar.js?v=1"></script>
+<!-- JS absolu -->
+<script src="/assets/js/navbar.js?v=1"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
       if (typeof renderMenu === 'function') renderMenu(window.ecorideUser || null);
@@ -107,4 +108,3 @@ try {
 </script>
 </body>
 </html>
- 

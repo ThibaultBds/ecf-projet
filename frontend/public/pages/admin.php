@@ -94,14 +94,14 @@ if ($_POST && isset($_POST['action'])) {
     <meta charset="UTF-8">
     <title>Administration - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Chemin vers les assets publics depuis /frontend/private/admin/ -->
-<link rel="stylesheet" href="/assets/css/style.css">
+    <!-- CSS absolu -->
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
 <header class="container-header">
     <h1>
-        <a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
+        <a href="/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
             <span class="material-icons">eco</span> EcoRide
         </a>
     </h1>
@@ -174,8 +174,8 @@ if ($_POST && isset($_POST['action'])) {
     </form>
 </main>
 
-<!-- Chemin JS public depuis /frontend/private/admin/ -->
-<script src="../../public/assets/js/navbar.js?v=1"></script>
+<!-- JS absolu -->
+<script src="/assets/js/navbar.js?v=1"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
       if (typeof renderMenu === 'function') renderMenu(window.ecorideUser || null);

@@ -31,13 +31,14 @@ try {
   <meta charset="UTF-8" />
   <title>Modération - EcoRide</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" href="../assets/css/style.css">
+  <!-- CSS absolu -->
+  <link rel="stylesheet" href="/assets/css/style.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
 <header class="container-header">
   <h1>
-    <a href="/ecoride/frontend/public/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
+    <a href="/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
       <span class="material-icons">gavel</span> Modération EcoRide
     </a>
   </h1>
@@ -74,15 +75,18 @@ try {
   <?php endif; ?>
 
   <div style="margin-top:16px;">
-    <a href="/ecoride/frontend/public/profil.php">← Retour au profil</a>
+    <a href="/profil.php">← Retour au profil</a>
   </div>
 </main>
 
-<script src="/ecoride/frontend/public/assets/js/navbar.js"></script>
+<!-- JS absolu -->
+<script src="/assets/js/navbar.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        if (window.ecorideUser) renderMenu(window.ecorideUser);
-        else renderMenu();
+        if (typeof renderMenu === 'function') {
+            if (window.ecorideUser) renderMenu(window.ecorideUser);
+            else renderMenu();
+        }
     });
 </script>
 </body>
