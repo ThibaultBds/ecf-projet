@@ -1,4 +1,18 @@
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [QSA,L]
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Laisse Apache servir les fichiers existants
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Redirige les fichiers .php vers pages/ s'ils n'existent pas à la racine
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} ^/([^/]+\.php)$
+  RewriteRule ^([^/]+\.php)$ pages/$1 [L]
+
+  # Si rien n'existe, affiche une vraie 404
+  RewriteRule ^ - [R=404,L]
+</IfModule>
