@@ -18,8 +18,8 @@ function renderMenu(user) {
       <nav class="navbar">
         <ul>
           <li><a href="/index.php">🏠 Accueil</a></li>
-          <li><a href="/covoiturages.php">🚗 Covoiturages</a></li>
-          <li><a href="/contact.php">📧 Contact</a></li>
+          <li><a href="pages/covoiturages.php">🚗 Covoiturages</a></li>
+          <li><a href="pages/contact.php">📧 Contact</a></li>
         </ul>
         <div id="user-profile" style="display:${user && user.email ? 'flex' : 'none'};align-items:center;gap:10px;">
           <a href="/profil.php" style="display:flex;align-items:center;gap:8px;color:white;text-decoration:none;">

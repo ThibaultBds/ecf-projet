@@ -1,14 +1,17 @@
 <?php
-session_start();
+// 🔹 1. Important : aucune ligne vide avant "<?php"
+ob_start();          // évite les erreurs d'en-têtes
+session_start();     // démarre la session PHP
+// (ne rien mettre ici comme echo, ni HTML)
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
   <title>EcoRide - Accueil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../assets/css/style.css?v=2025">
-   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
   <header class="container-header">
@@ -18,20 +21,23 @@ session_start();
       </a>
     </h1>
   </header>
+
   <script>
-  window.ecorideUser = <?php
-    if (isset($_SESSION['user'])) {
-      $u = $_SESSION['user'];
-      echo json_encode([
-        'email' => $u['email'],
-        'pseudo' => $u['pseudo'],
-        'type' => $u['type']
-      ]);
-    } else {
-      echo 'null';
-    }
-  ?>;
+    // 🔹 2. Ce code JS affiche les infos de session côté front
+    window.ecorideUser = <?php
+      if (isset($_SESSION['user'])) {
+        $u = $_SESSION['user'];
+        echo json_encode([
+          'email' => $u['email'],
+          'pseudo' => $u['pseudo'],
+          'type' => $u['type']
+        ]);
+      } else {
+        echo 'null';
+      }
+    ?>;
   </script>
+
   <main>
     <section class="hero">
       <h2>Voyagez vert, partagez vos trajets !</h2>
@@ -43,12 +49,10 @@ session_start();
       <a href="login_secure.php" class="cta-btn secondary">Connexion</a>
     </section>
 
-    <!-- Formulaire de recherche placé sous le hero, centré et espacé -->
+    <!-- Formulaire de recherche -->
     <div style="display:flex;justify-content:center;margin:30px 0;">
       <form class="search-bar" style="margin:0;max-width:900px;width:100%;box-sizing:border-box;">
-        <label for="depart" style="display:none;">Départ</label>
         <input type="text" id="depart" placeholder="Départ" list="villes" name="depart" autocomplete="on">
-        <label for="arrivee" style="display:none;">Arrivée</label>
         <input type="text" id="arrivee" placeholder="Arrivée" list="villes" name="arrivee" autocomplete="on">
         <datalist id="villes">
           <option value="Paris">
@@ -64,7 +68,6 @@ session_start();
         </datalist>
         <input type="text" id="dateInput" name="date" placeholder="JJ / MM / AAAA" autocomplete="off" readonly style="background:#222;color:#fff;font-weight:bold;letter-spacing:2px;text-align:center;cursor:pointer;">
         <div id="calendarPopup" style="display:none;position:absolute;z-index:10;"></div>
-        <label for="places-select" style="display:none;">Places</label>
         <select id="places-select" name="places">
           <option value="">Places</option>
           <option value="1">1</option>
@@ -76,7 +79,7 @@ session_start();
       </form>
     </div>
 
-    <!-- Calculateur d'économies -->
+    <!-- Section calculateur -->
     <section class="calculator-section" style="background:#f8f9fa;padding:30px 20px;margin:30px 0;border-radius:10px;">
       <div style="max-width:900px;margin:0 auto;">
         <h3 style="text-align:center;color:#2d3436;margin-bottom:20px;">
@@ -108,39 +111,23 @@ session_start();
 
     <section class="presentation-entreprise">
       <h2>À propos de <span class="green">EcoRide</span></h2>
-      <strong>EcoRide</strong> a été imaginé pour répondre à la pollution générée par les trajets du quotidien. Portée par une vraie ambition écologique, la plateforme propose des solutions de covoiturage accessibles à tous, que votre voiture soit écolo ou non.
-      </p>
-      <p>
-        Notre objectif : devenir la référence du covoiturage éco-responsable partout en France.<br>
-        Ensemble, réduisons notre empreinte carbone, économisons, et voyageons plus intelligemment !
-      </p>
+      <p><strong>EcoRide</strong> a été imaginé pour répondre à la pollution générée par les trajets du quotidien. Portée par une vraie ambition écologique, la plateforme propose des solutions de covoiturage accessibles à tous, que votre voiture soit écolo ou non.</p>
+      <p>Notre objectif : devenir la référence du covoiturage éco-responsable partout en France.<br> Ensemble, réduisons notre empreinte carbone, économisons, et voyageons plus intelligemment !</p>
     </section>
 
     <section class="benefits">
       <h3>Pourquoi choisir EcoRide ?</h3>
       <div class="benefit-list">
-        <div>
-          <span class="material-icons" aria-hidden="true">eco</span>
-          <p>Réduisez votre empreinte carbone</p>
-        </div>
-        <div>
-          <span class="material-icons" aria-hidden="true">savings</span>
-          <p>Faites des économies</p>
-        </div>
-        <div>
-          <span class="material-icons" aria-hidden="true">groups</span>
-          <p>Rencontrez des gens sympas</p>
-        </div>
-        <div>
-          <span class="material-icons" aria-hidden="true">star</span>
-          <p>Trajets fiables & sécurisés</p>
-        </div>
+        <div><span class="material-icons" aria-hidden="true">eco</span><p>Réduisez votre empreinte carbone</p></div>
+        <div><span class="material-icons" aria-hidden="true">savings</span><p>Faites des économies</p></div>
+        <div><span class="material-icons" aria-hidden="true">groups</span><p>Rencontrez des gens sympas</p></div>
+        <div><span class="material-icons" aria-hidden="true">star</span><p>Trajets fiables & sécurisés</p></div>
       </div>
     </section>
 
     <section class="story-cards">
       <div class="alt-card">
-<img src="../assets/images/smartcar.jpeg" alt="Covoiturage écologique" class="alt-img">
+        <img src="../assets/images/smartcar.jpeg" alt="Covoiturage écologique" class="alt-img">
         <div class="alt-desc">
           <h4>Voyagez écologique</h4>
           <p>Réduisez votre empreinte carbone en partageant vos trajets. Chaque voyage en covoiturage permet d'économiser en moyenne 2,3 kg de CO₂.</p>
@@ -164,13 +151,12 @@ session_start();
       </div>
     </section>
   </main>
+
   <footer>
     <p>&copy; 2025 EcoRide - Tous droits réservés</p>
-    <div>
-      <a href="#" id="openModalLegal">Mentions légales</a>
-    </div>
+    <div><a href="#" id="openModalLegal">Mentions légales</a></div>
   </footer>
-  <!-- Modal Mentions Légales -->
+
   <dialog id="modal-legal" class="modal-legal-dialog">
     <form method="dialog" class="modal-legal-content">
       <button class="modal-legal-close" id="closeModalLegal" aria-label="Fermer la fenêtre" type="button">×</button>
@@ -192,16 +178,17 @@ session_start();
       </div>
     </form>
   </dialog>
+
   <script src="../assets/js/script.js"></script>
   <script src="../assets/js/navbar.js"></script>
   <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    if (window.ecorideUser) {
-      renderMenu(window.ecorideUser);
-    } else {
-      renderMenu();
-    }
-  });
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.ecorideUser) {
+        renderMenu(window.ecorideUser);
+      } else {
+        renderMenu();
+      }
+    });
   </script>
 </body>
 </html>
