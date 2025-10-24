@@ -103,7 +103,7 @@ Ce document fait foi en cas d’impossibilité de test direct.
 ## 7. Accès local
 
 Une fois installé, l’application est accessible à l’adresse suivante :  
-[http://localhost/ecoride/frontend/public/pages/index.php](http://localhost/ecoride/frontend/public/pages/index.php)
+[http://localhost:8081](http://localhost:8081)
 
 ---
 
