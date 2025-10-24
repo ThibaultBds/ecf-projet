@@ -59,18 +59,29 @@ try {
   <?php if (!$reports): ?>
     <p>Aucun signalement en attente 👌</p>
   <?php else: ?>
-    <table border="1" cellpadding="5">
-      <tr><th>#</th><th>Type</th><th>Message</th><th>Par</th><th>Statut</th><th>Créé</th></tr>
-      <?php foreach ($reports as $r): ?>
+    <table class="admin-table">
+      <thead>
         <tr>
-          <td><?= (int)$r['id'] ?></td>
-          <td><?= htmlspecialchars($r['type']) ?></td>
-          <td><?= htmlspecialchars($r['message']) ?></td>
-          <td><?= htmlspecialchars($r['reporter'] ?? '—') ?></td>
-          <td><?= htmlspecialchars($r['status']) ?></td>
-          <td><?= htmlspecialchars($r['created_at']) ?></td>
+          <th>#</th>
+          <th>Type</th>
+          <th>Message</th>
+          <th>Par</th>
+          <th>Statut</th>
+          <th>Créé</th>
         </tr>
-      <?php endforeach; ?>
+      </thead>
+      <tbody>
+        <?php foreach ($reports as $r): ?>
+          <tr>
+            <td><?= (int)$r['id'] ?></td>
+            <td><span class="admin-badge <?= htmlspecialchars($r['type']) ?>"><?= htmlspecialchars($r['type']) ?></span></td>
+            <td><?= htmlspecialchars($r['message']) ?></td>
+            <td><?= htmlspecialchars($r['reporter'] ?? '—') ?></td>
+            <td><span class="admin-badge <?= htmlspecialchars($r['status']) ?>"><?= htmlspecialchars($r['status']) ?></span></td>
+            <td><?= htmlspecialchars($r['created_at']) ?></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
     </table>
   <?php endif; ?>
 
