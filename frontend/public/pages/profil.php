@@ -24,7 +24,7 @@ $user = $_SESSION['user'];
 try {
     $pdo = getDatabase();
 
-    $stmt = $pdo->prepare("SELECT id, email, pseudo, role, status, credits FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id, email, pseudo, role, status, credits, user_type FROM users WHERE id = ?");
     $stmt->execute([$user['id']]);
     $userData = $stmt->fetch(PDO::FETCH_ASSOC) ?: $user;
 
@@ -42,6 +42,22 @@ try {
     $userData = $user;
     $myTrips = [];
     $error = "Erreur lors du chargement du profil.";
+}
+
+// Traitement mise à jour type utilisateur
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_user_type') {
+    $new_type = $_POST['user_type'] ?? '';
+    if (in_array($new_type, ['passager', 'chauffeur', 'les_deux'])) {
+        try {
+            $pdo = getDatabase();
+            $stmt = $pdo->prepare("UPDATE users SET user_type = ? WHERE id = ?");
+            $stmt->execute([$new_type, $user['id']]);
+            $userData['user_type'] = $new_type;
+            $success = "Type d'utilisateur mis à jour.";
+        } catch (Exception $e) {
+            $error = "Erreur lors de la mise à jour.";
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -75,6 +91,9 @@ try {
     <?php if (!empty($error)): ?>
       <div class="message-error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
+    <?php if (!empty($success)): ?>
+      <div class="message-success"><?= htmlspecialchars($success) ?></div>
+    <?php endif; ?>
 
     <div class="profile-box">
         <p><strong>Email :</strong> <?= htmlspecialchars($userData['email'] ?? '') ?></p>
@@ -82,7 +101,28 @@ try {
         <p><strong>Rôle :</strong> <?= htmlspecialchars($userData['role'] ?? '') ?></p>
         <p><strong>Statut :</strong> <?= htmlspecialchars($userData['status'] ?? '') ?></p>
         <p><strong>Crédits :</strong> <?= (int)($userData['credits'] ?? 0) ?></p>
+        <p><strong>Type d'utilisateur :</strong> <?= htmlspecialchars($userData['user_type'] ?? 'passager') ?></p>
     </div>
+
+    <h3>Modifier mon type d'utilisateur</h3>
+    <form method="POST" class="form-container">
+        <input type="hidden" name="action" value="update_user_type">
+        <label for="user_type">Je suis :</label>
+        <select name="user_type" id="user_type" required>
+            <option value="passager" <?= ($userData['user_type'] ?? 'passager') === 'passager' ? 'selected' : '' ?>>Passager</option>
+            <option value="chauffeur" <?= ($userData['user_type'] ?? 'passager') === 'chauffeur' ? 'selected' : '' ?>>Chauffeur</option>
+            <option value="les_deux" <?= ($userData['user_type'] ?? 'passager') === 'les_deux' ? 'selected' : '' ?>>Les deux</option>
+        </select>
+        <button type="submit" class="btn-primary">Mettre à jour</button>
+    </form>
+
+    <h3>Gestion de mon compte</h3>
+    <ul>
+        <li><a href="/backend/public/gestion_vehicules.php">Gérer mes véhicules</a></li>
+        <li><a href="/backend/public/gestion_preferences.php">Gérer mes préférences</a></li>
+        <li><a href="/backend/public/espace_chauffeur.php">Espace chauffeur (créer un trajet)</a></li>
+        <li><a href="mes_trajets.php">Voir mes trajets</a></li>
+    </ul>
 
     <h3>Vos derniers trajets</h3>
     <?php if (!$myTrips): ?>

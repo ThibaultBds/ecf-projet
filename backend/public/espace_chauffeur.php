@@ -55,8 +55,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $vehicle_id = $vehicle['id'];
         }
 
+        // Vérifier crédits suffisants (prix + 2 pour plateforme)
+        $total_cost = $prix + 2;
+        $stmt = $pdo->prepare("SELECT credits FROM users WHERE id = ?");
+        $stmt->execute([$user['id']]);
+        $current_credits = $stmt->fetchColumn();
+        if ($current_credits < $total_cost) {
+            throw new Exception('Crédits insuffisants. Vous avez ' . $current_credits . ' crédits, nécessaire ' . $total_cost . '.');
+        }
+
         // Créer le trajet
         if (createTrip($user['id'], $vehicle_id, $ville_depart, $ville_arrivee, $datetime_depart, $prix, $places, $description)) {
+            // Déduire crédits (prix + 2)
+            $stmt = $pdo->prepare("UPDATE users SET credits = credits - ? WHERE id = ?");
+            $stmt->execute([$total_cost, $user['id']]);
+
             // Log de l'activité
             try {
                 $pdo = getDatabase();
@@ -65,8 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             } catch (Exception $e) {
                 // Log silencieux en cas d'erreur
             }
-            
-            $success = 'Trajet créé avec succès !';
+
+            $success = 'Trajet créé avec succès ! ' . $total_cost . ' crédits déduits.';
             $_POST = [];
         } else {
             throw new Exception('Erreur lors de la création du trajet');
@@ -256,7 +269,7 @@ function getStatusLabel($status) {
                     </div>
                 <?php endif; ?>
                 <div style="text-align:center;margin-top:30px;">
-                    <a href="profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">← Retour au profil</a>
+                    <a href="/profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">← Retour au profil</a>
                 </div>
             </div>
         </div>

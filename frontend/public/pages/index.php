@@ -181,7 +181,8 @@ session_start();     // démarre la session PHP
 
   <script src="../assets/js/script.js"></script>
   <script src="../assets/js/navbar.js"></script>
-  <script>
+  <script>Developer: Show Running Extensions
+
     document.addEventListener('DOMContentLoaded', function() {
       if (window.ecorideUser) {
         renderMenu(window.ecorideUser);

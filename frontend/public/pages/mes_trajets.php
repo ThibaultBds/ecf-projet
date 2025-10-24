@@ -35,6 +35,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             if (in_array($new_status, ['en_cours', 'termine', 'annule'])) {
                 $stmt = $pdo->prepare("UPDATE trips SET status = ? WHERE id = ? AND chauffeur_id = ?");
                 $stmt->execute([$new_status, $trip_id, $user['id']]);
+
+                if ($new_status === 'annule') {
+                    // Annulation par chauffeur : rembourser les participants et envoyer mail
+                    $stmt = $pdo->prepare("SELECT tp.user_id, tp.credits_utilises, u.email FROM trip_participants tp JOIN users u ON tp.user_id = u.id WHERE tp.trip_id = ?");
+                    $stmt->execute([$trip_id]);
+                    $participants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    foreach ($participants as $participant) {
+                        // Rembourser crédits
+                        $stmt = $pdo->prepare("UPDATE users SET credits = credits + ? WHERE id = ?");
+                        $stmt->execute([$participant['credits_utilises'], $participant['user_id']]);
+
+                        // Envoyer mail (simulé, utiliser mail() ou service)
+                        $subject = "Annulation de trajet EcoRide";
+                        $message = "Votre trajet de " . $trajet['ville_depart'] . " à " . $trajet['ville_arrivee'] . " a été annulé par le chauffeur. Vos crédits ont été remboursés.";
+                        // mail($participant['email'], $subject, $message); // Activer si mail configuré
+                        error_log("Mail envoyé à " . $participant['email'] . ": " . $message); // Log pour test
+                    }
+
+                    // Supprimer participations
+                    $stmt = $pdo->prepare("DELETE FROM trip_participants WHERE trip_id = ?");
+                    $stmt->execute([$trip_id]);
+                }
+
                 $success = "Le statut du trajet a été mis à jour.";
             }
         }
