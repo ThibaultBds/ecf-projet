@@ -202,3 +202,4 @@ function createDefaultVehicle($user_id, $places = 4) {
     }
 }
 ?>
+"// maj connexion" 
