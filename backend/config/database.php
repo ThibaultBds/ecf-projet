@@ -1,12 +1,14 @@
-<?php
+<?php 
 /**
  * Configuration et gestion de la base de données EcoRide
- * Compatible Heroku JawsDB & local XAMPP/MAMP
+ * Compatible Heroku JawsDB & Docker (MySQL 8)
  *
- * Si tu testes en local :
- * - Par défaut ci-dessous (à ADAPTER) :
- *     host = 127.0.0.1, user = ecoride, mdp = ecoride123, base = ecoride, port = 3306
- * - Ou mets user = root et ton mot de passe root si tu préfères.
+ * En local avec Docker :
+ * - host = ecoride-db (nom du service dans docker-compose.yml)
+ * - user = root
+ * - mdp = root
+ * - base = ecoride
+ * - port = 3306
  *
  * En prod Heroku/JawsDB :
  * - La config est récupérée automatiquement via JAWSDB_URL ou CLEARDB_DATABASE_URL.
@@ -25,14 +27,14 @@ class Database {
     private $conn;
 
     public function __construct() {
-        // === CONFIGURATION LOCALE (MODIFIE ICI SI BESOIN) ===
-        $this->host     = '127.0.0.1';     // ou 'localhost'
+        // === CONFIGURATION DOCKER (par défaut) ===
+        $this->host     = 'ecoride-db';   // ⚡ nom du service MySQL Docker
         $this->dbName   = 'ecoride';
-        $this->username = 'ecoride';       // mets 'root' si tu utilises root
-        $this->password = 'ecoride123';    // mets le mdp root si tu utilises root
+        $this->username = 'root';
+        $this->password = 'root';
         $this->port     = 3306;
 
-        // === HEROKU/JAWSDB (automatique si variable d'env présente) ===
+        // === CONFIGURATION HEROKU/JAWSDB (auto si variable d'env détectée) ===
         $herokuUrl = getenv('JAWSDB_URL') ?: getenv('CLEARDB_DATABASE_URL');
         if ($herokuUrl) {
             $dbparts        = parse_url($herokuUrl);
@@ -57,7 +59,7 @@ class Database {
         } catch (PDOException $exception) {
             throw new DatabaseConnectionException(
                 "ERREUR DB : " . $exception->getMessage() .
-                ". Vérifie dans backend/config/database.php que tes identifiants sont bons (voir commentaires en haut du fichier) !"
+                ". Vérifie dans backend/config/database.php que tes identifiants sont bons !"
             );
         }
         return $this->conn;
@@ -199,3 +201,4 @@ function createDefaultVehicle($user_id, $places = 4) {
         return false;
     }
 }
+?>

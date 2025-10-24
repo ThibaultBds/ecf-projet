@@ -1,29 +1,35 @@
-version: '3.8'
+version: "3.9"
 
 services:
   web:
-    build: .
-    container_name: ecoride_web
+    build:
+      context: ./docker                 # 🔹 Dockerfile dans le dossier ./docker
+    container_name: ecoride-web
     ports:
-      - "8081:80"
+      - "8081:80"                       # 🔹 ton site accessible sur http://localhost:8081
     volumes:
-      - .:/var/www/html
+      - .:/var/www/html                 # 🔹 monte tout le projet (frontend + backend)
     depends_on:
       - db
     environment:
       - APACHE_DOCUMENT_ROOT=/var/www/html/frontend/public
+    restart: always                     # 🔹 redémarre auto si le container crash
+    command: apache2-foreground         # 🔹 démarre Apache proprement
 
   db:
     image: mysql:8.0
-    container_name: ecoride_db
+    container_name: ecoride-db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: ecoride
       MYSQL_USER: ecoride_user
       MYSQL_PASSWORD: ecoride_pass
+    ports:
+      - "3306:3306"                     # 🔹 pour accès depuis DBeaver / PHP
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql          # 🔹 sauvegarde persistante des données
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d  # 🔹 scripts .sql auto-exécutés
 
 volumes:
   db_data:
