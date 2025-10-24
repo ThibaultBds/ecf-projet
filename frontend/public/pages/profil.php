@@ -95,13 +95,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
       <div class="message-success"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
 
-    <div class="profile-box">
-        <p><strong>Email :</strong> <?= htmlspecialchars($userData['email'] ?? '') ?></p>
-        <p><strong>Pseudo :</strong> <?= htmlspecialchars($userData['pseudo'] ?? '') ?></p>
-        <p><strong>Rôle :</strong> <?= htmlspecialchars($userData['role'] ?? '') ?></p>
-        <p><strong>Statut :</strong> <?= htmlspecialchars($userData['status'] ?? '') ?></p>
-        <p><strong>Crédits :</strong> <?= (int)($userData['credits'] ?? 0) ?></p>
-        <p><strong>Type d'utilisateur :</strong> <?= htmlspecialchars($userData['user_type'] ?? 'passager') ?></p>
+    <div class="profile-section">
+        <div class="profile-info">
+            <div class="profile-item">
+                <span class="material-icons">email</span>
+                <div>
+                    <strong>Email</strong>
+                    <p><?= htmlspecialchars($userData['email'] ?? '') ?></p>
+                </div>
+            </div>
+            <div class="profile-item">
+                <span class="material-icons">person</span>
+                <div>
+                    <strong>Pseudo</strong>
+                    <p><?= htmlspecialchars($userData['pseudo'] ?? '') ?></p>
+                </div>
+            </div>
+            <div class="profile-item">
+                <span class="material-icons">admin_panel_settings</span>
+                <div>
+                    <strong>Rôle</strong>
+                    <p><span class="admin-badge <?= strtolower($userData['role'] ?? '') ?>"><?= htmlspecialchars($userData['role'] ?? '') ?></span></p>
+                </div>
+            </div>
+            <div class="profile-item">
+                <span class="material-icons">check_circle</span>
+                <div>
+                    <strong>Statut</strong>
+                    <p><span class="admin-badge <?= htmlspecialchars($userData['status'] ?? '') ?>"><?= htmlspecialchars($userData['status'] ?? '') ?></span></p>
+                </div>
+            </div>
+            <div class="profile-item">
+                <span class="material-icons">account_balance_wallet</span>
+                <div>
+                    <strong>Crédits</strong>
+                    <p class="number"><?= (int)($userData['credits'] ?? 0) ?></p>
+                </div>
+            </div>
+            <div class="profile-item">
+                <span class="material-icons">directions_car</span>
+                <div>
+                    <strong>Type d'utilisateur</strong>
+                    <p><span class="admin-badge <?= htmlspecialchars($userData['user_type'] ?? 'passager') ?>"><?= htmlspecialchars($userData['user_type'] ?? 'passager') ?></span></p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <h3>Modifier mon type d'utilisateur</h3>
@@ -117,23 +155,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     </form>
 
     <h3>Gestion de mon compte</h3>
-    <ul>
-        <li><a href="/backend/public/gestion_vehicules.php">Gérer mes véhicules</a></li>
-        <li><a href="/backend/public/gestion_preferences.php">Gérer mes préférences</a></li>
-        <li><a href="/backend/public/espace_chauffeur.php">Espace chauffeur (créer un trajet)</a></li>
-        <li><a href="mes_trajets.php">Voir mes trajets</a></li>
-    </ul>
+    <div class="account-links">
+        <a href="/backend/public/gestion_vehicules.php" class="account-link">
+            <span class="material-icons">directions_car</span>
+            Gérer mes véhicules
+        </a>
+        <a href="/backend/public/gestion_preferences.php" class="account-link">
+            <span class="material-icons">settings</span>
+            Gérer mes préférences
+        </a>
+        <a href="/backend/public/espace_chauffeur.php" class="account-link">
+            <span class="material-icons">add_road</span>
+            Espace chauffeur (créer un trajet)
+        </a>
+        <a href="mes_trajets.php" class="account-link">
+            <span class="material-icons">list</span>
+            Voir mes trajets
+        </a>
+    </div>
 
     <h3>Vos derniers trajets</h3>
     <?php if (!$myTrips): ?>
         <p>Aucun trajet.</p>
     <?php else: ?>
-        <ul>
+        <div class="trips-list">
             <?php foreach ($myTrips as $t): ?>
-                <li><?= htmlspecialchars($t['ville_depart']) ?> → <?= htmlspecialchars($t['ville_arrivee']) ?>
-                    (<?= htmlspecialchars($t['status']) ?>)</li>
+                <div class="trip-item">
+                    <div class="trip-route">
+                        <span class="material-icons">location_on</span>
+                        <span><?= htmlspecialchars($t['ville_depart']) ?> → <?= htmlspecialchars($t['ville_arrivee']) ?></span>
+                    </div>
+                    <div class="trip-status">
+                        <span class="admin-badge <?= htmlspecialchars($t['status']) ?>"><?= htmlspecialchars($t['status']) ?></span>
+                    </div>
+                </div>
             <?php endforeach; ?>
-        </ul>
+        </div>
     <?php endif; ?>
 
     <p><a href="/index.php">← Retour à l’accueil</a></p>

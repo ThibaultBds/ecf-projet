@@ -124,54 +124,87 @@ if ($_POST && isset($_POST['action'])) {
     <?php endif; ?>
 
     <!-- Stats -->
-    <div style="display:flex;gap:20px;flex-wrap:wrap;">
-        <div>Utilisateurs actifs: <?= (int)$stats['users'] ?></div>
-        <div>Trajets planifiés: <?= (int)$stats['trips'] ?></div>
-        <div>Signalements ouverts: <?= (int)$stats['reports'] ?></div>
-        <div>Crédits plateforme: <?= (int)$totalPlatformCredits ?></div>
+    <div class="stats-cards">
+        <div class="stats-card">
+            <h3>Utilisateurs actifs</h3>
+            <p class="number"><?= (int)$stats['users'] ?></p>
+        </div>
+        <div class="stats-card">
+            <h3>Trajets planifiés</h3>
+            <p class="number"><?= (int)$stats['trips'] ?></p>
+        </div>
+        <div class="stats-card">
+            <h3>Signalements ouverts</h3>
+            <p class="number"><?= (int)$stats['reports'] ?></p>
+        </div>
+        <div class="stats-card">
+            <h3>Crédits plateforme</h3>
+            <p class="number"><?= (int)$totalPlatformCredits ?></p>
+        </div>
     </div>
 
     <h3>Gestion des utilisateurs</h3>
-    <table border="1" cellpadding="5">
-        <tr><th>ID</th><th>Email</th><th>Pseudo</th><th>Rôle</th><th>Statut</th><th>Actions</th></tr>
-        <?php foreach ($users as $u): ?>
+    <table class="admin-table">
+        <thead>
             <tr>
-                <td><?= (int)$u['id'] ?></td>
-                <td><?= htmlspecialchars($u['email']) ?></td>
-                <td><?= htmlspecialchars($u['pseudo']) ?></td>
-                <td><?= htmlspecialchars($u['role']) ?></td>
-                <td><?= htmlspecialchars($u['status']) ?></td>
-                <td>
-                    <?php if ($u['status'] === 'actif'): ?>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="action" value="suspend_user">
-                            <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                            <button type="submit">Suspendre</button>
-                        </form>
-                    <?php else: ?>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="action" value="activate_user">
-                            <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
-                            <button type="submit">Réactiver</button>
-                        </form>
-                    <?php endif; ?>
-                </td>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Pseudo</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th>Actions</th>
             </tr>
-        <?php endforeach; ?>
+        </thead>
+        <tbody>
+            <?php foreach ($users as $u): ?>
+                <tr>
+                    <td><?= (int)$u['id'] ?></td>
+                    <td><?= htmlspecialchars($u['email']) ?></td>
+                    <td><?= htmlspecialchars($u['pseudo']) ?></td>
+                    <td><span class="admin-badge <?= strtolower($u['role']) ?>"><?= htmlspecialchars($u['role']) ?></span></td>
+                    <td><span class="admin-badge <?= $u['status'] ?>"><?= htmlspecialchars($u['status']) ?></span></td>
+                    <td>
+                        <?php if ($u['status'] === 'actif'): ?>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="action" value="suspend_user">
+                                <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                                <button type="submit" class="btn-admin">Suspendre</button>
+                            </form>
+                        <?php else: ?>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="action" value="activate_user">
+                                <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                                <button type="submit" class="btn-primary">Réactiver</button>
+                            </form>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
     </table>
 
     <h3>Créer un compte Employé</h3>
-    <form method="POST">
-        <input type="hidden" name="action" value="create_employee">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="text" name="pseudo" placeholder="Pseudo" required>
-        <input type="password" name="password" placeholder="Mot de passe temporaire" required>
-        <select name="role">
-            <option value="Moderateur">Modérateur</option>
-            <option value="Administrateur">Administrateur</option>
-        </select>
-        <button type="submit">Créer</button>
-    </form>
+    <div class="form-container">
+        <form method="POST">
+            <input type="hidden" name="action" value="create_employee">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+
+            <label for="pseudo">Pseudo</label>
+            <input type="text" id="pseudo" name="pseudo" placeholder="Pseudo" required>
+
+            <label for="password">Mot de passe temporaire</label>
+            <input type="password" id="password" name="password" placeholder="Mot de passe temporaire" required>
+
+            <label for="role">Rôle</label>
+            <select id="role" name="role">
+                <option value="Moderateur">Modérateur</option>
+                <option value="Administrateur">Administrateur</option>
+            </select>
+
+            <button type="submit" class="btn-primary">Créer</button>
+        </form>
+    </div>
 </main>
 
 <!-- JS absolu -->
