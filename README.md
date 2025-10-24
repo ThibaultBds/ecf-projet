@@ -1,174 +1,201 @@
-# 🌿 EcoRide – Plateforme de covoiturage écologique
+🌿 EcoRide – Plateforme de covoiturage écologique
 
-**EcoRide** est une plateforme web de covoiturage écologique permettant de partager des trajets facilement tout en favorisant une mobilité durable.  
-Projet réalisé par Brandès Thibault dans le cadre du Titre Professionnel Développeur Web & Web Mobile (TP DWWM).
+EcoRide est une plateforme web de covoiturage écologique permettant de partager des trajets facilement tout en favorisant une mobilité durable.
+Projet réalisé par Thibault dans le cadre du Titre Professionnel Développeur Web & Web Mobile (TP DWWM).
 
----
+🗂️ Sommaire
 
-## 🗂️ Sommaire
+Présentation
 
-1. Présentation  
-2. Accès à l’application  
-3. Preuves de fonctionnement  
-4. Difficultés rencontrées  
-5. Technologies utilisées  
-6. Installation locale  
-7. Accès local  
-8. Comptes de test  
-9. Problèmes connus / Limitations  
-10. Structure du projet  
-11. Documentation  
-12. Contact
+Démonstration & Accès
 
----
+Fonctionnalités principales
 
-## 1. Présentation
+Environnement Docker
 
-EcoRide facilite le partage de trajets entre particuliers pour encourager une mobilité plus durable.  
-Les utilisateurs peuvent rechercher, proposer et réserver des trajets selon des critères écologiques et sociaux (animaux, fumeur, type de véhicule, etc.).
+Installation locale
 
----
+Accès local
 
-## 2. Accès à l’application
+Comptes de test
 
-- **Démo en ligne (Heroku)** :  
-  [https://ecoride-heroku-b5554d0a41a1.herokuapp.com/pages/index.php](https://ecoride-heroku-b5554d0a41a1.herokuapp.com/pages/index.php)
+Sauvegarde & Base de données
 
-- **Accès local après installation** :  
-  [http://localhost/ecoride/frontend/public/pages/index.php](http://localhost/ecoride/frontend/public/pages/index.php)
+Problèmes connus / Limitations
 
-> Utilisez le lien qui correspond à votre environnement de test ou de démonstration.
+Structure du projet
 
----
+Documentation
 
-## 3. Preuves de fonctionnement
+Contact
 
-Toutes les fonctionnalités principales sont démontrées par des captures d’écran, disponibles dans le PDF “preuves de fonctionnement” (`/docs/PREUVES_FONCTIONNEMENT.pdf`).  
-Ce document fait foi en cas d’impossibilité de test direct.
+1. 🌍 Présentation
 
----
+EcoRide facilite le partage de trajets entre particuliers pour encourager une mobilité plus durable.
+Les utilisateurs peuvent rechercher, proposer et réserver des trajets selon divers critères (fumeur, animaux, type de véhicule, etc.).
+L’objectif principal est de promouvoir un covoiturage écoresponsable, simple d’utilisation et accessible à tous.
 
-## 4. Difficultés rencontrées (base de données)
+2. 🚀 Démonstration & Accès
 
-- **Import de la base de données** : certaines contraintes techniques sur les hébergeurs (Heroku/JawsDB, etc.) empêchent l’import sans erreurs.
-- **Adaptation du script SQL** : Le script fonctionne en local (phpMyAdmin/XAMPP) mais peut nécessiter des adaptations ailleurs.
-- **Conséquence** : Les preuves de fonctionnement sont apportées via screenshots.
+En ligne (démo Heroku) :
+https://ecoride-heroku-b5554d0a41a1.herokuapp.com/pages/index.php
 
----
+En local (Docker) :
+http://localhost:8081
 
-## 5. 💻 Technologies utilisées
+L’adresse http://localhost/ecoride/frontend/public/pages/index.php
+ n’est utilisée que pour XAMPP.
+En Docker, l’accès se fait directement via le port 8081.
 
-- PHP 8.x (PDO orienté objet)
-- HTML5, CSS3 (Flexbox, Bootstrap)
-- JavaScript (vanilla JS)
-- MySQL / MariaDB
-- Chart.js (statistiques)
-- Google Material Icons
-- Serveur local : XAMPP (Windows)
+3. ⚡ Fonctionnalités principales
 
----
+Authentification (utilisateur, modérateur, administrateur)
 
-## 6. 🛠️ Installation locale
+Publication et recherche de trajets
 
-### Prérequis
+Gestion des préférences (animaux, fumeur, confort, écologie)
 
-- XAMPP (Apache, PHP, MySQL)
-- Git
+Visualisation de statistiques (Chart.js)
 
-### Étapes
+Formulaires dynamiques connectés à la BDD
 
-1. **Cloner le dépôt**
-   ```
-   git clone https://github.com/ThibaultBds/ecf-projet.git
-   ```
-2. **Placer le dossier dans XAMPP**
-   - Copier le dossier dans `C:\xampp\htdocs\ecoride`
-3. **Créer la base de données**
-   - Ouvrir phpMyAdmin
-   - Importer **`SQL/ecoride.sql`**
-4. **Configurer la connexion**
-   - Modifier `config.php` (ou `backend/config/database.php`) avec vos identifiants MySQL locaux :  
-     ```
-     $host = 'localhost';
-     $dbname = 'ecoride';
-     $username = 'root';
-     $password = '';
-     ```
-5. **Lancer le serveur**
-   - Démarrer Apache et MySQL via XAMPP
-   - Accéder à l’application via [http://localhost/ecoride/frontend/public/pages/index.php](http://localhost/ecoride/frontend/public/pages/index.php)
+Administration / modération (validation, suppression de trajets)
 
----
+4. 🐳 Environnement Docker
 
-## 7. Accès local
+Le projet fonctionne entièrement dans un environnement Dockerisé.
 
-Une fois installé, l’application est accessible à l’adresse suivante :  
-[http://localhost:8081](http://localhost:8081)
+Conteneurs :
 
----
+ecoride_web → Apache + PHP (port 8081)
 
-## 8. Comptes de test
+ecoride_db → MySQL 8 (port 3306)
 
-Utilisez les identifiants suivants pour tester les différents rôles dans l’application :
+Les deux conteneurs communiquent via un réseau interne Docker.
+La base de données est automatiquement importée au premier lancement depuis docker/mysql-init/ecoride.sql.
 
-- **Utilisateur Standard**
-  - Email : user@ecoride.fr
-  - Mot de passe : password
-  - Rôle : Utilisateur
+5. 🛠️ Installation locale (version Docker)
 
-- **Administrateur**
-  - Email : admin@ecoride.fr
-  - Mot de passe : password
-  - Rôle : Administrateur
+Prérequis :
 
-- **Modérateur**
-  - Email : modo@ecoride.fr
-  - Mot de passe : password
-  - Rôle : Modérateur
+Docker Desktop
 
-> Ces identifiants sont ceux de la base locale de développement et des captures d’écran.
+Git
 
----
+Étapes :
 
-## 9. Problèmes connus / Limitations
+Cloner le dépôt :
+git clone https://github.com/ThibaultBds/ecf-projet.git
 
-- Import SQL impossible sur certains hébergeurs (Heroku/JawsDB).
-- Les preuves de fonctionnement sont fournies par captures d’écran.
-- Le dossier `vendor/` n’est pas inclus : lancer `composer install` après clonage si besoin.
-- L’application peut nécessiter des adaptations selon l’hébergeur.
+cd ecoride
 
----
+Démarrer les conteneurs :
+docker compose up --build
 
-## 10. Structure du projet
+Accéder au site :
+http://localhost:8081
 
-```
+(Optionnel) Recréer la base :
+docker compose down -v
+docker compose up --build
+
+6. 🌐 Accès local
+
+Accès principal : http://localhost:8081
+
+Si ton docker-compose.yml ne pointe pas sur frontend/public, utiliser :
+http://localhost:8081/frontend/public/pages/index.php
+
+7. 👥 Comptes de test
+
+Utilisateur :
+
+user@ecoride.fr
+ / password
+
+Modérateur :
+
+modo@ecoride.fr
+ / password
+
+Administrateur :
+
+admin@ecoride.fr
+ / password
+
+Ces comptes sont inclus dans la base importée automatiquement.
+
+8. 💾 Base de données & Sauvegarde
+
+Import automatique :
+
+Fichier ecoride.sql dans docker/mysql-init/
+
+Import automatique au démarrage de ecoride_db
+
+Sauvegardes :
+
+Stockées dans le dossier backup/
+
+Commande manuelle :
+docker exec ecoride_db mysqldump -u root -proot ecoride > backup/backup-ecoride_$(date +%F_%H-%M).sql
+
+Connexion PDO (backend/config/database.php) :
+
+host : ecoride-db
+
+username : root
+
+password : root
+
+dbName : ecoride
+
+port : 3306
+
+9. ⚠️ Problèmes connus / Limitations
+
+Import SQL impossible sur certains hébergeurs (Heroku/JawsDB).
+
+Le dossier vendor/ est ignoré → exécuter composer install si besoin.
+
+Quelques ajustements possibles selon la configuration (ports, environnements).
+
+Certaines fonctions d’administration sont locales uniquement.
+
+10. 🧱 Structure du projet
+
 ecoride/
-├── backend/      # Code PHP (logique serveur, API)
-├── frontend/     # HTML, CSS, JS, images
-├── SQL/          # Fichiers SQL (base de données)
-│   └── ecoride.sql
-├── docs/         # Documentation PDF (technique, manuel, preuves)
-├── script/       # Scripts divers
-├── docker/       # Fichiers Docker (optionnel)
-└── README.md     # Ce fichier
-```
+├── backend/ → logique serveur (PHP, sécurité, API)
+│ ├── config/ → fichiers de configuration
+│ └── public/ → pages et traitements PHP
+├── frontend/ → interface utilisateur (HTML, CSS, JS)
+│ ├── assets/ → ressources (CSS, JS, images, HTML)
+│ └── pages/ → pages principales
+├── docker/ → configuration Docker
+│ ├── mysql-init/ → fichier ecoride.sql (import auto)
+│ └── Dockerfile
+├── backup/ → sauvegardes SQL
+├── docs/ → documentation PDF (technique, utilisateur, preuves)
+├── docker-compose.yml → configuration principale
+├── .env → variables d’environnement
+├── composer.json / lock → dépendances PHP
+├── Procfile → déploiement Heroku
+├── TODO.md → tâches à venir
+└── README.md → ce fichier
 
----
+11. 📚 Documentation
 
-## 11. Documentation
+Manuel d’utilisation : docs/Manuel Utilisateur.pdf
 
-- Manuel d’utilisation : `docs/Manuel Utilisateur.pdf`
-- Documentation technique : `docs/Documentation_Technique.pdf`
-- Preuves de fonctionnement : `docs/PREUVES_FONCTIONNEMENT.pdf`
-- Charte graphique : `docs/Charte_Graphique.pdf`
-- Remarques sur la base de données : `docs/Remarque sur la base de données (1).pdf`
+Documentation technique : docs/Documentation Technique.pdf
 
----
+Charte graphique : docs/Charte Graphique.pdf
 
-## 12. Contact
+Preuves de fonctionnement : docs/PREUVES_FONCTIONNEMENT.pdf
 
-Auteur : Brandès Thibault  
-Date : 22 juillet 2025  
-Formation : TP Développeur Web & Web Mobile
+Gestion de projet : docs/project_management.md
 
----
+12. 📞 Contact
+
+Thibault
+Formation : Titre Professionnel – Développeur Web & Web Mobile (DWWM)
