@@ -1685,3 +1685,137 @@ background-color: #fff3e0;
   display: inline-block !important;
 }
 
+/* === PAGE: ESPACE CHAUFFEUR === */
+.driver-dashboard {
+  max-width: 1100px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.driver-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 32px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  margin-bottom: 40px;
+  border: 1px solid #e8f4f0;
+}
+
+.driver-card h2, .driver-card h3 {
+  color: #2d3436;
+  margin-bottom: 20px;
+}
+
+.driver-form {
+  display: grid;
+  gap: 20px;
+}
+
+.driver-form label {
+  font-weight: 600;
+  color: #2d3436;
+  margin-bottom: 6px;
+}
+
+.driver-form input,
+.driver-form select,
+.driver-form textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e8f4f0;
+  border-radius: 12px;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.driver-form input:focus,
+.driver-form select:focus,
+.driver-form textarea:focus {
+  border-color: #00b894;
+  box-shadow: 0 0 0 4px rgba(0,184,148,0.15);
+}
+
+.trip-card {
+  border: 1.5px solid #e8f4f0;
+  border-radius: 12px;
+  background: #f9fdfc;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.trip-card:hover {
+  transform: translateY(-3px);
+}
+
+.trip-card h4 {
+  margin: 0 0 10px;
+  color: #00b894;
+}
+
+.trip-card small {
+  color: #636e72;
+}
+/* === PAGE: PRÉFÉRENCES === */
+.preferences-container {
+  max-width: 600px;
+  margin: 60px auto;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e8f4f0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  padding: 36px 32px;
+  text-align: center;
+}
+
+.preferences-container h2 {
+  color: #00b894;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.preferences-container p {
+  color: #636e72;
+  margin-bottom: 25px;
+}
+
+.preferences-form {
+  text-align: left;
+}
+
+.preferences-form label {
+  font-weight: 600;
+  color: #2d3436;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.preferences-form select,
+.preferences-form input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid #e8f4f0;
+  margin-bottom: 20px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.preferences-form select:focus,
+.preferences-form input:focus {
+  border-color: #00b894;
+  box-shadow: 0 0 0 4px rgba(0,184,148,0.15);
+}
+
+.preferences-form button {
+  margin-top: 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.preferences-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,184,148,0.25);
+}

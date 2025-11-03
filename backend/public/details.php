@@ -94,7 +94,7 @@ $credit_requis = (int)$covoiturage['prix'];
                         <?= htmlspecialchars($covoiturage['ville_depart']) ?> → <?= htmlspecialchars($covoiturage['ville_arrivee']) ?>
                     </h2>
                     <p style="margin:5px 0;color:#636e72;font-size:18px; display:flex; align-items:center; gap:10px;">
-                        <img src="<?= htmlspecialchars($covoiturage['conducteur_avatar_url'] ?? 'assets/default_avatar.png') ?>" alt="Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                        <img src="<?= htmlspecialchars($covoiturage['conducteur_avatar_url'] ?? 'assets/default_avatar.png') ?>" alt="Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;image-rendering: -moz-crisp-edges; image-rendering: -o-crisp-edges; image-rendering: pixelated; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; filter: none;">
                         <span>Conducteur : <?= htmlspecialchars($covoiturage['conducteur']) ?></span>
                     </p>
                     <?php if ($covoiturage['is_ecological']): ?>

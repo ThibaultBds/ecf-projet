@@ -115,9 +115,11 @@ $credit_requis = (int)$covoiturage['prix'];
                         <?= htmlspecialchars($covoiturage['ville_depart']) ?> → <?= htmlspecialchars($covoiturage['ville_arrivee']) ?>
                     </h2>
                     <p style="margin:5px 0;color:#636e72;font-size:18px; display:flex; align-items:center; gap:10px;">
-                        <img src="<?= htmlspecialchars($covoiturage['conducteur_avatar_url'] ?? 'assets/default_avatar.png') ?>" alt="Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                        <?php
+                        $avatar_url = ($covoiturage['conducteur'] === 'marc') ? 'images/sebastien.jpg' : ($covoiturage['conducteur_avatar_url'] ?? 'images/default_avatar.png');
+                        ?>
+                        <img src="../assets/<?= htmlspecialchars($avatar_url) ?>" alt="Avatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #f1f2f6;image-rendering: -moz-crisp-edges; image-rendering: -o-crisp-edges; image-rendering: pixelated; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; filter: none;">
                         <span>Conducteur : <?= htmlspecialchars($covoiturage['conducteur']) ?></span>
-                    </p>
                     <?php if ($covoiturage['is_ecological']): ?>
                         <div style="display:inline-block;background:#00b894;color:white;padding:4px 12px;border-radius:15px;font-size:12px;font-weight:600;margin-top:10px;">
                             ⚡ Trajet écologique

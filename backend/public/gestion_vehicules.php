@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/autoload.php';
+require_once '../config/autoload.php';
 useClass('Database');
 
 if (!isset($_SESSION['user'])) {
@@ -65,12 +65,12 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
 <head>
     <meta charset="UTF-8">
     <title>Mes Véhicules - EcoRide</title>
-    <link rel="stylesheet" href="/Ecoridegit/frontend/public/assets/css/style.css">
+    <link rel="stylesheet" href="../../frontend/public/assets/css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <header class="container-header">
-        <h1><a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;"><span class="material-icons">eco</span> EcoRide</a></h1>
+        <h1><a href="/frontend/public/pages/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;"><span class="material-icons">eco</span> EcoRide</a></h1>
     </header>
 
     <main class="member-container">
@@ -136,10 +136,10 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
         <?php endif; ?>
         
         <div style="text-align:center;margin-top:30px;">
-            <a href="profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">← Retour au profil</a>
+            <a href="/frontend/public/pages/profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">← Retour au profil</a>
         </div>
     </main>
-    <script src="/Ecoridegit/frontend/public/assets/js/navbar.js"></script>
+    <script src="../../frontend/public/assets/js/navbar.js"></script>
 </body>
 </html>
 

@@ -284,13 +284,8 @@ document.addEventListener('DOMContentLoaded', function() {
     setupCalendar();
 
     // Calculateur
-    const searchForm = document.querySelector('.search-bar');
-    if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            mettreAJourCalculs();
-        });
-    }
+    // Note: Le formulaire de recherche dans index.php doit pouvoir soumettre normalement
+    // Le calculateur est mis à jour sur les événements 'input' des champs
     
     const departInput = document.getElementById('depart');
     const arriveeInput = document.getElementById('arrivee');

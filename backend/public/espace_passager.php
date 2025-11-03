@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/autoload.php';
+require_once '../config/autoload.php';
 useClass('Database');
 
 // Vérifier l'authentification
@@ -108,7 +108,7 @@ function getParticipationStatusLabel($status) {
                 <?php endif; ?>
                 
                 <div style="text-align:center;margin-top:30px;">
-                    <a href="profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">← Retour au profil</a>
+                    <a href="/frontend/public/pages/profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">← Retour au profil</a>
                 </div>
             </div>
         </div>

@@ -82,18 +82,25 @@ function getDatabase() {
 function getTrips($depart = '', $arrivee = '', $date = '') {
     try {
         $pdo = getDatabase();
-        $sql = "SELECT t.*, u.pseudo as conducteur, v.marque, v.modele, v.energie, u.rating
+        $sql = "SELECT t.*, u.pseudo as conducteur, v.marque, v.modele, v.energie, u.rating,
+                       TIMESTAMPDIFF(HOUR, NOW(), t.date_depart) as heures_restantes,
+                       TIMESTAMPDIFF(MINUTE, NOW(), t.date_depart) as minutes_restantes,
+                       CASE
+                           WHEN u.pseudo = 'Marc D.' THEN 'images/sebastien.jpg'
+                           WHEN u.pseudo = 'Sophie L.' THEN 'images/lucie.jpg'
+                           ELSE 'images/default_avatar.png'
+                       END as conducteur_avatar_url
                 FROM trips t
                 JOIN users u ON t.chauffeur_id = u.id
                 JOIN vehicles v ON t.vehicle_id = v.id
-                WHERE t.status = 'planifie' AND t.places_restantes > 0";
+                WHERE t.status = 'planifie' AND t.places_restantes > 0 AND t.date_depart > NOW()";
         $params = [];
         if (!empty($depart)) {
-            $sql .= " AND t.ville_depart LIKE ?";
+            $sql .= " AND LOWER(t.ville_depart) LIKE LOWER(?)";
             $params[] = "%$depart%";
         }
         if (!empty($arrivee)) {
-            $sql .= " AND t.ville_arrivee LIKE ?";
+            $sql .= " AND LOWER(t.ville_arrivee) LIKE LOWER(?)";
             $params[] = "%$arrivee%";
         }
         if (!empty($date)) {
@@ -103,8 +110,13 @@ function getTrips($depart = '', $arrivee = '', $date = '') {
         $sql .= " ORDER BY t.date_depart ASC";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll();
+        $results = $stmt->fetchAll();
+
+
+
+        return $results;
     } catch (Exception $e) {
+        error_log("Erreur getTrips: " . $e->getMessage());
         return [];
     }
 }
@@ -123,7 +135,12 @@ function getUserById($id) {
 function getTripById($id) {
     try {
         $pdo = getDatabase();
-        $stmt = $pdo->prepare("SELECT t.*, u.pseudo as conducteur, v.marque, v.modele, v.energie
+        $stmt = $pdo->prepare("SELECT t.*, u.pseudo as conducteur, v.marque, v.modele, v.energie,
+                               CASE
+                                   WHEN u.pseudo = 'Marc D.' THEN 'images/sebastien.jpg'
+                                   WHEN u.pseudo = 'Sophie L.' THEN 'images/lucie.jpg'
+                                   ELSE 'images/default_avatar.png'
+                               END as conducteur_avatar_url
                                FROM trips t
                                JOIN users u ON t.chauffeur_id = u.id
                                JOIN vehicles v ON t.vehicle_id = v.id
@@ -201,5 +218,3 @@ function createDefaultVehicle($user_id, $places = 4) {
         return false;
     }
 }
-?>
-"// maj connexion" 

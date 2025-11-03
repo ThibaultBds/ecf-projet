@@ -51,7 +51,7 @@ session_start();     // démarre la session PHP
 
     <!-- Formulaire de recherche -->
     <div style="display:flex;justify-content:center;margin:30px 0;">
-      <form class="search-bar" style="margin:0;max-width:900px;width:100%;box-sizing:border-box;">
+      <form class="search-bar" style="margin:0;max-width:900px;width:100%;box-sizing:border-box;" action="covoiturages.php" method="get">
         <input type="text" id="depart" placeholder="Départ" list="villes" name="depart" autocomplete="on">
         <input type="text" id="arrivee" placeholder="Arrivée" list="villes" name="arrivee" autocomplete="on">
         <datalist id="villes">
@@ -181,8 +181,7 @@ session_start();     // démarre la session PHP
 
   <script src="../assets/js/script.js"></script>
   <script src="../assets/js/navbar.js"></script>
-  <script>Developer: Show Running Extensions
-
+  <script>
     document.addEventListener('DOMContentLoaded', function() {
       if (window.ecorideUser) {
         renderMenu(window.ecorideUser);

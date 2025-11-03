@@ -1,8 +1,11 @@
 <?php
 session_start();
+require_once '../config/autoload.php';
+useClass('Database');
+
 // Vérifie si l'utilisateur est connecté
-if (!isset($_SESSION['email'])) {
-    header('Location: login.html');
+if (!isset($_SESSION['user'])) {
+    header('Location: login_secure.php');
     exit;
 }
 ?>
@@ -20,7 +23,7 @@ if (!isset($_SESSION['email'])) {
 <div class="member-container">
   <h2>Bienvenue dans votre espace membre</h2>
   <p>Bonjour <strong><?php echo htmlspecialchars($_SESSION['email']); ?></strong> !</p>
-  <a href="deconnexion.php" class="logout-link">Se déconnecter</a>
+  <a href="/frontend/public/pages/logout.php" class="logout-link">Se déconnecter</a>
   <!-- Ajoute ici tout contenu réservé aux membres -->
 </div>
 </body>
