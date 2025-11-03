@@ -1,4 +1,4 @@
-<?php
+  <?php
 session_start();
 require_once __DIR__ . '/../../../backend/config/autoload.php';
 useClass('Database');
@@ -83,8 +83,14 @@ $credit_requis = (int)$covoiturage['prix'];
                 <span class="material-icons">eco</span> EcoRide
             </a>
         </h1>
-        <!-- Le menu sera injecté par navbar.js -->
     </header>
+    <script>
+    window.ecorideUser = <?php echo isset($_SESSION['user']) ? json_encode([
+        'email' => $_SESSION['user']['email'],
+        'pseudo' => $_SESSION['user']['pseudo'],
+        'type' => $_SESSION['user']['type']
+    ]) : 'null'; ?>;
+    </script>
 
     <main>
         <section class="detail-container" style="max-width:800px;margin:0 auto;padding:20px;">
@@ -310,6 +316,8 @@ $credit_requis = (int)$covoiturage['prix'];
     <script src="../assets/js/navbar.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Le menu est géré automatiquement par navbar.js avec window.ecorideUser
+            
             // Animation au hover pour les boutons de connexion
             const loginBtn = document.querySelector('.login-cta-btn');
             const registerBtn = document.querySelector('.register-cta-btn');
@@ -434,23 +442,18 @@ $credit_requis = (int)$covoiturage['prix'];
                     }
                 });
             }
+            
+            // Filtres avancés
+            const toggleBtn = document.getElementById('toggle-filters');
+            const filtersBlock = document.getElementById('advanced-filters');
+            if (toggleBtn && filtersBlock) {
+                toggleBtn.addEventListener('click', function() {
+                    filtersBlock.style.display = (filtersBlock.style.display === 'none' || filtersBlock.style.display === '') ? 'block' : 'none';
+                });
+            }
         });
     </script>
-</main>
-<script src="../assets/js/navbar.js"></script>
 </body>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Filtres avancés
-        const toggleBtn = document.getElementById('toggle-filters');
-        const filtersBlock = document.getElementById('advanced-filters');
-        if (toggleBtn && filtersBlock) {
-            toggleBtn.addEventListener('click', function() {
-                filtersBlock.style.display = (filtersBlock.style.display === 'none' || filtersBlock.style.display === '') ? 'block' : 'none';
-            });
-        }
-    });
-</script>
 </html>
 
 

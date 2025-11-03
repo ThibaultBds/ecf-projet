@@ -4,7 +4,7 @@ require_once '../config/autoload.php';
 useClass('Database');
 
 if (!isset($_SESSION['user'])) {
-    header('Location: login_secure.php');
+    header('Location: /pages/login_secure.php');
     exit();
 }
 
@@ -41,20 +41,25 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
             throw new Exception("Le nombre de places doit être entre 1 et 8.");
         }
 
+        // Validation de la plaque d'immatriculation (format français basique)
+        if (!preg_match('/^[A-Z]{2}-\d{3}-[A-Z]{2}$/', strtoupper($plaque))) {
+            throw new Exception("Format de plaque invalide (ex: AB-123-CD).");
+        }
+
         $stmt = $pdo->prepare("
             INSERT INTO vehicles (user_id, marque, modele, couleur, plaque, energie, places_disponibles, date_immatriculation)
             VALUES (?, ?, ?, ?, ?, ?, ?, '2020-01-01')
         ");
-        $stmt->execute([$user['id'], $marque, $modele, $couleur, $plaque, $energie, $places]);
-        
+        $stmt->execute([$user['id'], $marque, $modele, $couleur, strtoupper($plaque), $energie, $places]);
+
         $success = "Véhicule ajouté avec succès !";
         $_POST = [];
-        
+
         // Recharger les véhicules
         $stmt = $pdo->prepare("SELECT * FROM vehicles WHERE user_id = ? ORDER BY created_at DESC");
         $stmt->execute([$user['id']]);
         $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
     } catch (Exception $e) {
         $error = $e->getMessage();
     }
@@ -65,83 +70,256 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
 <head>
     <meta charset="UTF-8">
     <title>Mes Véhicules - EcoRide</title>
-    <link rel="stylesheet" href="../../frontend/public/assets/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/css/style.css?v=2025">
+    <link rel="stylesheet" href="/assets/css/pages.css?v=2025">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <header class="container-header">
-        <h1><a href="/frontend/public/pages/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;"><span class="material-icons">eco</span> EcoRide</a></h1>
+        <h1>
+            <a href="/pages/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
+                <span class="material-icons">eco</span> EcoRide
+            </a>
+        </h1>
     </header>
 
-    <main class="member-container">
-        <h2><span class="material-icons">directions_car</span> Mes Véhicules</h2>
+    <main class="vehicles-container">
+        <div class="page-header">
+            <h2><span class="material-icons">directions_car</span> Mes Véhicules</h2>
+            <p>Gérez vos véhicules pour proposer des trajets écologiques</p>
+        </div>
 
-        <?php if ($success): ?><div class="message-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
-        <?php if ($error): ?><div class="message-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+        <?php if ($success): ?>
+            <div class="message-success" id="success-message">
+                <span class="material-icons">check_circle</span>
+                <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
 
-        <h3>Ajouter un véhicule</h3>
-        <form method="POST" class="form-container">
-            <input type="hidden" name="action" value="add_vehicle">
-            <div>
-                <label for="marque">Marque</label>
-                <input type="text" id="marque" name="marque" required value="<?= htmlspecialchars($_POST['marque'] ?? '') ?>">
+        <?php if ($error): ?>
+            <div class="message-error">
+                <span class="material-icons">error</span>
+                <?= htmlspecialchars($error) ?>
             </div>
-            <div>
-                <label for="modele">Modèle</label>
-                <input type="text" id="modele" name="modele" required value="<?= htmlspecialchars($_POST['modele'] ?? '') ?>">
-            </div>
-            <div>
-                <label for="couleur">Couleur</label>
-                <input type="text" id="couleur" name="couleur" required value="<?= htmlspecialchars($_POST['couleur'] ?? '') ?>">
-            </div>
-            <div>
-                <label for="plaque">Plaque d'immatriculation</label>
-                <input type="text" id="plaque" name="plaque" required value="<?= htmlspecialchars($_POST['plaque'] ?? '') ?>" placeholder="Ex: AB-123-CD">
-            </div>
-            <div>
-                <label for="energie">Type d'énergie</label>
-                <select name="energie" id="energie" required>
-                    <option value="">Choisir...</option>
-                    <option value="essence" <?= ($_POST['energie'] ?? '') === 'essence' ? 'selected' : '' ?>>Essence</option>
-                    <option value="diesel" <?= ($_POST['energie'] ?? '') === 'diesel' ? 'selected' : '' ?>>Diesel</option>
-                    <option value="electrique" <?= ($_POST['energie'] ?? '') === 'electrique' ? 'selected' : '' ?>>Électrique</option>
-                    <option value="hybride" <?= ($_POST['energie'] ?? '') === 'hybride' ? 'selected' : '' ?>>Hybride</option>
-                </select>
-            </div>
-            <div>
-                <label for="places">Nombre de places</label>
-                <input type="number" id="places" name="places" min="1" max="8" value="<?= htmlspecialchars($_POST['places'] ?? '4') ?>" required>
-            </div>
-            <button type="submit" class="btn-primary">Ajouter le véhicule</button>
-        </form>
+        <?php endif; ?>
 
-        <h3>Mes véhicules (<?= count($vehicles) ?>)</h3>
-        <?php if (empty($vehicles)): ?>
-            <p>Aucun véhicule enregistré.</p>
-        <?php else: ?>
-            <div class="vehicles-list">
+        <!-- Liste des véhicules -->
+        <?php if (!empty($vehicles)): ?>
+            <div class="vehicles-grid">
                 <?php foreach ($vehicles as $vehicle): ?>
-                    <div class="vehicle-card" style="border:1px solid #ddd;padding:15px;margin:10px 0;border-radius:8px;">
-                        <h4><?= htmlspecialchars($vehicle['marque']) ?> <?= htmlspecialchars($vehicle['modele']) ?></h4>
-                        <p><strong>Couleur:</strong> <?= htmlspecialchars($vehicle['couleur']) ?></p>
-                        <p><strong>Plaque:</strong> <?= htmlspecialchars($vehicle['plaque']) ?></p>
-                        <p><strong>Énergie:</strong> <?= htmlspecialchars(ucfirst($vehicle['energie'])) ?></p>
-                        <p><strong>Places:</strong> <?= (int)$vehicle['places_disponibles'] ?></p>
-                        <?php if ($vehicle['energie'] === 'electrique'): ?>
-                            <span style="background:#00b894;color:white;padding:2px 8px;border-radius:12px;font-size:12px;">⚡ Écologique</span>
-                        <?php endif; ?>
+                    <div class="vehicle-card">
+                        <div class="vehicle-image <?= $vehicle['energie'] === 'electrique' ? 'ecological' : '' ?>">
+                            <span class="material-icons">
+                                <?= $vehicle['energie'] === 'electrique' ? 'electric_car' : 'local_shipping' ?>
+                            </span>
+                        </div>
+
+                        <div class="vehicle-info">
+                            <h3>
+                                <?= htmlspecialchars($vehicle['marque']) ?> <?= htmlspecialchars($vehicle['modele']) ?>
+                                <?php if ($vehicle['energie'] === 'electrique'): ?>
+                                    <span class="material-icons ecological-badge" title="Véhicule écologique">eco</span>
+                                <?php endif; ?>
+                            </h3>
+
+                            <div class="vehicle-details">
+                                <div class="vehicle-detail">
+                                    <span class="material-icons">palette</span>
+                                    <?= htmlspecialchars($vehicle['couleur']) ?>
+                                </div>
+                                <div class="vehicle-detail">
+                                    <span class="material-icons">tag</span>
+                                    <?= htmlspecialchars($vehicle['plaque']) ?>
+                                </div>
+                                <div class="vehicle-detail">
+                                    <span class="material-icons">
+                                        <?= $vehicle['energie'] === 'electrique' ? 'electric_bolt' :
+                                           ($vehicle['energie'] === 'hybride' ? 'battery_charging_full' : 'local_gas_station') ?>
+                                    </span>
+                                    <?= htmlspecialchars(ucfirst($vehicle['energie'])) ?>
+                                </div>
+                                <div class="vehicle-detail">
+                                    <span class="material-icons">group</span>
+                                    <?= (int)$vehicle['places_disponibles'] ?> places
+                                </div>
+                            </div>
+
+                            <div class="vehicle-stats">
+                                <h4><span class="material-icons">analytics</span> Statistiques</h4>
+                                <div class="vehicle-stats-grid">
+                                    <div class="stat-item">
+                                        <div class="stat-number">0</div>
+                                        <div class="stat-label">Trajets</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-number">0</div>
+                                        <div class="stat-label">Passagers</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-number">0€</div>
+                                        <div class="stat-label">Revenus</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="vehicle-actions">
+                                <button class="btn-vehicle-edit" onclick="editVehicle(<?= $vehicle['id'] ?>)">
+                                    <span class="material-icons">edit</span>
+                                    Modifier
+                                </button>
+                                <button class="btn-vehicle-delete" onclick="deleteVehicle(<?= $vehicle['id'] ?>)">
+                                    <span class="material-icons">delete</span>
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
-        
-        <div style="text-align:center;margin-top:30px;">
-            <a href="/frontend/public/pages/profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">← Retour au profil</a>
+
+        <!-- Section d'ajout de véhicule -->
+        <div class="add-vehicle-section">
+            <h3 style="text-align: center; margin-bottom: 30px; color: #2d3436;">
+                <span class="material-icons" style="vertical-align: middle; margin-right: 10px;">add_circle</span>
+                Ajouter un véhicule
+            </h3>
+
+            <form method="POST" class="add-vehicle-form" id="add-vehicle-form" novalidate>
+                <input type="hidden" name="action" value="add_vehicle">
+
+                <div class="form-group">
+                    <label for="marque">Marque *</label>
+                    <input type="text" id="marque" name="marque" required
+                           value="<?= htmlspecialchars($_POST['marque'] ?? '') ?>"
+                           placeholder="Ex: Renault, Peugeot, Tesla...">
+                </div>
+
+                <div class="form-group">
+                    <label for="modele">Modèle *</label>
+                    <input type="text" id="modele" name="modele" required
+                           value="<?= htmlspecialchars($_POST['modele'] ?? '') ?>"
+                           placeholder="Ex: Clio, 308, Model 3...">
+                </div>
+
+                <div class="form-group">
+                    <label for="couleur">Couleur *</label>
+                    <input type="text" id="couleur" name="couleur" required
+                           value="<?= htmlspecialchars($_POST['couleur'] ?? '') ?>"
+                           placeholder="Ex: Blanc, Bleu, Rouge...">
+                </div>
+
+                <div class="form-group">
+                    <label for="plaque">Plaque d'immatriculation *</label>
+                    <input type="text" id="plaque" name="plaque" required
+                           value="<?= htmlspecialchars($_POST['plaque'] ?? '') ?>"
+                           placeholder="Ex: AB-123-CD" pattern="[A-Z]{2}-\d{3}-[A-Z]{2}"
+                           style="text-transform: uppercase;">
+                    <small style="color: #636e72; font-size: 0.9rem;">Format: AB-123-CD</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="energie">Type d'énergie *</label>
+                    <select name="energie" id="energie" required>
+                        <option value="">Choisir...</option>
+                        <option value="essence" <?= ($_POST['energie'] ?? '') === 'essence' ? 'selected' : '' ?>>
+                            Essence
+                        </option>
+                        <option value="diesel" <?= ($_POST['energie'] ?? '') === 'diesel' ? 'selected' : '' ?>>
+                            Diesel
+                        </option>
+                        <option value="electrique" <?= ($_POST['energie'] ?? '') === 'electrique' ? 'selected' : '' ?>>
+                            ⚡ Électrique (Écologique)
+                        </option>
+                        <option value="hybride" <?= ($_POST['energie'] ?? '') === 'hybride' ? 'selected' : '' ?>>
+                            Hybride
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="places">Nombre de places disponibles *</label>
+                    <input type="number" id="places" name="places" min="1" max="8"
+                           value="<?= htmlspecialchars($_POST['places'] ?? '4') ?>" required>
+                    <small style="color: #636e72; font-size: 0.9rem;">Places pour les passagers (1-8)</small>
+                </div>
+
+                <button type="submit" class="btn-add-vehicle" id="add-btn">
+                    <span class="material-icons">add</span>
+                    Ajouter le véhicule
+                </button>
+            </form>
+        </div>
+
+        <div class="back-link" style="text-align:center;margin-top:40px;">
+            <a href="/frontend/public/pages/profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">
+                <span class="material-icons">arrow_back</span>
+                Retour au profil
+            </a>
         </div>
     </main>
-    <script src="../../frontend/public/assets/js/navbar.js"></script>
+
+    <script>
+        window.ecorideUser = <?= isset($_SESSION['user']) ? json_encode($_SESSION['user']) : 'null' ?>;
+    </script>
+    <script src="/assets/js/navbar.js"></script>
+    <script>
+        // Rendu du menu avec navbar.js
+        if (typeof renderMenu === 'function') {
+            renderMenu(window.ecorideUser);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('add-vehicle-form');
+            const addBtn = document.getElementById('add-btn');
+            const successMessage = document.getElementById('success-message');
+            const plaqueInput = document.getElementById('plaque');
+
+            // Format automatique de la plaque
+            plaqueInput.addEventListener('input', function(e) {
+                let value = e.target.value.toUpperCase();
+                value = value.replace(/[^A-Z0-9]/g, '');
+
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '-' + value.substring(2);
+                }
+                if (value.length >= 6) {
+                    value = value.substring(0, 6) + '-' + value.substring(6);
+                }
+                if (value.length > 9) {
+                    value = value.substring(0, 9);
+                }
+
+                e.target.value = value;
+            });
+
+            // Animation du bouton d'ajout
+            form.addEventListener('submit', function(e) {
+                addBtn.innerHTML = '<span class="material-icons spinning">sync</span> Ajout en cours...';
+                addBtn.disabled = true;
+                addBtn.style.opacity = '0.7';
+            });
+
+            // Auto-disparition du message de succès
+            if (successMessage) {
+                setTimeout(() => {
+                    successMessage.style.opacity = '0';
+                    setTimeout(() => successMessage.style.display = 'none', 300);
+                }, 3000);
+            }
+        });
+
+        // Fonctions pour gérer les véhicules
+        function editVehicle(vehicleId) {
+            alert('Fonctionnalité de modification à venir pour le véhicule #' + vehicleId);
+        }
+
+        function deleteVehicle(vehicleId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.')) {
+                alert('Fonctionnalité de suppression à venir pour le véhicule #' + vehicleId);
+            }
+        }
+    </script>
 </body>
 </html>
-
-
-
