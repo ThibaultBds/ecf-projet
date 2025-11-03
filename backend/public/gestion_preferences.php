@@ -6,7 +6,7 @@ useClass('Database');
 
 // --- Vérif connexion utilisateur ---
 if (!isset($_SESSION['user'])) {
-    header('Location: login_secure.php');
+    header('Location: /pages/login_secure.php');
     exit();
 }
 
@@ -19,10 +19,19 @@ try {
     $pdo = getDatabase();
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $musique = $_POST['musique'] ?? '';
-        $animaux = $_POST['animaux'] ?? '';
-        $discussion = $_POST['discussion'] ?? '';
-        $fumeur = $_POST['fumeur'] ?? '';
+        $musique = trim($_POST['musique'] ?? '');
+        $animaux = trim($_POST['animaux'] ?? '');
+        $discussion = trim($_POST['discussion'] ?? '');
+        $fumeur = trim($_POST['fumeur'] ?? '');
+
+        // Validation
+        $validOptions = ['oui', 'non'];
+        $validDiscussion = ['plaisir', 'un_peu', 'silence'];
+
+        if (!in_array($musique, $validOptions) || !in_array($animaux, $validOptions) ||
+            !in_array($discussion, $validDiscussion) || !in_array($fumeur, $validOptions)) {
+            throw new Exception('Options invalides sélectionnées.');
+        }
 
         $stmt = $pdo->prepare("
             INSERT INTO user_preferences (user_id, musique, animaux, discussion, fumeur)
@@ -50,63 +59,222 @@ try {
     <meta charset="UTF-8">
     <title>Mes Préférences - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../assets/css/style.css?v=2025">
+    <link rel="stylesheet" href="/assets/css/style.css?v=2025">
+    <link rel="stylesheet" href="/assets/css/pages.css?v=2025">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <header class="container-header"></header>
+    <header class="container-header">
+        <h1>
+            <a href="/pages/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
+                <span class="material-icons">eco</span> EcoRide
+            </a>
+        </h1>
+    </header>
 
     <main class="preferences-container">
-        <h2><span class="material-icons">tune</span> Mes Préférences</h2>
-        <p>Ces informations seront visibles par les passagers pour mieux correspondre à votre style de trajet.</p>
+        <div class="page-header">
+            <h2><span class="material-icons">tune</span> Mes Préférences</h2>
+            <p>Ces informations seront visibles par les passagers pour mieux correspondre à votre style de trajet.</p>
+        </div>
 
-        <?php if ($success): ?><div class="message-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
-        <?php if ($error): ?><div class="message-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+        <?php if ($success): ?>
+            <div class="message-success" id="success-message">
+                <span class="material-icons">check_circle</span>
+                <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
 
-        <form method="POST" class="preferences-form">
-            <label for="musique">Musique</label>
-            <select id="musique" name="musique" required>
-                <option value="">Choisir...</option>
-                <option value="oui" <?= ($preferences['musique'] ?? '') === 'oui' ? 'selected' : '' ?>>Oui</option>
-                <option value="non" <?= ($preferences['musique'] ?? '') === 'non' ? 'selected' : '' ?>>Non</option>
-            </select>
+        <?php if ($error): ?>
+            <div class="message-error">
+                <span class="material-icons">error</span>
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
 
-            <label for="animaux">Animaux acceptés</label>
-            <select id="animaux" name="animaux" required>
-                <option value="">Choisir...</option>
-                <option value="oui" <?= ($preferences['animaux'] ?? '') === 'oui' ? 'selected' : '' ?>>Oui</option>
-                <option value="non" <?= ($preferences['animaux'] ?? '') === 'non' ? 'selected' : '' ?>>Non</option>
-            </select>
+        <form method="POST" class="preferences-form" id="preferences-form" novalidate>
+            <div class="preferences-grid">
+                <!-- Musique -->
+                <div class="preference-card">
+                    <h3>
+                        <span class="material-icons">music_note</span>
+                        Musique
+                    </h3>
+                    <div class="preference-options">
+                        <label class="preference-option <?= ($preferences['musique'] ?? '') === 'oui' ? 'selected' : '' ?>">
+                            <input type="radio" name="musique" value="oui" <?= ($preferences['musique'] ?? '') === 'oui' ? 'checked' : '' ?>>
+                            <div class="radio-custom"></div>
+                            <div class="option-content">
+                                <div class="option-title">Avec plaisir</div>
+                                <div class="option-description">J'adore partager de la musique pendant les trajets</div>
+                            </div>
+                        </label>
 
-            <label for="discussion">Discussion pendant le trajet</label>
-            <select id="discussion" name="discussion" required>
-                <option value="">Choisir...</option>
-                <option value="plaisir" <?= ($preferences['discussion'] ?? '') === 'plaisir' ? 'selected' : '' ?>>Avec plaisir</option>
-                <option value="un_peu" <?= ($preferences['discussion'] ?? '') === 'un_peu' ? 'selected' : '' ?>>Un peu</option>
-                <option value="silence" <?= ($preferences['discussion'] ?? '') === 'silence' ? 'selected' : '' ?>>Plutôt silence</option>
-            </select>
+                        <label class="preference-option <?= ($preferences['musique'] ?? '') === 'non' ? 'selected' : '' ?>">
+                            <input type="radio" name="musique" value="non" <?= ($preferences['musique'] ?? '') === 'non' ? 'checked' : '' ?>>
+                            <div class="radio-custom"></div>
+                            <div class="option-content">
+                                <div class="option-title">Préférablement silence</div>
+                                <div class="option-description">Je préfère voyager dans le calme</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
 
-            <label for="fumeur">Fumeur</label>
-            <select id="fumeur" name="fumeur" required>
-                <option value="">Choisir...</option>
-                <option value="oui" <?= ($preferences['fumeur'] ?? '') === 'oui' ? 'selected' : '' ?>>Oui</option>
-                <option value="non" <?= ($preferences['fumeur'] ?? '') === 'non' ? 'selected' : '' ?>>Non</option>
-            </select>
+                <!-- Animaux -->
+                <div class="preference-card">
+                    <h3>
+                        <span class="material-icons">pets</span>
+                        Animaux
+                    </h3>
+                    <div class="preference-options">
+                        <label class="preference-option <?= ($preferences['animaux'] ?? '') === 'oui' ? 'selected' : '' ?>">
+                            <input type="radio" name="animaux" value="oui" <?= ($preferences['animaux'] ?? '') === 'oui' ? 'checked' : '' ?>>
+                            <div class="radio-custom"></div>
+                            <div class="option-content">
+                                <div class="option-title">Acceptés</div>
+                                <div class="option-description">Les animaux de compagnie sont les bienvenus</div>
+                            </div>
+                        </label>
 
-            <button type="submit" class="btn-primary">
-                <span class="material-icons">save</span> Enregistrer les préférences
-            </button>
+                        <label class="preference-option <?= ($preferences['animaux'] ?? '') === 'non' ? 'selected' : '' ?>">
+                            <input type="radio" name="animaux" value="non" <?= ($preferences['animaux'] ?? '') === 'non' ? 'checked' : '' ?>>
+                            <div class="radio-custom"></div>
+                            <div class="option-content">
+                                <div class="option-title">Non acceptés</div>
+                                <div class="option-description">Désolé, pas d'animaux dans le véhicule</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Discussion -->
+                <div class="preference-card">
+                    <h3>
+                        <span class="material-icons">chat</span>
+                        Discussion
+                    </h3>
+                    <div class="preference-options">
+                        <label class="preference-option <?= ($preferences['discussion'] ?? '') === 'plaisir' ? 'selected' : '' ?>">
+                            <input type="radio" name="discussion" value="plaisir" <?= ($preferences['discussion'] ?? '') === 'plaisir' ? 'checked' : '' ?>>
+                            <div class="radio-custom"></div>
+                            <div class="option-content">
+                                <div class="option-title">Avec plaisir</div>
+                                <div class="option-description">J'adore discuter pendant le trajet</div>
+                            </div>
+                        </label>
+
+                        <label class="preference-option <?= ($preferences['discussion'] ?? '') === 'un_peu' ? 'selected' : '' ?>">
+                            <input type="radio" name="discussion" value="un_peu" <?= ($preferences['discussion'] ?? '') === 'un_peu' ? 'checked' : '' ?>>
+                            <div class="radio-custom"></div>
+                            <div class="option-content">
+                                <div class="option-title">Un peu</div>
+                                <div class="option-description">Quelques échanges sont appréciés</div>
+                            </div>
+                        </label>
+
+                        <label class="preference-option <?= ($preferences['discussion'] ?? '') === 'silence' ? 'selected' : '' ?>">
+                            <input type="radio" name="discussion" value="silence" <?= ($preferences['discussion'] ?? '') === 'silence' ? 'checked' : '' ?>>
+                            <div class="radio-custom"></div>
+                            <div class="option-content">
+                                <div class="option-title">Préférablement silence</div>
+                                <div class="option-description">Je voyage en silence</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Fumeur -->
+                <div class="preference-card">
+                    <h3>
+                        <span class="material-icons">smoking_rooms</span>
+                        Tabac
+                    </h3>
+                    <div class="preference-options">
+                        <label class="preference-option <?= ($preferences['fumeur'] ?? '') === 'oui' ? 'selected' : '' ?>">
+                            <input type="radio" name="fumeur" value="oui" <?= ($preferences['fumeur'] ?? '') === 'oui' ? 'checked' : '' ?>>
+                            <div class="radio-custom"></div>
+                            <div class="option-content">
+                                <div class="option-title">Fumeur</div>
+                                <div class="option-description">Je fume pendant les trajets</div>
+                            </div>
+                        </label>
+
+                        <label class="preference-option <?= ($preferences['fumeur'] ?? '') === 'non' ? 'selected' : '' ?>">
+                            <input type="radio" name="fumeur" value="non" <?= ($preferences['fumeur'] ?? '') === 'non' ? 'checked' : '' ?>>
+                            <div class="radio-custom"></div>
+                            <div class="option-content">
+                                <div class="option-title">Non fumeur</div>
+                                <div class="option-description">Véhicule non-fumeur</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preferences-actions">
+                <button type="submit" class="btn-save-preferences" id="save-btn">
+                    <span class="material-icons">save</span>
+                    Enregistrer les préférences
+                </button>
+            </div>
         </form>
 
-        <div style="text-align:center;margin-top:30px;">
-            <a href="/frontend/public/pages/profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">← Retour au profil</a>
+        <div class="back-link" style="text-align:center;margin-top:40px;">
+            <a href="/frontend/public/pages/profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">
+                <span class="material-icons">arrow_back</span>
+                Retour au profil
+            </a>
         </div>
     </main>
 
     <script>
+        // DEBUG: Afficher les données de session
+        console.log('DEBUG SESSION:', <?= json_encode($_SESSION['user'] ?? null) ?>);
         window.ecorideUser = <?= isset($_SESSION['user']) ? json_encode($_SESSION['user']) : 'null' ?>;
+        console.log('DEBUG window.ecorideUser:', window.ecorideUser);
     </script>
-    <script src="../assets/js/navbar.js"></script>
-    <script src="../assets/js/script.js"></script>
+    <script src="/assets/js/navbar.js"></script>
+    <script>
+        // Rendu du menu avec navbar.js
+        if (typeof renderMenu === 'function') {
+            renderMenu(window.ecorideUser);
+        }
+
+        // JavaScript pour l'interactivité des préférences
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('preferences-form');
+            const saveBtn = document.getElementById('save-btn');
+            const successMessage = document.getElementById('success-message');
+
+            // Gestion des options de préférences
+            document.querySelectorAll('.preference-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const radio = this.querySelector('input[type="radio"]');
+                    const groupName = radio.name;
+                    document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
+                        r.closest('.preference-option').classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    radio.checked = true;
+                });
+            });
+
+            // Animation du bouton de sauvegarde
+            form.addEventListener('submit', function(e) {
+                saveBtn.innerHTML = '<span class="material-icons spinning">sync</span> Enregistrement...';
+                saveBtn.disabled = true;
+                saveBtn.style.opacity = '0.7';
+            });
+
+            // Auto-disparition du message de succès
+            if (successMessage) {
+                setTimeout(() => {
+                    successMessage.style.opacity = '0';
+                    setTimeout(() => successMessage.style.display = 'none', 300);
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>

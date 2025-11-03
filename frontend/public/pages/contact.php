@@ -216,18 +216,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </dialog>
 
-    <script src="../assets/js/script.js"></script>
-    <script src="../assets/js/navbar.js"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (window.ecorideUser) {
-            renderMenu(window.ecorideUser);
-        } else {
-            renderMenu();
-        }
-    });
-    </script>
-</main>
 <script src="../assets/js/navbar.js"></script>
+    <script>
+        // Rendu du menu avec navbar.js
+        if (typeof renderMenu === 'function') {
+            renderMenu(window.ecorideUser);
+        }
+    </script>
 </body>
 </html>

@@ -25,6 +25,10 @@ $ecologique = isset($_GET['ecologique']) ? $_GET['ecologique'] : '';
 try {
     // Récupérer les covoiturages avec filtres de base via SQL
     $covoiturages = getTrips($depart, $arrivee, $date);
+    
+    // DEBUG: Afficher le nombre de résultats
+    error_log("DEBUG covoiturages.php: Nombre de trajets trouvés = " . count($covoiturages));
+    error_log("DEBUG covoiturages.php: Filtres - depart='$depart', arrivee='$arrivee', date='$date'");
 
     // Filtrage avancé côté serveur
     if ($prix_max !== null && $prix_max !== '') {
