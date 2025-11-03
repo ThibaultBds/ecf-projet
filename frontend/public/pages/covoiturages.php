@@ -23,8 +23,10 @@ $note_min = isset($_GET['note_min']) ? (float)$_GET['note_min'] : null;
 $ecologique = isset($_GET['ecologique']) ? $_GET['ecologique'] : '';
 
 try {
+    // Récupérer les covoiturages avec filtres de base via SQL
     $covoiturages = getTrips($depart, $arrivee, $date);
-    // Filtrage avancé
+
+    // Filtrage avancé côté serveur
     if ($prix_max !== null && $prix_max !== '') {
         $covoiturages = array_filter($covoiturages, function($c) use ($prix_max) {
             return $c['prix'] <= $prix_max;
@@ -40,6 +42,10 @@ try {
             return $ecologique == '1' ? $c['is_ecological'] : !$c['is_ecological'];
         });
     }
+
+    // Réindexer le tableau pour éviter les clés manquantes
+    $covoiturages = array_values($covoiturages);
+
 } catch (Exception $e) {
     $covoiturages = [];
     $error_message = "Erreur lors du chargement des covoiturages.";
@@ -107,6 +113,9 @@ try {
                 </button>
                 <div id="advanced-filters" style="display:none;margin-top:20px;text-align:left;background:#f8f9fa;padding:20px;border-radius:8px;max-width:500px;margin-left:auto;margin-right:auto;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
                     <form method="get" action="covoiturages.php">
+                        <input type="hidden" name="depart" value="<?= htmlspecialchars($depart) ?>">
+                        <input type="hidden" name="arrivee" value="<?= htmlspecialchars($arrivee) ?>">
+                        <input type="hidden" name="date" value="<?= htmlspecialchars($date) ?>">
                         <label for="prix_max">Prix max :</label>
                         <input type="number" name="prix_max" id="prix_max" min="0" style="margin-right:20px;">
                         <label for="note_min">Note min :</label>
@@ -143,7 +152,7 @@ try {
                         </div>
                         <div class="ride-details">
                             <p><span class="material-icons">schedule</span> <?= date('d/m/Y à H:i', strtotime($c['date_depart'])) ?></p>
-                            <p><span class="material-icons">person</span> <?= htmlspecialchars($c['conducteur']) ?></p>
+                            <p><span class="material-icons">person</span> <img src="../assets/<?= htmlspecialchars(($c['conducteur'] === 'marc') ? 'images/sebastien.jpg' : ($c['conducteur_avatar_url'] ?? 'images/default_avatar.png')) ?>" alt="Avatar" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;vertical-align:middle;image-rendering: -moz-crisp-edges; image-rendering: -o-crisp-edges; image-rendering: pixelated; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; filter: none;"> <?= htmlspecialchars($c['conducteur']) ?></p>
                             <p><span class="material-icons">directions_car</span> <?= htmlspecialchars($c['marque']) ?> <?= htmlspecialchars($c['modele']) ?></p>
                             <p><span class="material-icons">people</span> <?= (int)$c['places_restantes'] ?> places restantes</p>
                         </div>

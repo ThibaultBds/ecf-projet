@@ -1,22 +1,24 @@
 FROM php:8.2-apache
 
-RUN docker-php-ext-install pdo_mysql
+# Active les extensions utiles (mysqli, pdo, etc.)
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+
+# Active mod_rewrite (utile si tu fais des routes plus tard)
 RUN a2enmod rewrite
 
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/frontend/public
-RUN sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" \
-    /etc/apache2/sites-available/000-default.conf \
-    /etc/apache2/sites-available/default-ssl.conf
+# Définition du dossier racine principal (frontend/public)
+ENV APACHE_DOCUMENT_ROOT /var/www/html/frontend/public
 
-# 🔥 Autoriser .htaccess à être pris en compte
-RUN echo "<Directory /var/www/html/frontend/public>\n\
-    Options Indexes FollowSymLinks\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>" > /etc/apache2/conf-available/project.conf \
- && a2enconf project
+# Configuration d’Apache avec alias pour le backend
+RUN echo "Alias /backend /var/www/html/backend/public" > /etc/apache2/conf-available/ecoride.conf \
+    && echo "<Directory /var/www/html/backend/public>" >> /etc/apache2/conf-available/ecoride.conf \
+    && echo "    AllowOverride All" >> /etc/apache2/conf-available/ecoride.conf \
+    && echo "    Require all granted" >> /etc/apache2/conf-available/ecoride.conf \
+    && echo "</Directory>" >> /etc/apache2/conf-available/ecoride.conf \
+    && a2enconf ecoride
 
-WORKDIR /var/www/html
-COPY . /var/www/html
+# Applique le nouveau DocumentRoot
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 
 EXPOSE 80
+CMD ["apache2-foreground"]

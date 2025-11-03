@@ -3,18 +3,27 @@ version: "3.9"
 services:
   web:
     build:
-      context: ./docker                 # 🔹 Dockerfile dans le dossier ./docker
+      context: ./docker                      # Dockerfile dans ./docker
     container_name: ecoride-web
     ports:
-      - "8081:80"                       # 🔹 ton site accessible sur http://localhost:8081
+      - "8081:80"                            # 🔹 site sur http://localhost:8081
     volumes:
-      - .:/var/www/html                 # 🔹 monte tout le projet (frontend + backend)
+      - .:/var/www/html                      # 🔹 monte tout le projet (frontend + backend)
     depends_on:
       - db
     environment:
       - APACHE_DOCUMENT_ROOT=/var/www/html/frontend/public
-    restart: always                     # 🔹 redémarre auto si le container crash
-    command: apache2-foreground         # 🔹 démarre Apache proprement
+    restart: always
+    command: >
+      bash -c "
+        # 🔹 création d’un alias Apache pour le backend
+        echo 'Alias /backend /var/www/html/backend/public' > /etc/apache2/conf-enabled/ecoride.conf &&
+        echo '<Directory /var/www/html/backend/public>' >> /etc/apache2/conf-enabled/ecoride.conf &&
+        echo '    AllowOverride All' >> /etc/apache2/conf-enabled/ecoride.conf &&
+        echo '    Require all granted' >> /etc/apache2/conf-enabled/ecoride.conf &&
+        echo '</Directory>' >> /etc/apache2/conf-enabled/ecoride.conf &&
+        apache2-foreground
+      "
 
   db:
     image: mysql:8.0
@@ -26,10 +35,10 @@ services:
       MYSQL_USER: ecoride_user
       MYSQL_PASSWORD: ecoride_pass
     ports:
-      - "3306:3306"                     # 🔹 pour accès depuis DBeaver / PHP
+      - "3306:3306"                          # 🔹 accès via DBeaver / PHPMyAdmin
     volumes:
-      - db_data:/var/lib/mysql          # 🔹 sauvegarde persistante des données
-      - ./docker/mysql-init:/docker-entrypoint-initdb.d  # 🔹 scripts .sql auto-exécutés
+      - db_data:/var/lib/mysql               # 🔹 persistance des données
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d  # 🔹 scripts SQL auto
 
 volumes:
   db_data:

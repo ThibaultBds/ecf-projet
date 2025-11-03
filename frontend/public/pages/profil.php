@@ -156,15 +156,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     <h3>Gestion de mon compte</h3>
     <div class="account-links">
-        <a href="/backend/public/gestion_vehicules.php" class="account-link">
-            <span class="material-icons">directions_car</span>
+    <a href="/backend/gestion_vehicules.php" class="account-link">
+
+       <span class="material-icons">directions_car</span>
             Gérer mes véhicules
         </a>
-        <a href="/backend/public/gestion_preferences.php" class="account-link">
+        <a href="/backend/gestion_preferences.php" class="account-link">
+    
             <span class="material-icons">settings</span>
             Gérer mes préférences
         </a>
-        <a href="/backend/public/espace_chauffeur.php" class="account-link">
+        <a href="/backend/espace_chauffeur.php" class="account-link">
             <span class="material-icons">add_road</span>
             Espace chauffeur (créer un trajet)
         </a>
