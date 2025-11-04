@@ -48,24 +48,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $vehicle = getVehicleByUserId($user['id']);
         $vehicle_id = $vehicle ? $vehicle['id'] : createDefaultVehicle($user['id'], $places);
 
-        $total_cost = $prix + 2;
+        // Frais de plateforme pour créer un trajet (2 crédits)
+        $platform_fee = 2;
         $stmt = $pdo->prepare("SELECT credits FROM users WHERE id = ?");
         $stmt->execute([$user['id']]);
         $current_credits = $stmt->fetchColumn();
-        if ($current_credits < $total_cost) {
-            throw new Exception('Crédits insuffisants. Vous avez ' . $current_credits . ' crédits, nécessaire ' . $total_cost . '.');
+        if ($current_credits < $platform_fee) {
+            throw new Exception('Crédits insuffisants. Vous avez ' . $current_credits . ' crédits, nécessaire ' . $platform_fee . ' crédits pour créer un trajet.');
         }
 
         if (createTrip($user['id'], $vehicle_id, $ville_depart, $ville_arrivee, $datetime_depart, $prix, $places, $description)) {
+            // Déduire uniquement les frais de plateforme (2 crédits)
             $stmt = $pdo->prepare("UPDATE users SET credits = credits - ? WHERE id = ?");
-            $stmt->execute([$total_cost, $user['id']]);
+            $stmt->execute([$platform_fee, $user['id']]);
 
             try {
                 $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)");
                 $stmt->execute([$user['id'], 'Création trajet', "$ville_depart → $ville_arrivee", $_SERVER['REMOTE_ADDR'] ?? '']);
             } catch (Exception $e) {}
 
-            $success = 'Trajet créé avec succès ! ' . $total_cost . ' crédits déduits.';
+            $success = 'Trajet créé avec succès ! ' . $platform_fee . ' crédits de frais plateforme déduits. Vous recevrez ' . $prix . ' crédits par passager.';
             $_POST = [];
         } else {
             throw new Exception('Erreur lors de la création du trajet.');
@@ -377,11 +379,11 @@ function getStatusLabel($status) {
             const descriptionTextarea = document.getElementById('description');
             const charCount = document.getElementById('char-count');
 
-            // Calcul automatique du coût total
+            // Calcul automatique du coût total (frais plateforme uniquement)
             function updateTotalCost() {
                 const prix = parseFloat(prixInput.value) || 0;
-                const total = prix + 2; // 2 crédits plateforme
-                totalCostSpan.innerHTML = `Coût total: <strong>${total}€</strong>`;
+                const platformFee = 2; // Frais plateforme
+                totalCostSpan.innerHTML = `Frais plateforme: <strong>${platformFee} crédits</strong> | Vous recevrez: <strong>${prix}€ par passager</strong>`;
             }
 
             prixInput.addEventListener('input', updateTotalCost);
@@ -427,8 +429,48 @@ function getStatusLabel($status) {
         }
 
         function cancelTrip(tripId) {
-            if (confirm('Êtes-vous sûr de vouloir annuler ce trajet ? Les passagers seront notifiés.')) {
-                alert('Fonctionnalité d\'annulation à venir pour le trajet #' + tripId);
+            if (confirm('Êtes-vous sûr de vouloir annuler ce trajet ? Les passagers seront remboursés et vous récupérerez vos 2 crédits de frais plateforme.')) {
+                // Désactiver le bouton pendant le traitement
+                const cancelBtn = event.target.closest('button');
+                const originalContent = cancelBtn.innerHTML;
+                cancelBtn.disabled = true;
+                cancelBtn.innerHTML = '<span class="material-icons spinning">sync</span> Annulation...';
+                
+                // Appel AJAX
+                fetch('cancel_trip.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    credentials: 'same-origin', // Important pour envoyer les cookies de session
+                    body: 'trip_id=' + tripId
+                })
+                .then(function(response) {
+                    // Vérifier si la réponse est OK
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    console.log('Réponse serveur:', data);
+                    if (data.success) {
+                        // Afficher le message de succès
+                        alert('✅ ' + data.message);
+                        // Recharger la page pour voir les changements
+                        window.location.reload();
+                    } else {
+                        alert('❌ ' + data.message);
+                        cancelBtn.disabled = false;
+                        cancelBtn.innerHTML = originalContent;
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Erreur complète:', error);
+                    alert('❌ Erreur lors de l annulation du trajet: ' + error.message);
+                    cancelBtn.disabled = false;
+                    cancelBtn.innerHTML = originalContent;
+                });
             }
         }
     </script>

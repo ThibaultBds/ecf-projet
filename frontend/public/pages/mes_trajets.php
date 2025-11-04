@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         if ($_POST['action'] === 'cancel_participation') {
             // Logique d'annulation pour un passager
-            $stmt = $pdo->prepare("DELETE FROM trip_participants WHERE trip_id = ? AND user_id = ?");
+            $stmt = $pdo->prepare("DELETE FROM trip_participants WHERE trip_id = ? AND passager_id = ?");
             $stmt->execute([$trip_id, $user['id']]);
 
             $stmt = $pdo->prepare("UPDATE trips SET places_restantes = places_restantes + 1 WHERE id = ?");
@@ -38,14 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 if ($new_status === 'annule') {
                     // Annulation par chauffeur : rembourser les participants et envoyer mail
-                    $stmt = $pdo->prepare("SELECT tp.user_id, tp.credits_utilises, u.email FROM trip_participants tp JOIN users u ON tp.user_id = u.id WHERE tp.trip_id = ?");
+                    $stmt = $pdo->prepare("SELECT tp.passager_id, tp.credits_utilises, u.email FROM trip_participants tp JOIN users u ON tp.passager_id = u.id WHERE tp.trip_id = ?");
                     $stmt->execute([$trip_id]);
                     $participants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                     foreach ($participants as $participant) {
                         // Rembourser crédits
                         $stmt = $pdo->prepare("UPDATE users SET credits = credits + ? WHERE id = ?");
-                        $stmt->execute([$participant['credits_utilises'], $participant['user_id']]);
+                        $stmt->execute([$participant['credits_utilises'], $participant['passager_id']]);
 
                         // Envoyer mail (simulé, utiliser mail() ou service)
                         $subject = "Annulation de trajet EcoRide";
@@ -78,7 +78,7 @@ try {
     $trajets_conduits = $stmt->fetchAll();
 
     // Participations
-    $stmt = $pdo->prepare("SELECT t.*, tp.has_reviewed FROM trips t JOIN trip_participants tp ON t.id = tp.trip_id WHERE tp.user_id = ? ORDER BY t.date_depart DESC");
+    $stmt = $pdo->prepare("SELECT t.*, tp.has_reviewed FROM trips t JOIN trip_participants tp ON t.id = tp.trip_id WHERE tp.passager_id = ? ORDER BY t.date_depart DESC");
     $stmt->execute([$user['id']]);
     $participations = $stmt->fetchAll();
 

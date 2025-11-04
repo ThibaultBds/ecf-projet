@@ -9,12 +9,17 @@ requireLogin();
 
 // Type/role de l'utilisateur
 $type = $_SESSION['user']['type'] ?? ($_SESSION['user']['role'] ?? 'utilisateur');
-// Redirections éventuelles si tu sépares les dashboards
-if ($type === 'admin' || (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Administrateur')) {
-    header('Location: /admin.php'); exit;
-}
-if ($type === 'moderateur' || (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Moderateur')) {
-    header('Location: /moderateur.php'); exit;
+
+// 🔧 Redirection intelligente : on ne redirige que depuis l'accueil
+if (basename($_SERVER['PHP_SELF']) === 'index.php') {
+    if ($type === 'admin' || (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Administrateur')) {
+        header('Location: /admin.php'); 
+        exit;
+    }
+    if ($type === 'moderateur' || (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Moderateur')) {
+        header('Location: /moderateur.php'); 
+        exit;
+    }
 }
 
 // Unification pour le front
@@ -66,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <meta charset="UTF-8">
     <title>Profil - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- CSS absolu -->
     <link rel="stylesheet" href="/assets/css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
@@ -80,125 +84,159 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <nav id="navbar"></nav>
 </header>
 
-<!-- Session unifiée exposée au front -->
 <script>
   window.ecorideUser = <?= $auth ? json_encode($auth, JSON_UNESCAPED_UNICODE) : 'null' ?>;
 </script>
 
 <main style="max-width:1000px;margin:40px auto;padding:0 20px;">
-    <h2>Mon Profil</h2>
+    <h2 style="color:#2d3436;font-size:2rem;margin-bottom:30px;display:flex;align-items:center;gap:12px;">
+        <span class="material-icons" style="font-size:2.2rem;color:#00b894;">account_circle</span>
+        Mon Profil
+    </h2>
 
     <?php if (!empty($error)): ?>
-      <div class="message-error"><?= htmlspecialchars($error) ?></div>
+      <div class="message-error" style="margin-bottom:25px;"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
     <?php if (!empty($success)): ?>
-      <div class="message-success"><?= htmlspecialchars($success) ?></div>
+      <div class="message-success" style="margin-bottom:25px;"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
 
-    <div class="profile-section">
-        <div class="profile-info">
-            <div class="profile-item">
-                <span class="material-icons">email</span>
+    <!-- Informations du profil -->
+    <div style="border-radius:12px;padding:30px;box-shadow:0 2px 12px rgba(0,0,0,0.08);margin-bottom:35px;">
+        <h3 style="color:#2d3436;font-size:1.4rem;margin-bottom:25px;border-bottom:2px solid #00b894;padding-bottom:10px;">
+            📋 Informations personnelles
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+            <div style="display:flex;align-items:center;gap:15px;padding:15px;border-radius:8px;">
+                <span class="material-icons" style="color:#00b894;font-size:32px;">email</span>
                 <div>
-                    <strong>Email</strong>
-                    <p><?= htmlspecialchars($userData['email'] ?? '') ?></p>
+                    <strong style="color:#636e72;font-size:0.9rem;display:block;margin-bottom:4px;">Email</strong>
+                    <p style="margin:0;color:#2d3436;font-size:1rem;"><?= htmlspecialchars($userData['email'] ?? '') ?></p>
                 </div>
             </div>
-            <div class="profile-item">
-                <span class="material-icons">person</span>
+            <div style="display:flex;align-items:center;gap:15px;padding:15px;border-radius:8px;">
+                <span class="material-icons" style="color:#00b894;font-size:32px;">person</span>
                 <div>
-                    <strong>Pseudo</strong>
-                    <p><?= htmlspecialchars($userData['pseudo'] ?? '') ?></p>
+                    <strong style="color:#636e72;font-size:0.9rem;display:block;margin-bottom:4px;">Pseudo</strong>
+                    <p style="margin:0;color:#2d3436;font-size:1rem;"><?= htmlspecialchars($userData['pseudo'] ?? '') ?></p>
                 </div>
             </div>
-            <div class="profile-item">
-                <span class="material-icons">admin_panel_settings</span>
+            <div style="display:flex;align-items:center;gap:15px;padding:15px;border-radius:8px;">
+                <span class="material-icons" style="color:#00b894;font-size:32px;">admin_panel_settings</span>
                 <div>
-                    <strong>Rôle</strong>
-                    <p><span class="admin-badge <?= strtolower($userData['role'] ?? '') ?>"><?= htmlspecialchars($userData['role'] ?? '') ?></span></p>
+                    <strong style="color:#636e72;font-size:0.9rem;display:block;margin-bottom:4px;">Rôle</strong>
+                    <p style="margin:0;"><span class="admin-badge <?= strtolower($userData['role'] ?? '') ?>"><?= htmlspecialchars($userData['role'] ?? '') ?></span></p>
                 </div>
             </div>
-            <div class="profile-item">
-                <span class="material-icons">check_circle</span>
+            <div style="display:flex;align-items:center;gap:15px;padding:15px;border-radius:8px;">
+                <span class="material-icons" style="color:#00b894;font-size:32px;">check_circle</span>
                 <div>
-                    <strong>Statut</strong>
-                    <p><span class="admin-badge <?= htmlspecialchars($userData['status'] ?? '') ?>"><?= htmlspecialchars($userData['status'] ?? '') ?></span></p>
+                    <strong style="color:#636e72;font-size:0.9rem;display:block;margin-bottom:4px;">Statut</strong>
+                    <p style="margin:0;"><span class="admin-badge <?= htmlspecialchars($userData['status'] ?? '') ?>"><?= htmlspecialchars($userData['status'] ?? '') ?></span></p>
                 </div>
             </div>
-            <div class="profile-item">
-                <span class="material-icons">account_balance_wallet</span>
+            <div style="display:flex;align-items:center;gap:15px;padding:15px;border-radius:8px;">
+                <span class="material-icons" style="color:#00b894;font-size:32px;">account_balance_wallet</span>
                 <div>
-                    <strong>Crédits</strong>
-                    <p class="number"><?= (int)($userData['credits'] ?? 0) ?></p>
+                    <strong style="color:#636e72;font-size:0.9rem;display:block;margin-bottom:4px;">Crédits</strong>
+                    <p style="margin:0;color:#00b894;font-size:1.5rem;font-weight:700;"><?= (int)($userData['credits'] ?? 0) ?></p>
                 </div>
             </div>
-            <div class="profile-item">
-                <span class="material-icons">directions_car</span>
+            <div style="display:flex;align-items:center;gap:15px;padding:15px;border-radius:8px;">
+                <span class="material-icons" style="color:#00b894;font-size:32px;">directions_car</span>
                 <div>
-                    <strong>Type d'utilisateur</strong>
-                    <p><span class="admin-badge <?= htmlspecialchars($userData['user_type'] ?? 'passager') ?>"><?= htmlspecialchars($userData['user_type'] ?? 'passager') ?></span></p>
+                    <strong style="color:#636e72;font-size:0.9rem;display:block;margin-bottom:4px;">Type d'utilisateur</strong>
+                    <p style="margin:0;"><span class="admin-badge <?= htmlspecialchars($userData['user_type'] ?? 'passager') ?>"><?= htmlspecialchars($userData['user_type'] ?? 'passager') ?></span></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <h3>Modifier mon type d'utilisateur</h3>
-    <form method="POST" class="form-container">
-        <input type="hidden" name="action" value="update_user_type">
-        <label for="user_type">Je suis :</label>
-        <select name="user_type" id="user_type" required>
-            <option value="passager" <?= ($userData['user_type'] ?? 'passager') === 'passager' ? 'selected' : '' ?>>Passager</option>
-            <option value="chauffeur" <?= ($userData['user_type'] ?? 'passager') === 'chauffeur' ? 'selected' : '' ?>>Chauffeur</option>
-            <option value="les_deux" <?= ($userData['user_type'] ?? 'passager') === 'les_deux' ? 'selected' : '' ?>>Les deux</option>
-        </select>
-        <button type="submit" class="btn-primary">Mettre à jour</button>
-    </form>
-
-    <h3>Gestion de mon compte</h3>
-    <div class="account-links">
-    <a href="/backend/gestion_vehicules.php" class="account-link">
-
-       <span class="material-icons">directions_car</span>
-            Gérer mes véhicules
-        </a>
-        <a href="/backend/gestion_preferences.php" class="account-link">
-    
-            <span class="material-icons">settings</span>
-            Gérer mes préférences
-        </a>
-        <a href="/backend/espace_chauffeur.php" class="account-link">
-            <span class="material-icons">add_road</span>
-            Espace chauffeur (créer un trajet)
-        </a>
-        <a href="mes_trajets.php" class="account-link">
-            <span class="material-icons">list</span>
-            Voir mes trajets
-        </a>
+    <!-- Modifier le type d'utilisateur -->
+    <div style="border-radius:12px;padding:30px;box-shadow:0 2px 12px rgba(0,0,0,0.08);margin-bottom:35px;">
+        <h3 style="color:#2d3436;font-size:1.4rem;margin-bottom:20px;border-bottom:2px solid #00b894;padding-bottom:10px;">
+            🔄 Modifier mon type d'utilisateur
+        </h3>
+        <form method="POST" style="max-width:500px;">
+            <input type="hidden" name="action" value="update_user_type">
+            <label for="user_type" style="display:block;font-weight:600;color:#2d3436;margin-bottom:10px;font-size:1rem;">Je suis :</label>
+            <select name="user_type" id="user_type" required style="width:100%;padding:12px 16px;border:2px solid #e8f4f0;border-radius:8px;font-size:1rem;margin-bottom:20px;">
+                <option value="passager" <?= ($userData['user_type'] ?? 'passager') === 'passager' ? 'selected' : '' ?>>🚶 Passager</option>
+                <option value="chauffeur" <?= ($userData['user_type'] ?? 'passager') === 'chauffeur' ? 'selected' : '' ?>>🚗 Chauffeur</option>
+                <option value="les_deux" <?= ($userData['user_type'] ?? 'passager') === 'les_deux' ? 'selected' : '' ?>>🚗🚶 Les deux</option>
+            </select>
+            <button type="submit" class="btn-primary" style="padding:12px 30px;font-size:1rem;">Mettre à jour</button>
+        </form>
     </div>
 
-    <h3>Vos derniers trajets</h3>
+ <!-- Gestion du compte -->
+<div class="profil-section compte-section">
+    <h3 class="profil-titre">⚙️ Gestion de mon compte</h3>
+    <?php 
+    $user_type = $userData['user_type'] ?? 'passager';
+    $is_driver = ($user_type === 'chauffeur' || $user_type === 'les_deux');
+    ?>
+    
+    <div class="profil-liens-grid">
+    <?php if ($is_driver): ?>
+        <a href="/backend/gestion_vehicules.php" class="profil-lien lien-vehicules">
+            <span class="material-icons">directions_car</span>
+            <span>Gérer mes véhicules</span>
+        </a>
+
+        <a href="/backend/gestion_preferences.php" class="profil-lien lien-preferences">
+            <span class="material-icons">settings</span>
+            <span>Gérer mes préférences</span>
+        </a>
+
+        <a href="/backend/espace_chauffeur.php" class="profil-lien lien-espace-chauffeur">
+            <span class="material-icons">add_road</span>
+            <span>Espace chauffeur</span>
+        </a>
+
+        <a href="/backend/mes_trajets.php" class="profil-lien lien-trajets">
+            <span class="material-icons">list</span>
+            <span>Voir mes trajets</span>
+        </a>
+    <?php endif; ?>
+    </div>
+</div>
+
+<!-- Derniers trajets -->
+<div class="profil-section trajets-section">
+    <h3 class="profil-titre">🚗 Vos derniers trajets</h3>
     <?php if (!$myTrips): ?>
-        <p>Aucun trajet.</p>
+        <p class="texte-vide">Aucun trajet pour le moment.</p>
     <?php else: ?>
-        <div class="trips-list">
+        <div class="trajets-liste">
             <?php foreach ($myTrips as $t): ?>
-                <div class="trip-item">
-                    <div class="trip-route">
+                <div class="trajet-item">
+                    <div class="trajet-infos">
                         <span class="material-icons">location_on</span>
-                        <span><?= htmlspecialchars($t['ville_depart']) ?> → <?= htmlspecialchars($t['ville_arrivee']) ?></span>
+                        <span class="trajet-ville">
+                            <?= htmlspecialchars($t['ville_depart']) ?> → <?= htmlspecialchars($t['ville_arrivee']) ?>
+                        </span>
+                        <span class="trajet-date"><?= date('d/m/Y', strtotime($t['date_depart'])) ?></span>
                     </div>
-                    <div class="trip-status">
-                        <span class="admin-badge <?= htmlspecialchars($t['status']) ?>"><?= htmlspecialchars($t['status']) ?></span>
-                    </div>
+                    <span class="admin-badge <?= htmlspecialchars($t['status']) ?>">
+                        <?= htmlspecialchars($t['status']) ?>
+                    </span>
                 </div>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
+</div>
 
-    <p><a href="/index.php">← Retour à l’accueil</a></p>
+<!-- Bouton retour -->
+<div class="retour-section">
+    <a href="/index.php" class="btn-retour">
+        <span class="material-icons">arrow_back</span>
+        Retour à l'accueil
+    </a>
+</div>
+
 </main>
 
-<!-- JS absolu -->
 <script src="/assets/js/navbar.js?v=1"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {

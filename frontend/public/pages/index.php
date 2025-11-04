@@ -46,7 +46,8 @@ session_start();     // démarre la session PHP
         Rejoignez la communauté <strong>EcoRide</strong> du covoiturage écologique.
       </p>
       <a href="covoiturages.php" class="cta-btn">Découvrir les covoiturages</a>
-      <a href="login_secure.php" class="cta-btn secondary">Connexion</a>
+      <!-- 🔹 Bouton dynamique -->
+      <a id="cta-dynamic" href="login_secure.php" class="cta-btn secondary">Connexion</a>
     </section>
 
     <!-- Formulaire de recherche -->
@@ -80,7 +81,7 @@ session_start();     // démarre la session PHP
     </div>
 
     <!-- Section calculateur -->
-    <section class="calculator-section" style="background:#f8f9fa;padding:30px 20px;margin:30px 0;border-radius:10px;">
+    <section class="calculator-section" style="padding:30px 20px;margin:30px 0;border-radius:10px;">
       <div style="max-width:900px;margin:0 auto;">
         <h3 style="text-align:center;color:#2d3436;margin-bottom:20px;">
           <span class="material-icons" style="vertical-align:middle;color:#00b894;">calculate</span>
@@ -181,12 +182,19 @@ session_start();     // démarre la session PHP
 
   <script src="../assets/js/script.js"></script>
   <script src="../assets/js/navbar.js"></script>
+
   <script>
+    // 🔹 3. Gère dynamiquement le bouton selon la session
     document.addEventListener('DOMContentLoaded', function() {
+      const ctaDynamic = document.getElementById('cta-dynamic');
+
       if (window.ecorideUser) {
-        renderMenu(window.ecorideUser);
+        ctaDynamic.textContent = "Voir mes trajets";
+        ctaDynamic.href = "mes_covoiturages.php";
+        ctaDynamic.classList.remove("secondary");
       } else {
-        renderMenu();
+        ctaDynamic.textContent = "Connexion";
+        ctaDynamic.href = "login_secure.php";
       }
     });
   </script>

@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+
 require_once __DIR__ . '/../../../backend/config/autoload.php';
 useClass('Database');
 
@@ -86,7 +87,7 @@ try {
   <?php endif; ?>
 
   <div style="margin-top:16px;">
-    <a href="/profil.php">← Retour au profil</a>
+<a href="profil.php">← Retour au profil</a>
   </div>
 </main>
 
