@@ -88,7 +88,7 @@ try {
         </section>
 
         <!-- Formulaire de recherche -->
-        <section style="max-width:900px;margin:0 auto;padding:20px;">
+        <section>
             <form method="GET" class="search-bar">
                 <input type="text"   name="depart"   placeholder="Ville de départ" value="<?= htmlspecialchars($depart) ?>"   list="villes">
                 <input type="text"   name="arrivee"  placeholder="Ville d'arrivée" value="<?= htmlspecialchars($arrivee) ?>" list="villes">

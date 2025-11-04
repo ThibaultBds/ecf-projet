@@ -1,4 +1,3 @@
-/* --- Responsive Navbar --- */
 .navbar {
   display: flex;
   flex-wrap: wrap;
@@ -54,7 +53,6 @@
     font-size: 18px !important;
   }
 }
-/* RESET ET BASE */
 * {
   box-sizing: border-box;
 }
@@ -63,12 +61,11 @@ body {
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
-  background: #e8f4f0; /* Vert très clair qui s'harmonise avec le header */
+  background: #e6f4ff; 
   color: #2d3436;
   line-height: 1.6;
 }
 
-/* HEADER */
 .container-header {
   background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); /* Retour au vert d'origine */
   padding: 20px 40px;
@@ -86,11 +83,9 @@ body {
   font-weight: 700;
 }
 
-/* NAVBAR */
 .navbar {
 background: #2e5a63;
 padding: 18px 32px;
-/* border-bottom: 3px solid #00ffff; */
 display: flex;
 justify-content: space-between;
 align-items: center;
@@ -118,7 +113,6 @@ align-items: center;
   transform: translateY(-2px);
 }
 
-/* HEADER AVEC NAVBAR INTÉGRÉE */
 .header-nav {
   display: flex !important;
   align-items: center !important;
@@ -157,7 +151,6 @@ align-items: center;
   transform: translateY(-2px) !important;
 }
 
-/* HERO SECTION */
 .hero {
   background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); /* Retour au vert d'origine */
   color: white;
@@ -206,17 +199,20 @@ align-items: center;
   box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
 
-/* FORMULAIRE DE RECHERCHE */
 .search-bar {
+  background: #fff;
   display: flex;
+  flex-wrap: wrap;
   gap: 15px;
-  background: #ffffff !important; /* Blanc pur pour la barre de recherche */
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  flex-wrap: wrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   align-items: center;
+  justify-content: center;
+  margin: 30px auto;
+  max-width: 900px;
 }
+
 
 .search-bar input,
 .search-bar select {
@@ -256,7 +252,6 @@ align-items: center;
   max-width: 1200px;
   margin: 40px auto;
   padding: 40px 20px;
-  background: #ffffff !important; /* Blanc pur pour les sections */
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
@@ -311,7 +306,6 @@ align-items: center;
 .pub-card-full {
   display: flex;
   align-items: center;
-  background: #ffffff !important; /* Blanc pur pour les cartes */
   border-radius: 12px;
   padding: 30px;
   margin-bottom: 30px;
@@ -336,7 +330,7 @@ align-items: center;
   box-shadow: 0 2px 12px rgba(0,0,0,0.10);
   display: block;
   margin: 0 auto 16px auto;
-  background: #f4f4f4;
+  background: #f8f9fa;
 }
 
 @media (max-width: 700px) {
@@ -550,18 +544,16 @@ footer a:hover {
 
 /* Input date avec couleur plus douce */
 #dateInput {
-  background: #1b5e20 !important; /* Vert très foncé naturel */
+  background: white !important; /* Vert très foncé naturel */
   color: #c8e6c9 !important; /* Texte vert très clair */
   font-weight: bold !important;
   letter-spacing: 2px !important;
   text-align: center !important;
   cursor: pointer !important;
-  border: 2px solid #00b894 !important; /* Retour au vert d'origine */
 }
 
 #dateInput:focus {
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(0,184,148,0.3) !important; /* Retour au vert d'origine */
 }
 
 /* RESPONSIVE */
@@ -1685,137 +1677,232 @@ background-color: #fff3e0;
   display: inline-block !important;
 }
 
-/* === PAGE: ESPACE CHAUFFEUR === */
-.driver-dashboard {
-  max-width: 1100px;
-  margin: 60px auto;
-  padding: 0 20px;
-}
+/* === PAGE: PROFIL === */
 
-.driver-card {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 32px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  margin-bottom: 40px;
-  border: 1px solid #e8f4f0;
-}
-
-.driver-card h2, .driver-card h3 {
-  color: #2d3436;
-  margin-bottom: 20px;
-}
-
-.driver-form {
-  display: grid;
-  gap: 20px;
-}
-
-.driver-form label {
-  font-weight: 600;
-  color: #2d3436;
-  margin-bottom: 6px;
-}
-
-.driver-form input,
-.driver-form select,
-.driver-form textarea {
-  width: 100%;
-  padding: 14px 16px;
-  border: 2px solid #e8f4f0;
-  border-radius: 12px;
-  background: #fff;
-  transition: all 0.2s ease;
-}
-
-.driver-form input:focus,
-.driver-form select:focus,
-.driver-form textarea:focus {
-  border-color: #00b894;
-  box-shadow: 0 0 0 4px rgba(0,184,148,0.15);
-}
-
-.trip-card {
-  border: 1.5px solid #e8f4f0;
-  border-radius: 12px;
+/* --- Structure générale --- */
+body {
+  font-family: 'Poppins', sans-serif;
   background: #f9fdfc;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-  transition: transform 0.2s ease;
+  margin: 0;
+  color: #2d3436;
 }
 
-.trip-card:hover {
+.profil-section {
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  margin-bottom: 35px;
+  background: #fff;
+}
+
+.profil-titre {
+  color: #2d3436;
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #00b894;
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- Informations principales --- */
+.message-error {
+  background: #ffeaea;
+  color: #d63031;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #ff7675;
+}
+
+.message-success {
+  background: #e8fdf4;
+  color: #00b894;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #55efc4;
+}
+
+/* --- Liens du compte --- */
+.profil-liens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.profil-lien {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.profil-lien .material-icons {
+  font-size: 28px;
+}
+
+.profil-lien:hover {
   transform: translateY(-3px);
 }
 
-.trip-card h4 {
-  margin: 0 0 10px;
-  color: #00b894;
+/* --- Liens spécifiques --- */
+.lien-vehicules,
+.lien-preferences,
+.lien-espace-chauffeur {
+  background: linear-gradient(135deg, #00b894, #00cec9);
+  box-shadow: 0 4px 10px rgba(0,184,148,0.3);
 }
 
-.trip-card small {
-  color: #636e72;
-}
-/* === PAGE: PRÉFÉRENCES === */
-.preferences-container {
-  max-width: 600px;
-  margin: 60px auto;
-  background: #ffffff;
-  border-radius: 18px;
-  border: 1px solid #e8f4f0;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  padding: 36px 32px;
-  text-align: center;
+.lien-trajets {
+  background: linear-gradient(135deg, #0984e3, #74b9ff);
+  box-shadow: 0 4px 10px rgba(9,132,227,0.3);
 }
 
-.preferences-container h2 {
-  color: #FFFFFF;
-  font-weight: 700;
-  margin-bottom: 10px;
+.lien-vehicules:hover,
+.lien-preferences:hover,
+.lien-espace-chauffeur:hover {
+  box-shadow: 0 6px 15px rgba(0,184,148,0.4);
 }
 
-.preferences-container p {
-  color: #FFFFFF;
-  margin-bottom: 25px;
+.lien-trajets:hover {
+  box-shadow: 0 6px 15px rgba(9,132,227,0.4);
 }
 
-.preferences-form {
-  text-align: left;
+/* --- Derniers trajets --- */
+.trajets-liste {
+  display: grid;
+  gap: 15px;
 }
 
-.preferences-form label {
-  font-weight: 600;
+.trajet-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-radius: 8px;
+  border-left: 4px solid #00b894;
+  background: #f9fdfc;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.trajet-infos {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   color: #2d3436;
-  display: block;
-  margin-bottom: 8px;
 }
 
-.preferences-form select,
-.preferences-form input {
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: 2px solid #e8f4f0;
-  margin-bottom: 20px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+.trajet-infos .material-icons {
+  color: #00b894;
+  font-size: 24px;
 }
 
-.preferences-form select:focus,
-.preferences-form input:focus {
-  border-color: #00b894;
-  box-shadow: 0 0 0 4px rgba(0,184,148,0.15);
+.trajet-date {
+  color: #636e72;
+  font-size: 0.9rem;
 }
 
-.preferences-form button {
-  margin-top: 10px;
-  border-radius: 12px;
+.texte-vide {
+  color: #636e72;
+  text-align: center;
+  padding: 30px 0;
+}
+
+.retour-section {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.btn-retour {
+  color: #00b894;
+  text-decoration: none;
   font-weight: 600;
-  letter-spacing: 0.4px;
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 2px solid #00b894;
+  border-radius: 8px;
+  transition: all 0.2s;
 }
 
-.preferences-form button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,184,148,0.25);
+.btn-retour:hover {
+  background: #00b894;
+  color: white;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.admin-badge.administrateur { background: #d63031; color: #fff; }
+.admin-badge.moderateur { background: #0984e3; color: #fff; }
+.admin-badge.actif { background: #00b894; color: #fff; }
+.admin-badge.inactif { background: #b2bec3; color: #2d3436; }
+.admin-badge.passager { background: #55efc4; color: #2d3436; }
+.admin-badge.chauffeur { background: #00b894; color: #fff; }
+.admin-badge.les_deux { background: linear-gradient(135deg, #00b894, #00cec9); color: #fff; }
+
+select, input, button {
+  font-family: inherit;
+}
+button.btn-primary {
+  background: #00b894;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+button.btn-primary:hover {
+  background: #00cec9;
+}
+
+input[type="date"] {
+  width: 100%;
+  max-width: 250px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border-radius: 12px;
+  background: #fdfdfd;
+  color: #2d3436;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 184, 148, 0.1);
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(47%) sepia(67%) saturate(405%) hue-rotate(121deg) brightness(94%) contrast(91%);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+input[type="date"]:hover {
+  background: #f9fffc;
+  box-shadow: 0 3px 10px rgba(0, 184, 148, 0.15);
+}
+
+input[type="date"]:focus {
+  border-color: #019e7a;
+  box-shadow: 0 0 8px rgba(0, 184, 148, 0.35);
+  outline: none;
+  background: #fff;
 }
