@@ -26,7 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $stmt = $pdo->prepare("UPDATE trips SET places_restantes = places_restantes + 1 WHERE id = ?");
             $stmt->execute([$trip_id]);
             
-            // Rembourser les crédits (à implémenter)
             $success = "Votre participation a été annulée.";
 
         } elseif ($_POST['action'] === 'update_trip_status') {
@@ -37,24 +36,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $stmt->execute([$new_status, $trip_id, $user['id']]);
 
                 if ($new_status === 'annule') {
-                    // Annulation par chauffeur : rembourser les participants et envoyer mail
-                    $stmt = $pdo->prepare("SELECT tp.passager_id, tp.credits_utilises, u.email FROM trip_participants tp JOIN users u ON tp.passager_id = u.id WHERE tp.trip_id = ?");
+                    // Annulation par chauffeur : rembourser les participants
+                    $stmt = $pdo->prepare("
+                        SELECT tp.passager_id, tp.credits_utilises, u.email, t.ville_depart, t.ville_arrivee
+                        FROM trip_participants tp
+                        JOIN users u ON tp.passager_id = u.id
+                        JOIN trips t ON t.id = tp.trip_id
+                        WHERE tp.trip_id = ?
+                    ");
                     $stmt->execute([$trip_id]);
                     $participants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                     foreach ($participants as $participant) {
-                        // Rembourser crédits
                         $stmt = $pdo->prepare("UPDATE users SET credits = credits + ? WHERE id = ?");
                         $stmt->execute([$participant['credits_utilises'], $participant['passager_id']]);
 
-                        // Envoyer mail (simulé, utiliser mail() ou service)
                         $subject = "Annulation de trajet EcoRide";
-                        $message = "Votre trajet de " . $trajet['ville_depart'] . " à " . $trajet['ville_arrivee'] . " a été annulé par le chauffeur. Vos crédits ont été remboursés.";
-                        // mail($participant['email'], $subject, $message); // Activer si mail configuré
-                        error_log("Mail envoyé à " . $participant['email'] . ": " . $message); // Log pour test
+                        $message = "Votre trajet de {$participant['ville_depart']} à {$participant['ville_arrivee']} a été annulé par le chauffeur. Vos crédits ont été remboursés.";
+                        // mail($participant['email'], $subject, $message);
+                        error_log("Mail envoyé à {$participant['email']}: $message");
                     }
 
-                    // Supprimer participations
                     $stmt = $pdo->prepare("DELETE FROM trip_participants WHERE trip_id = ?");
                     $stmt->execute([$trip_id]);
                 }
@@ -62,23 +64,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $success = "Le statut du trajet a été mis à jour.";
             }
         }
+
         header('Location: mes_trajets.php?success=' . urlencode($success));
         exit();
+
     } catch (Exception $e) {
         $error = "Une erreur est survenue : " . $e->getMessage();
     }
 }
 
-// Récupérer les trajets conduits et les participations
+// Récupérer les trajets conduits et participations
 try {
     $pdo = getDatabase();
+    
     // Trajets conduits
     $stmt = $pdo->prepare("SELECT * FROM trips WHERE chauffeur_id = ? ORDER BY date_depart DESC");
     $stmt->execute([$user['id']]);
     $trajets_conduits = $stmt->fetchAll();
 
     // Participations
-    $stmt = $pdo->prepare("SELECT t.*, tp.has_reviewed FROM trips t JOIN trip_participants tp ON t.id = tp.trip_id WHERE tp.passager_id = ? ORDER BY t.date_depart DESC");
+    $stmt = $pdo->prepare("
+        SELECT t.*, tp.has_reviewed
+        FROM trips t
+        JOIN trip_participants tp ON t.id = tp.trip_id
+        WHERE tp.passager_id = ?
+        ORDER BY t.date_depart DESC
+    ");
     $stmt->execute([$user['id']]);
     $participations = $stmt->fetchAll();
 
@@ -105,15 +116,16 @@ try {
             </a>
         </h1>
     </header>
+
     <script>
-    window.ecorideUser = <?php echo isset($user) ? json_encode([
+    window.ecorideUser = <?php echo json_encode([
         'email' => $user['email'],
         'pseudo' => $user['pseudo'],
         'type' => $user['type']
-    ]) : 'null'; ?>;
+    ]); ?>;
     </script>
 
-    <main class="member-container" style="max-width:900px;margin:auto;padding:30px 0;">
+    <main class="member-container" style="max-width:900px;margin-bottom: 50px; padding:30px 0;">
         <h2 style="display:flex;align-items:center;gap:10px;color:#00b894;font-size:2.2rem;margin-bottom:30px;">
             <span class="material-icons" style="font-size:2.5rem;vertical-align:middle;">history</span> Mes Trajets
         </h2>
@@ -121,6 +133,7 @@ try {
         <?php if (isset($_GET['success'])): ?>
             <div class="message-success" style="margin-bottom:20px;"><?= htmlspecialchars($_GET['success']) ?></div>
         <?php endif; ?>
+
         <?php if ($error): ?>
             <div class="message-error" style="margin-bottom:20px;"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
@@ -129,23 +142,29 @@ try {
             <?php if (!empty($trajets_conduits)): ?>
                 <h3 style="color:#0984e3;font-size:1.3rem;margin-bottom:15px;">Trajets que je conduis</h3>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;">
-                <?php foreach ($trajets_conduits as $trajet): ?>
-                    <div class="ride-card-history" style="background:#f8f9fa;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.04);margin-bottom:0;">
-                        <p style="font-size:1.1rem;font-weight:600;color:#00b894;margin-bottom:8px;"><span class="material-icons" style="vertical-align:middle;margin-right:6px;">directions_car</span><?= htmlspecialchars($trajet['ville_depart']) ?> → <?= htmlspecialchars($trajet['ville_arrivee']) ?></p>
-                        <p style="color:#636e72;margin-bottom:10px;">Départ : <?= date('d/m/Y H:i', strtotime($trajet['date_depart'])) ?> <span style="margin-left:10px;">Statut: <strong><?= ucfirst($trajet['status']) ?></strong></span></p>
-                        <form method="POST" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-                            <input type="hidden" name="trip_id" value="<?= $trajet['id'] ?>">
-                            <?php if ($trajet['status'] === 'planifie'): ?>
-                                <input type="hidden" name="status" value="en_cours">
-                                <button type="submit" name="action" value="update_trip_status" class="btn-secondary">Démarrer</button>
-                                <button type="submit" name="action" value="update_trip_status" formaction="mes_trajets.php" formmethod="post" name="status" value="annule" class="btn-danger">Annuler le trajet</button>
-                            <?php elseif ($trajet['status'] === 'en_cours'): ?>
-                                <input type="hidden" name="status" value="termine">
-                                <button type="submit" name="action" value="update_trip_status" class="btn-primary">Terminer</button>
-                            <?php endif; ?>
-                        </form>
-                    </div>
-                <?php endforeach; ?>
+                    <?php foreach ($trajets_conduits as $trajet): ?>
+                        <div class="ride-card-history" style="background:#f8f9fa;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+                            <p style="font-size:1.1rem;font-weight:600;color:#00b894;margin-bottom:8px;">
+                                <span class="material-icons" style="vertical-align:middle;margin-right:6px;">directions_car</span>
+                                <?= htmlspecialchars($trajet['ville_depart']) ?> → <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                            </p>
+                            <p style="color:#636e72;margin-bottom:10px;">
+                                Départ : <?= date('d/m/Y H:i', strtotime($trajet['date_depart'])) ?> 
+                                <span style="margin-left:10px;">Statut: <strong><?= ucfirst($trajet['status']) ?></strong></span>
+                            </p>
+                            <form method="POST" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                                <input type="hidden" name="trip_id" value="<?= $trajet['id'] ?>">
+                                <?php if ($trajet['status'] === 'planifie'): ?>
+                                    <input type="hidden" name="status" value="en_cours">
+                                    <button type="submit" name="action" value="update_trip_status" class="btn-secondary">Démarrer</button>
+                                    <button type="submit" name="action" value="update_trip_status" formaction="mes_trajets.php" formmethod="post" class="btn-danger" value="annule">Annuler le trajet</button>
+                                <?php elseif ($trajet['status'] === 'en_cours'): ?>
+                                    <input type="hidden" name="status" value="termine">
+                                    <button type="submit" name="action" value="update_trip_status" class="btn-primary">Terminer</button>
+                                <?php endif; ?>
+                            </form>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -153,53 +172,65 @@ try {
         <div class="trajets-section" style="margin-bottom:40px;">
             <h3 style="color:#0984e3;font-size:1.3rem;margin-bottom:15px;">Trajets où je suis passager</h3>
             <?php if (empty($participations)): ?>
-                <p style="color:#636e72;">Vous ne participez à aucun trajet. <a href="covoiturages.php" style="color:#00b894;font-weight:600;">Trouver un trajet</a></p>
+                <p style="color:#636e72;">Vous ne participez à aucun trajet. 
+                    <a href="covoiturages.php" style="color:#00b894;font-weight:600;">Trouver un trajet</a>
+                </p>
             <?php else: ?>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;">
-                <?php foreach ($participations as $trajet): ?>
-                    <div class="ride-card-history" style="background:#f8f9fa;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.04);margin-bottom:0;">
-                        <p style="font-size:1.1rem;font-weight:600;color:#00b894;margin-bottom:8px;"><span class="material-icons" style="vertical-align:middle;margin-right:6px;">person</span><?= htmlspecialchars($trajet['ville_depart']) ?> → <?= htmlspecialchars($trajet['ville_arrivee']) ?></p>
-                        <p style="color:#636e72;margin-bottom:10px;">Départ : <?= date('d/m/Y H:i', strtotime($trajet['date_depart'])) ?> <span style="margin-left:10px;">Statut: <strong><?= ucfirst($trajet['status']) ?></strong></span></p>
-                        <?php if ($trajet['status'] === 'planifie'): ?>
-                            <form method="POST" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-                                <input type="hidden" name="trip_id" value="<?= $trajet['id'] ?>">
-                                <button type="submit" name="action" value="cancel_participation" class="btn-danger">Annuler ma participation</button>
-                            </form>
-                        <?php elseif ($trajet['status'] === 'termine' && !$trajet['has_reviewed']): ?>
-                            <details style="margin-top:10px;">
-                                <summary style="cursor:pointer;font-weight:600;color:#0984e3;">Noter ce trajet</summary>
-                                <form action="submit_review.php" method="POST" class="form-container" style="margin-top:10px;">
+                    <?php foreach ($participations as $trajet): ?>
+                        <div class="ride-card-history" style="background:#f8f9fa;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+                            <p style="font-size:1.1rem;font-weight:600;color:#00b894;margin-bottom:8px;">
+                                <span class="material-icons" style="vertical-align:middle;margin-right:6px;">person</span>
+                                <?= htmlspecialchars($trajet['ville_depart']) ?> → <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                            </p>
+                            <p style="color:#636e72;margin-bottom:10px;">
+                                Départ : <?= date('d/m/Y H:i', strtotime($trajet['date_depart'])) ?> 
+                                <span style="margin-left:10px;">Statut: <strong><?= ucfirst($trajet['status']) ?></strong></span>
+                            </p>
+                            <?php if ($trajet['status'] === 'planifie'): ?>
+                                <form method="POST" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
                                     <input type="hidden" name="trip_id" value="<?= $trajet['id'] ?>">
-                                    <input type="hidden" name="reviewed_id" value="<?= $trajet['chauffeur_id'] ?>">
-                                    <label for="note-<?= $trajet['id'] ?>">Note (sur 5)</label>
-                                    <input type="number" id="note-<?= $trajet['id'] ?>" name="note" min="1" max="5" required style="width:60px;">
-                                    <label for="commentaire-<?= $trajet['id'] ?>">Commentaire</label>
-                                    <textarea id="commentaire-<?= $trajet['id'] ?>" name="commentaire" required style="width:100%;min-height:60px;"></textarea>
-                                    <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" name="is_problem"> Signaler un problème</label>
-                                    <button type="submit" class="btn-primary">Envoyer</button>
+                                    <button type="submit" name="action" value="cancel_participation" class="btn-danger">Annuler ma participation</button>
                                 </form>
-                            </details>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
+                            <?php elseif ($trajet['status'] === 'termine' && !$trajet['has_reviewed']): ?>
+                                <details style="margin-top:10px;">
+                                    <summary style="cursor:pointer;font-weight:600;color:#0984e3;">Noter ce trajet</summary>
+                                    <form action="submit_review.php" method="POST" class="form-container" style="margin-top:10px;">
+                                        <input type="hidden" name="trip_id" value="<?= $trajet['id'] ?>">
+                                        <input type="hidden" name="reviewed_id" value="<?= $trajet['chauffeur_id'] ?>">
+                                        <label for="note-<?= $trajet['id'] ?>">Note (sur 5)</label>
+                                        <input type="number" id="note-<?= $trajet['id'] ?>" name="note" min="1" max="5" required style="width:60px;">
+                                        <label for="commentaire-<?= $trajet['id'] ?>">Commentaire</label>
+                                        <textarea id="commentaire-<?= $trajet['id'] ?>" name="commentaire" required style="width:100%;min-height:60px;"></textarea>
+                                        <label style="display:flex;align-items:center;gap:6px;">
+                                            <input type="checkbox" name="is_problem"> Signaler un problème
+                                        </label>
+                                        <button type="submit" class="btn-primary">Envoyer</button>
+                                    </form>
+                                </details>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             <?php endif; ?>
         </div>
+
         <div style="text-align:center;margin-top:30px;">
-            <a href="profil.php" style="color:#00b894;text-decoration:none;font-weight:600;font-size:1.1rem;display:inline-flex;align-items:center;gap:6px;"><span class="material-icons" style="vertical-align:middle;">arrow_back</span> Retour au profil</a>
+            <a href="profil.php" style="color:#00b894;text-decoration:none;font-weight:600;font-size:1.1rem;display:inline-flex;align-items:center;gap:6px;">
+                <span class="material-icons" style="vertical-align:middle;">arrow_back</span> Retour au profil
+            </a>
         </div>
     </main>
+
     <script src="../assets/js/navbar.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.ecorideUser && window.ecorideUser.email) {
-        renderMenu(window.ecorideUser);
-    } else {
-        renderMenu();
-    }
-});
-</script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.ecorideUser && window.ecorideUser.email) {
+            renderMenu(window.ecorideUser);
+        } else {
+            renderMenu();
+        }
+    });
+    </script>
 </body>
 </html>
-
-
