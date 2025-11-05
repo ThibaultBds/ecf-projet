@@ -194,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <span>Espace chauffeur</span>
         </a>
 
-        <a href="/backend/mes_trajets.php" class="profil-lien lien-trajets">
+        <a href="/mes_trajets.php" class="profil-lien lien-trajets">
             <span class="material-icons">list</span>
             <span>Voir mes trajets</span>
         </a>
