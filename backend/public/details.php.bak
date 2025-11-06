@@ -1,0 +1,108 @@
+<?php
+session_start();
+require_once 'config/autoload.php';
+useClass('Database');
+
+// Générer token CSRF
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Fonction utilitaire locale si elle n'existe pas déjà dans vos includes
+if (!function_exists('getReviewsByDriverId')) {
+    function getReviewsByDriverId($chauffeur_id) {
+        $pdo = getDatabase();
+        $stmt = $pdo->prepare("\n            SELECT r.*, u.pseudo as reviewer_pseudo\n            FROM reviews r\n            JOIN users u ON r.reviewer_id = u.id\n            WHERE r.reviewed_id = ? AND r.status = 'valide'\n            ORDER BY r.created_at DESC\n        ");
+        $stmt->execute([$chauffeur_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+// Récupérer l'ID du trajet
+$covoiturage_id = (int)($_GET['id'] ?? 0);
+
+if ($covoiturage_id <= 0) {
+    header('Location: covoiturages.php');
+    exit();
+}
+
+// Récupérer les données du trajet depuis la BDD
+try {
+    $covoiturage = getTripById($covoiturage_id);
+    if (!$covoiturage) {
+        header('Location: covoiturages.php?error=not_found');
+        exit();
+    }
+    
+    // Récupérer les avis sur le conducteur
+    $reviews = getReviewsByDriverId($covoiturage['chauffeur_id']);
+    
+    // Décoder les préférences
+    $preferences = json_decode($covoiturage['preferences'] ?? '{}', true);
+    
+} catch (Exception $e) {
+    error_log("Erreur details.php: " . $e->getMessage());
+    header('Location: covoiturages.php?error=db_error');
+    exit();
+}
+
+// Récupérer le crédit utilisateur si connecté
+$user_credit = 0;
+if (isset($_SESSION['user'])) {
+    try {
+        $userData = getUserById($_SESSION['user']['id']);
+        $user_credit = $userData['credits'] ?? 0;
+        $_SESSION['user']['credits'] = $user_credit; // Mettre à jour la session
+    } catch (Exception $e) {
+        $user_credit = 0;
+    }
+}
+
+// Calculer le crédit requis (prix du trajet en crédits)
+$credit_requis = (int)$covoiturage['prix'];
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détail du covoiturage - EcoRide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <header class="container-header">
+        <h1>
+            <a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
+                <span class="material-icons">eco</span> EcoRide
+            </a>
+        </h1>
+        <!-- Le menu sera injecté par navbar.js -->
+    </header>
+
+    <main>
+        <section class="detail-container" style="max-width:800px;margin:0 auto;padding:20px;">
+            <div class="detail-card" style="background:white;border-radius:12px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+                <div class="detail-header" style="border-bottom:2px solid #f1f2f6;padding-bottom:20px;margin-bottom:20px;">
+                    <h2 style="margin:0;color:#2d3436;font-size:28px;">
+                        <?= htmlspecialchars($covoiturage['ville_depart']) ?> → <?= htmlspecialchars($covoiturage['ville_arrivee']) ?>
+                    </h2>
+                    <p style="margin:5px 0;color:#636e72;font-size:18px; display:flex; align-items:center; gap:10px;">
+                        <img src="<?= htmlspecialchars($covoiturage['conducteur_avatar_url'] ?? 'assets/default_avatar.png') ?>" alt="Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;image-rendering: -moz-crisp-edges; image-rendering: -o-crisp-edges; image-rendering: pixelated; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; filter: none;">
+                        <span>Conducteur : <?= htmlspecialchars($covoiturage['conducteur']) ?></span>
+                    </p>
+                    <?php if ($covoiturage['is_ecological']): ?>
+                        <div style="display:inline-block;background:#00b894;color:white;padding:4px 12px;border-radius:15px;font-size:12px;font-weight:600;margin-top:10px;">
+                            ⚡ Trajet écologique
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="detail-info" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:30px;">
+                    <div class="info-item">
+                        <h4 style="margin:0 0 10px 0;color:#2d3436;">
+                            <span class="material-icons" style="vertical-align:middle;color:#00b894;">schedule</span>
+                            Date et heure
+                        </h4>
+                        <p><?= date('d/m/Y à H:i', strtotime($covoiturage['date_depart'])) ?></p>
+                    </div>

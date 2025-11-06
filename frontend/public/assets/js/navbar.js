@@ -18,39 +18,63 @@ function renderMenu(user) {
     // Debug
     console.log('renderMenu called with user:', user);
     
-    let navHtml = `
-      <nav class="navbar">
+    // Build inner content for the navbar. We will prefer filling the
+    // placeholder <nav id="navbar"> if present to avoid duplicating nav nodes.
+    const navInner = `
         <ul>
-          <li><a href="/pages/index.php">🏠 Accueil</a></li>
-          <li><a href="/pages/covoiturages.php">🚗 Covoiturages</a></li>
-          <li><a href="/pages/contact.php">📧 Contact</a></li>
+          <li><a class="nav-link" href="/pages/index.php">🏠 Accueil</a></li>
+          <li><a class="nav-link" href="/pages/covoiturages.php">🚗 Covoiturages</a></li>
+          <li><a class="nav-link" href="/pages/contact.php">📧 Contact</a></li>
         </ul>
-        <div id="user-profile" style="display:${user && user.email ? 'flex' : 'none'};align-items:center;gap:10px;">
-          <a href="/pages/profil.php" style="display:flex;align-items:center;gap:8px;color:white;text-decoration:none;">
-            <span class="material-icons" style="font-size:32px;border-radius:50%;background:#e0e0e0;color:#00b894;padding:4px;">account_circle</span>
-            <span id="user-name" style="font-weight:600;">${user && user.pseudo ? user.pseudo : 'Profil'}</span>
+        <div id="user-profile" class="nav-user">
+          <a href="/pages/profil.php" class="nav-profile-link">
+            <span class="material-icons nav-avatar">account_circle</span>
+            <span id="user-name" class="nav-username">${user && user.pseudo ? user.pseudo : 'Profil'}</span>
           </a>
-          <a id="logout-link" href="/pages/logout.php" style="color:white;text-decoration:none;margin-left:10px;">Déconnexion</a>
+          <a id="logout-link" href="/pages/logout.php" class="nav-logout">Déconnexion</a>
         </div>
-        <div id="auth-links" style="display:${user && user.email ? 'none' : 'flex'};gap:10px;">
-          <a href="/pages/login_secure.php" style="color:white;text-decoration:none;padding:8px 16px;border:1px solid rgba(255,255,255,0.3);border-radius:4px;">Connexion</a>
-          <a href="/pages/register.php" style="color:white;text-decoration:none;padding:8px 16px;background:rgba(255,255,255,0.2);border-radius:4px;">S'inscrire</a>
+        <div id="auth-links" class="nav-auth">
+          <a class="nav-auth-link" href="/pages/login_secure.php">Connexion</a>
+          <a class="nav-auth-cta" href="/pages/register.php">S'inscrire</a>
         </div>
-      </nav>
     `;
 
-    // Injection du menu
+    // Injection du menu — prefer existing placeholder <nav id="navbar"> if present
     const header = document.querySelector('header.container-header');
     if (header) {
-      const oldNav = header.querySelector('nav.navbar');
-      if (oldNav) oldNav.remove();
-      header.insertAdjacentHTML('beforeend', navHtml);
+      // Reuse any existing nav: prefer the explicit placeholder by id,
+      // otherwise reuse a nav with class .navbar if it already exists.
+      const existingNav = header.querySelector('nav#navbar') || header.querySelector('nav.navbar');
+      if (existingNav) {
+        existingNav.classList.add('navbar');
+        // ensure a stable id for future runs
+        if (!existingNav.id) existingNav.id = 'navbar';
+        existingNav.innerHTML = navInner;
+      } else {
+        // fallback: insert a new nav element with an id so subsequent calls reuse it
+        header.insertAdjacentHTML('beforeend', `<nav id="navbar" class="navbar">${navInner}</nav>`);
+      }
+
+      // Toggle visibility classes based on auth state (no inline styles)
+      const userProfileEl = header.querySelector('#user-profile');
+      const authLinksEl = header.querySelector('#auth-links');
+      if (user && user.email) {
+        if (userProfileEl) userProfileEl.classList.add('visible');
+        if (authLinksEl) authLinksEl.classList.remove('visible');
+      } else {
+        if (userProfileEl) userProfileEl.classList.remove('visible');
+        if (authLinksEl) authLinksEl.classList.add('visible');
+      }
     }
 
     // Déconnexion
-    const logoutLink = document.getElementById('logout-link');
+    // Déconnexion — remove previous listeners by replacing the node, then attach
+    let logoutLink = document.getElementById('logout-link');
     if (logoutLink) {
-      logoutLink.addEventListener('click', function(e) {
+      // clone the node to remove prior event listeners (safe idempotent approach)
+      const cloned = logoutLink.cloneNode(true);
+      logoutLink.parentNode.replaceChild(cloned, logoutLink);
+      cloned.addEventListener('click', function(e) {
         e.preventDefault();
         localStorage.removeItem('user');
         window.location.href = "/pages/logout.php";

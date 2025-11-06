@@ -56,20 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <header class="container-header">
-        <h1>
-            <a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
-                <span class="material-icons">eco</span> EcoRide
-            </a>
-        </h1>
-    </header>
-    <script>
-    window.ecorideUser = <?php echo isset($_SESSION['user']) ? json_encode([
-        'email' => $_SESSION['user']['email'],
-        'pseudo' => $_SESSION['user']['pseudo'],
-        'type' => $_SESSION['user']['type']
-    ]) : 'null'; ?>;
-    </script>
+    <?php require_once __DIR__ . '/../includes/header.php'; ?>
 
     <main>
         <div style="max-width:800px;margin:40px auto;padding:0 20px;">
@@ -216,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </dialog>
 
-<script src="../assets/js/navbar.js"></script>
+<?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
     <script>
         // Rendu du menu avec navbar.js
         if (typeof renderMenu === 'function') {

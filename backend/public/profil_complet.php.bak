@@ -80,7 +80,13 @@ try {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <?php require_once __DIR__ . '/includes/header.php'; ?>
+    <header class="container-header">
+        <h1>
+            <a href="index.html" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
+                <span class="material-icons">eco</span> EcoRide
+            </a>
+        </h1>
+    </header>
 
     <main style="max-width:800px;margin:40px auto;padding:0 20px;">
         <div style="background:white;padding:40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
@@ -120,7 +126,7 @@ try {
                                     <div style="font-size:0.9rem;color:#636e72;">Je recherche des trajets</div>
                                 </div>
                             </label>
-                            
+
                             <label for="user-type-chauffeur" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:15px;border:2px solid #ddd;border-radius:8px;transition:all 0.3s ease;">
                                 <input type="radio" id="user-type-chauffeur" name="user_type" value="chauffeur" <?= ($userPrefs['user_type_preference'] ?? '') === 'chauffeur' ? 'checked' : '' ?>>
                                 <div>
@@ -128,7 +134,7 @@ try {
                                     <div style="font-size:0.9rem;color:#636e72;">Je propose des trajets</div>
                                 </div>
                             </label>
-                            
+
                             <label for="user-type-les-deux" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:15px;border:2px solid #ddd;border-radius:8px;transition:all 0.3s ease;">
                                 <input type="radio" id="user-type-les-deux" name="user_type" value="les_deux" <?= ($userPrefs['user_type_preference'] ?? '') === 'les_deux' ? 'checked' : '' ?>>
                                 <div>
@@ -155,7 +161,7 @@ try {
                                 Accepte les fumeurs
                             </span>
                         </label>
-                        
+
                         <label for="animaux-checkbox" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
                             <input type="checkbox" id="animaux-checkbox" name="animaux" <?= ($userPrefs['animaux'] ?? 0) ? 'checked' : '' ?> style="transform:scale(1.2);">
                             <span>
@@ -164,7 +170,7 @@ try {
                             </span>
                         </label>
                     </div>
-                    
+
                     <div>
                         <label for="preferences-textarea" style="display:block;margin-bottom:8px;font-weight:600;color:#2d3436;">Préférences personnalisées</label>
                         <textarea id="preferences-textarea" name="preferences_custom" rows="3" placeholder="Ex: Musique calme, pas de discussions, arrêts autorisés..." style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;resize:vertical;box-sizing:border-box;"><?= htmlspecialchars($userPrefs['preference_custom'] ?? '') ?></textarea>
@@ -215,7 +221,7 @@ try {
         document.querySelectorAll('input[name="user_type"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 document.querySelectorAll('label').forEach(label => {
-                    if (label.querySelector('input[name="user_type"]')) {
+                    if (label.querySelector('input[name="user_type"])) {
                         label.style.borderColor = '#ddd';
                         label.style.background = 'white';
                         label.style.transform = 'scale(1)';
@@ -236,6 +242,3 @@ try {
     </script>
 </body>
 </html>
-
-
-

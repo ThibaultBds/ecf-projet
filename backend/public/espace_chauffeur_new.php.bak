@@ -1,0 +1,168 @@
+<?php
+ob_start();
+session_start();
+require_once '../config/autoload.php';
+useClass('Database');
+
+// --- Exceptions personnalisées ---
+class FormFieldException extends Exception {}
+class PriceOrPlacesException extends Exception {}
+class DateException extends Exception {}
+class DatabaseException extends Exception {}
+
+// Vérifier l'authentification
+if (!isset($_SESSION['user'])) {
+    header('Location: login_secure.php');
+    exit();
+}
+
+$user = $_SESSION['user'];
+$success = '';
+$error = '';
+
+// --- Traitement du formulaire de création de trajet ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create_trip') {
+    try {
+        $ville_depart = trim($_POST['ville_depart'] ?? '');
+        $ville_arrivee = trim($_POST['ville_arrivee'] ?? '');
+        $date_depart = $_POST['date_depart'] ?? '';
+        $heure_depart = $_POST['heure_depart'] ?? '';
+        $prix = isset($_POST['prix']) ? floatval($_POST['prix']) : 0;
+        $places = isset($_POST['places']) ? intval($_POST['places']) : 0;
+        $description = trim($_POST['description'] ?? '');
+
+        if (empty($ville_depart) || empty($ville_arrivee) || empty($date_depart) || empty($heure_depart)) {
+            throw new FormFieldException('Veuillez remplir tous les champs obligatoires.');
+        }
+        if ($prix < 1 || $prix > 100 || $places < 1 || $places > 4) {
+            throw new PriceOrPlacesException('Le prix doit être compris entre 1 et 100€, et le nombre de places entre 1 et 4.');
+        }
+
+        $datetime_depart = $date_depart . ' ' . $heure_depart;
+        if (strtotime($datetime_depart) <= time()) {
+            throw new DateException('La date de départ doit être dans le futur.');
+        }
+
+        $pdo = getDatabase();
+
+        $vehicle = getVehicleByUserId($user['id']);
+        $vehicle_id = $vehicle ? $vehicle['id'] : createDefaultVehicle($user['id'], $places);
+
+        $total_cost = $prix + 2;
+        $stmt = $pdo->prepare("SELECT credits FROM users WHERE id = ?");
+        $stmt->execute([$user['id']]);
+        $current_credits = $stmt->fetchColumn();
+        if ($current_credits < $total_cost) {
+            throw new Exception('Crédits insuffisants. Vous avez ' . $current_credits . ' crédits, nécessaire ' . $total_cost . '.');
+        }
+
+        if (createTrip($user['id'], $vehicle_id, $ville_depart, $ville_arrivee, $datetime_depart, $prix, $places, $description)) {
+            $stmt = $pdo->prepare("UPDATE users SET credits = credits - ? WHERE id = ?");
+            $stmt->execute([$total_cost, $user['id']]);
+
+            try {
+                $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$user['id'], 'Création trajet', "$ville_depart → $ville_arrivee", $_SERVER['REMOTE_ADDR'] ?? '']);
+            } catch (Exception $e) {}
+
+            $success = 'Trajet créé avec succès ! ' . $total_cost . ' crédits déduits.';
+            $_POST = [];
+        } else {
+            throw new Exception('Erreur lors de la création du trajet.');
+        }
+    } catch (FormFieldException|PriceOrPlacesException|DateException $e) {
+        $error = $e->getMessage();
+    } catch (Exception $e) {
+        $error = 'Une erreur inattendue est survenue.';
+    }
+}
+
+// --- Récupérer les trajets du chauffeur ---
+try {
+    $pdo = getDatabase();
+    $stmt = $pdo->prepare(
+        "SELECT t.*, COUNT(tp.id) as participants\n         FROM trips t\n         LEFT JOIN trip_participants tp ON t.id = tp.trip_id\n         WHERE t.chauffeur_id = ?\n         GROUP BY t.id\n         ORDER BY t.date_depart DESC"
+    );
+    $stmt->execute([$user['id']]);
+    $mes_trajets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $mes_trajets = [];
+    $error = $error ?: "Erreur lors du chargement de vos trajets.";
+}
+
+function getStatusColor($status) {
+    return [
+        'planifie' => '#00b894',
+        'en_cours' => '#f39c12',
+        'termine'  => '#636e72',
+        'annule'   => '#e74c3c'
+    ][$status] ?? '#b2bec3';
+}
+function getStatusLabel($status) {
+    return [
+        'planifie' => 'Planifié',
+        'en_cours' => 'En cours',
+        'termine'  => 'Terminé',
+        'annule'   => 'Annulé'
+    ][$status] ?? 'Planifié';
+}
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Espace Chauffeur - EcoRide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/css/style.css?v=2025">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <header class="container-header">
+        <h1>
+            <a href="/pages/index.php" class="site-brand">
+                <span class="material-icons">eco</span>
+                EcoRide
+            </a>
+        </h1>
+    </header>
+
+    <main class="ec-driver-dashboard">
+        <div class="ec-driver-card">
+            <div class="page-header">
+                <h2><span class="material-icons">drive_eta</span> Espace Chauffeur</h2>
+                <p>Proposez des trajets écologiques et gagnez des crédits</p>
+            </div>
+
+            <?php if ($success): ?>
+                <div class="message-success" id="success-message">
+                    <span class="material-icons">check_circle</span>
+                    <?= htmlspecialchars($success) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($error): ?>
+                <div class="message-error">
+                    <span class="material-icons">error</span>
+                    <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="ec-driver-stats">
+                <div class="ec-stat-card">
+                    <div class="ec-stat-icon">
+                        <span class="material-icons">account_balance_wallet</span>
+                    </div>
+                    <div class="ec-stat-info">
+                        <div class="ec-stat-number"><?php
+                            try {
+                                $pdo = getDatabase();
+                                $stmt = $pdo->prepare("SELECT credits FROM users WHERE id = ?");
+                                $stmt->execute([$user['id']]);
+                                echo $stmt->fetchColumn();
+                            } catch (Exception $e) {
+                                echo '0';
+                            }
+                        ?></div>
+                        <div class="stat-label">Crédits disponibles</div>
+                    </div>
+                </div>

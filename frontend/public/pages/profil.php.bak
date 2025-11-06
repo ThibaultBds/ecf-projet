@@ -33,13 +33,7 @@ try {
     $stmt->execute([$user['id']]);
     $userData = $stmt->fetch(PDO::FETCH_ASSOC) ?: $user;
 
-    $stmt = $pdo->prepare("
-        SELECT id, ville_depart, ville_arrivee, date_depart, status
-        FROM trips
-        WHERE chauffeur_id = ?
-        ORDER BY date_depart DESC
-        LIMIT 10
-    ");
+    $stmt = $pdo->prepare("\n        SELECT id, ville_depart, ville_arrivee, date_depart, status\n        FROM trips\n        WHERE chauffeur_id = ?\n        ORDER BY date_depart DESC\n        LIMIT 10\n    ");
     $stmt->execute([$user['id']]);
     $myTrips = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -75,7 +69,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-<?php require_once __DIR__ . '/../includes/header.php'; ?>
+<header class="container-header">
+    <h1>
+        <a href="/index.php" class="site-brand">
+            <span class="material-icons">eco</span> EcoRide
+        </a>
+    </h1>
+    <nav id="navbar"></nav>
+</header>
+
+<script>
+  window.ecorideUser = <?= $auth ? json_encode($auth, JSON_UNESCAPED_UNICODE) : 'null' ?>;
+</script>
 
 <main class="page-wrapper">
     <h2 class="profile-hero">
@@ -212,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     </span>
                 </div>
             <?php endforeach; ?>
-        </div>
+                </div>
     <?php endif; ?>
 </div>
 
@@ -226,6 +231,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 </main>
 
-<?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
+<script src="/assets/js/navbar.js?v=1"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      if (typeof renderMenu === 'function') renderMenu(window.ecorideUser || null);
+  });
+</script>
 </body>
 </html>
