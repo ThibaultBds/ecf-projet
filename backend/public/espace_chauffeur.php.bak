@@ -83,12 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 try {
     $pdo = getDatabase();
     $stmt = $pdo->prepare(
-        "SELECT t.*, COUNT(tp.id) as participants
-         FROM trips t
-         LEFT JOIN trip_participants tp ON t.id = tp.trip_id
-         WHERE t.chauffeur_id = ?
-         GROUP BY t.id
-         ORDER BY t.date_depart DESC"
+        "SELECT t.*, COUNT(tp.id) as participants\n         FROM trips t\n         LEFT JOIN trip_participants tp ON t.id = tp.trip_id\n         WHERE t.chauffeur_id = ?\n         GROUP BY t.id\n         ORDER BY t.date_depart DESC"
     );
     $stmt->execute([$user['id']]);
     $mes_trajets = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -125,7 +120,13 @@ function getStatusLabel($status) {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <?php require_once __DIR__ . '/includes/header.php'; ?>
+    <header class="container-header">
+        <h1>
+            <a href="/pages/index.php" class="site-brand">
+                <span class="material-icons">eco</span> EcoRide
+            </a>
+        </h1>
+    </header>
 
     <main class="ec-driver-dashboard">
         <div class="ec-driver-card">
@@ -323,27 +324,6 @@ function getStatusLabel($status) {
                                     <?= number_format($trajet['prix'], 2) ?> € par personne
                                 </div>
                             </div>
-
-                            <div class="trip-actions">
-                                <button class="btn-secondary" onclick="viewTrip(<?= $trajet['id'] ?>)">
-                                    <span class="material-icons">visibility</span>
-                                    Voir
-                                </button>
-                                <?php if ($trajet['status'] === 'planifie'): ?>
-                                    <button class="btn-primary" onclick="editTrip(<?= $trajet['id'] ?>)">
-                                        <span class="material-icons">edit</span>
-                                        Modifier
-                                    </button>
-                                    <button class="btn-error" onclick="cancelTrip(<?= $trajet['id'] ?>)">
-                                        <span class="material-icons">cancel</span>
-                                        Annuler
-                                    </button>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
 
             <div class="back-link">
                 <a href="/pages/profil.php" class="link-primary">

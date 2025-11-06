@@ -99,9 +99,18 @@ if ($_POST && isset($_POST['action'])) {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-<?php require_once __DIR__ . '/../includes/header.php'; ?>
+<header class="container-header">
+    <h1>
+        <a href="/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
+            <span class="material-icons">eco</span> EcoRide
+        </a>
+    </h1>
+    <nav id="navbar"></nav>
+</header>
+
+<!-- Session unifiée exposée au front -->
 <script>
-    window.ecorideUser = <?= $auth ? json_encode($auth, JSON_UNESCAPED_UNICODE) : 'null' ?>;
+  window.ecorideUser = <?= $auth ? json_encode($auth, JSON_UNESCAPED_UNICODE) : 'null' ?>;
 </script>
 
 <main style="max-width:1200px;margin:40px auto;padding:0 20px;">
@@ -198,11 +207,12 @@ if ($_POST && isset($_POST['action'])) {
     </div>
 </main>
 
-<?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
+<!-- JS absolu -->
+<script src="/assets/js/navbar.js?v=1"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-            if (typeof renderMenu === 'function') renderMenu(window.ecorideUser || null);
-    });
+  document.addEventListener('DOMContentLoaded', function() {
+      if (typeof renderMenu === 'function') renderMenu(window.ecorideUser || null);
+  });
 </script>
 </body>
 </html>

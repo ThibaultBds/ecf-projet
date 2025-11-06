@@ -144,8 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     });
     </script>
-</main>
-<script src="../assets/js/navbar.js"></script>
 </body>
 </html>
 

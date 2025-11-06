@@ -118,15 +118,14 @@ function getStatusLabel($status) {
     <meta charset="UTF-8">
     <title>Espace Chauffeur - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../frontend/public/assets/css/style.css?v=2025">
-    <link rel="stylesheet" href="../../frontend/public/assets/css/pages.css?v=2025">
+    <link rel="stylesheet" href="/assets/css/style.css?v=2025">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <header class="container-header"></header>
+    <?php require_once __DIR__ . '/includes/header.php'; ?>
 
-    <main class="driver-dashboard">
-        <div class="driver-card">
+    <main class="ec-driver-dashboard">
+        <div class="ec-driver-card">
             <div class="page-header">
                 <h2><span class="material-icons">drive_eta</span> Espace Chauffeur</h2>
                 <p>Proposez des trajets écologiques et gagnez des crédits</p>
@@ -146,13 +145,13 @@ function getStatusLabel($status) {
                 </div>
             <?php endif; ?>
 
-            <div class="driver-stats">
-                <div class="stat-card">
-                    <div class="stat-icon">
+            <div class="ec-driver-stats">
+                <div class="ec-stat-card">
+                    <div class="ec-stat-icon">
                         <span class="material-icons">account_balance_wallet</span>
                     </div>
-                    <div class="stat-info">
-                        <div class="stat-number"><?php
+                    <div class="ec-stat-info">
+                        <div class="ec-stat-number"><?php
                             try {
                                 $pdo = getDatabase();
                                 $stmt = $pdo->prepare("SELECT credits FROM users WHERE id = ?");
@@ -166,35 +165,35 @@ function getStatusLabel($status) {
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon">
+                <div class="ec-stat-card">
+                    <div class="ec-stat-icon">
                         <span class="material-icons">route</span>
                     </div>
-                    <div class="stat-info">
-                        <div class="stat-number"><?= count($mes_trajets) ?></div>
-                        <div class="stat-label">Trajets créés</div>
+                    <div class="ec-stat-info">
+                        <div class="ec-stat-number"><?= count($mes_trajets) ?></div>
+                        <div class="ec-stat-label">Trajets créés</div>
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon">
+                <div class="ec-stat-card">
+                    <div class="ec-stat-icon">
                         <span class="material-icons">group</span>
                     </div>
-                    <div class="stat-info">
-                        <div class="stat-number"><?php
+                    <div class="ec-stat-info">
+                        <div class="ec-stat-number"><?php
                             $totalParticipants = 0;
                             foreach ($mes_trajets as $trajet) {
                                 $totalParticipants += (int)$trajet['participants'];
                             }
                             echo $totalParticipants;
                         ?></div>
-                        <div class="stat-label">Passagers transportés</div>
+                        <div class="ec-stat-label">Passagers transportés</div>
                     </div>
                 </div>
             </div>
 
-            <h3 style="margin-top: 40px; color: #2d3436;">
-                <span class="material-icons" style="vertical-align: middle; margin-right: 10px;">add_road</span>
+            <h3 class="section-title">
+                <span class="material-icons icon-inline">add_road</span>
                 Proposer un nouveau trajet
             </h3>
 
@@ -267,7 +266,7 @@ function getStatusLabel($status) {
                     <label for="description">Description (optionnel)</label>
                     <textarea id="description" name="description" rows="3" maxlength="500"
                               placeholder="Détails sur le trajet, conditions, etc."><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
-                    <small style="color: #636e72;"><span id="char-count">0</span>/500 caractères</small>
+                    <small class="small-muted"><span id="char-count">0</span>/500 caractères</small>
                 </div>
 
                 <div class="form-submit">
@@ -279,9 +278,9 @@ function getStatusLabel($status) {
             </form>
         </div>
 
-        <div class="driver-card">
-            <h3 style="color: #2d3436;">
-                <span class="material-icons" style="vertical-align: middle; margin-right: 10px;">list</span>
+    <div class="ec-driver-card">
+            <h3 class="section-title">
+                <span class="material-icons icon-inline">list</span>
                 Mes trajets (<?= count($mes_trajets) ?>)
             </h3>
 
@@ -295,56 +294,60 @@ function getStatusLabel($status) {
                 <div class="trips-grid">
                     <?php foreach ($mes_trajets as $trajet): ?>
                         <div class="trip-card">
-                            <div class="trip-header">
-                                <h4>
-                                    <span class="material-icons">location_on</span>
-                                    <?= htmlspecialchars($trajet['ville_depart']) ?>
-                                    <span class="material-icons" style="margin: 0 8px;">arrow_forward</span>
-                                    <?= htmlspecialchars($trajet['ville_arrivee']) ?>
-                                </h4>
-                                <span class="trip-status" style="background: <?= getStatusColor($trajet['status']) ?>">
-                                    <?= getStatusLabel($trajet['status']) ?>
-                                </span>
-                            </div>
+                            <div class="trip-content">
+                                <div class="trip-header">
+                                    <h4>
+                                        <span class="material-icons">location_on</span>
+                                        <?= htmlspecialchars($trajet['ville_depart']) ?>
+                                        <span class="material-icons" style="margin: 0 8px;">arrow_forward</span>
+                                        <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                                    </h4>
+                                </div>
 
-                            <div class="trip-details">
-                                <div class="trip-detail">
-                                    <span class="material-icons">schedule</span>
-                                    <?= date('d/m/Y à H:i', strtotime($trajet['date_depart'])) ?>
-                                </div>
-                                <div class="trip-detail">
-                                    <span class="material-icons">group</span>
-                                    <?= (int)$trajet['participants'] ?> / <?= (int)$trajet['places_totales'] ?> passagers
-                                </div>
-                                <div class="trip-detail">
-                                    <span class="material-icons">euro</span>
-                                    <?= number_format($trajet['prix'], 2) ?> € par personne
+                                <div class="trip-details">
+                                    <div class="trip-detail">
+                                        <span class="material-icons">schedule</span>
+                                        <?= date('d/m/Y à H:i', strtotime($trajet['date_depart'])) ?>
+                                    </div>
+                                    <div class="trip-detail">
+                                        <span class="material-icons">group</span>
+                                        <?= (int)$trajet['participants'] ?> / <?= (int)$trajet['places_totales'] ?> passagers
+                                    </div>
+                                    <div class="trip-detail">
+                                        <span class="material-icons">euro</span>
+                                        <?= number_format($trajet['prix'], 2) ?> € par personne
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="trip-actions">
-                                <button class="btn-secondary" onclick="viewTrip(<?= $trajet['id'] ?>)">
+                                <button class="btn-view" onclick="viewTrip(<?= $trajet['id'] ?>)">
                                     <span class="material-icons">visibility</span>
                                     Voir
                                 </button>
+
                                 <?php if ($trajet['status'] === 'planifie'): ?>
-                                    <button class="btn-primary" onclick="editTrip(<?= $trajet['id'] ?>)">
+                                    <button class="btn-edit" onclick="editTrip(<?= $trajet['id'] ?>)">
                                         <span class="material-icons">edit</span>
                                         Modifier
                                     </button>
-                                    <button class="btn-error" onclick="cancelTrip(<?= $trajet['id'] ?>)">
+                                    <button class="btn-cancel" onclick="cancelTrip(<?= $trajet['id'] ?>)">
                                         <span class="material-icons">cancel</span>
                                         Annuler
                                     </button>
                                 <?php endif; ?>
+
+                                <span class="trip-status" style="background: <?= getStatusColor($trajet['status']) ?>">
+                                    <?= getStatusLabel($trajet['status']) ?>
+                                </span>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
 
-            <div class="back-link" style="text-align:center;margin-top:40px;">
-                <a href="/frontend/public/pages/profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">
+            <div class="back-link">
+                <a href="/pages/profil.php" class="link-primary">
                     <span class="material-icons">arrow_back</span>
                     Retour au profil
                 </a>
@@ -355,8 +358,8 @@ function getStatusLabel($status) {
     <script>
         window.ecorideUser = <?= isset($_SESSION['user']) ? json_encode($_SESSION['user']) : 'null' ?>;
     </script>
-    <script src="../../frontend/public/assets/js/navbar.js"></script>
-    <script src="../../frontend/public/assets/js/script.js"></script>
+    <script src="/assets/js/navbar.js"></script>
+    <script src="/assets/js/script.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -424,221 +427,6 @@ function getStatusLabel($status) {
         }
     </script>
 
-    <style>
-        .spinning {
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .message-success, .message-error {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            animation: slideIn 0.3s ease;
-        }
-
-        .message-success {
-            background: #e8f7f2;
-            color: #219150;
-            border: 1px solid #00b894;
-        }
-
-        .message-error {
-            background: #ffeaea;
-            color: #b8002e;
-            border: 1px solid #ff4d6d;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .driver-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border: 1px solid #e8f4f0;
-        }
-
-        .stat-icon {
-            background: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .stat-icon .material-icons {
-            font-size: 24px;
-        }
-
-        .stat-info {
-            flex: 1;
-        }
-
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 2px;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .price-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 8px;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .price-info .material-icons {
-            font-size: 16px;
-        }
-
-        .trips-grid {
-            display: grid;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .trip-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .trip-header h4 {
-            margin: 0;
-            color: var(--text-primary);
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .trip-status {
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .trip-details {
-            display: grid;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-
-        .trip-detail {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .trip-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .btn-error {
-            background: var(--error-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: var(--transition);
-        }
-
-        .btn-error:hover {
-            background: #a02622;
-            transform: translateY(-2px);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-
-        .empty-state h4 {
-            margin: 20px 0 10px 0;
-            color: var(--text-primary);
-        }
-
-        .back-link a {
-            transition: all 0.3s ease;
-        }
-
-        .back-link a:hover {
-            transform: translateX(-5px);
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .page-header h2 {
-            color: #2d3436;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .page-header p {
-            color: #636e72;
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-    </style>
+    <!-- Styles migrés vers frontend/public/assets/css/style.css -->
 </body>
 </html>

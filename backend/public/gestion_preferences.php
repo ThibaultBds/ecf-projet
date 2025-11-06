@@ -60,19 +60,13 @@ try {
     <title>Mes Préférences - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/assets/css/style.css?v=2025">
-    <link rel="stylesheet" href="/assets/css/pages.css?v=2025">
+    <link rel="stylesheet" href="/assets/css/style.css?v=2025">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <header class="container-header">
-        <h1>
-            <a href="/pages/index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
-                <span class="material-icons">eco</span> EcoRide
-            </a>
-        </h1>
-    </header>
+    <?php require_once __DIR__ . '/includes/header.php'; ?>
 
-    <main class="preferences-container">
+    <main class="gp-preferences-container">
         <div class="page-header">
             <h2><span class="material-icons">tune</span> Mes Préférences</h2>
             <p>Ces informations seront visibles par les passagers pour mieux correspondre à votre style de trajet.</p>
@@ -93,15 +87,15 @@ try {
         <?php endif; ?>
 
         <form method="POST" class="preferences-form" id="preferences-form" novalidate>
-            <div class="preferences-grid">
+            <div class="gp-preferences-grid">
                 <!-- Musique -->
-                <div class="preference-card">
+                <div class="gp-preference-card">
                     <h3>
                         <span class="material-icons">music_note</span>
                         Musique
                     </h3>
-                    <div class="preference-options">
-                        <label class="preference-option <?= ($preferences['musique'] ?? '') === 'oui' ? 'selected' : '' ?>">
+                    <div class="gp-preference-options">
+                        <label class="gp-preference-option <?= ($preferences['musique'] ?? '') === 'oui' ? 'selected' : '' ?>">
                             <input type="radio" name="musique" value="oui" <?= ($preferences['musique'] ?? '') === 'oui' ? 'checked' : '' ?>>
                             <div class="radio-custom"></div>
                             <div class="option-content">
@@ -110,7 +104,7 @@ try {
                             </div>
                         </label>
 
-                        <label class="preference-option <?= ($preferences['musique'] ?? '') === 'non' ? 'selected' : '' ?>">
+                        <label class="gp-preference-option <?= ($preferences['musique'] ?? '') === 'non' ? 'selected' : '' ?>">
                             <input type="radio" name="musique" value="non" <?= ($preferences['musique'] ?? '') === 'non' ? 'checked' : '' ?>>
                             <div class="radio-custom"></div>
                             <div class="option-content">
@@ -122,13 +116,13 @@ try {
                 </div>
 
                 <!-- Animaux -->
-                <div class="preference-card">
+                <div class="gp-preference-card">
                     <h3>
                         <span class="material-icons">pets</span>
                         Animaux
                     </h3>
-                    <div class="preference-options">
-                        <label class="preference-option <?= ($preferences['animaux'] ?? '') === 'oui' ? 'selected' : '' ?>">
+                    <div class="gp-preference-options">
+                        <label class="gp-preference-option <?= ($preferences['animaux'] ?? '') === 'oui' ? 'selected' : '' ?>">
                             <input type="radio" name="animaux" value="oui" <?= ($preferences['animaux'] ?? '') === 'oui' ? 'checked' : '' ?>>
                             <div class="radio-custom"></div>
                             <div class="option-content">
@@ -137,7 +131,7 @@ try {
                             </div>
                         </label>
 
-                        <label class="preference-option <?= ($preferences['animaux'] ?? '') === 'non' ? 'selected' : '' ?>">
+                        <label class="gp-preference-option <?= ($preferences['animaux'] ?? '') === 'non' ? 'selected' : '' ?>">
                             <input type="radio" name="animaux" value="non" <?= ($preferences['animaux'] ?? '') === 'non' ? 'checked' : '' ?>>
                             <div class="radio-custom"></div>
                             <div class="option-content">
@@ -149,13 +143,13 @@ try {
                 </div>
 
                 <!-- Discussion -->
-                <div class="preference-card">
+                <div class="gp-preference-card">
                     <h3>
                         <span class="material-icons">chat</span>
                         Discussion
                     </h3>
-                    <div class="preference-options">
-                        <label class="preference-option <?= ($preferences['discussion'] ?? '') === 'plaisir' ? 'selected' : '' ?>">
+                    <div class="gp-preference-options">
+                        <label class="gp-preference-option <?= ($preferences['discussion'] ?? '') === 'plaisir' ? 'selected' : '' ?>">
                             <input type="radio" name="discussion" value="plaisir" <?= ($preferences['discussion'] ?? '') === 'plaisir' ? 'checked' : '' ?>>
                             <div class="radio-custom"></div>
                             <div class="option-content">
@@ -164,7 +158,7 @@ try {
                             </div>
                         </label>
 
-                        <label class="preference-option <?= ($preferences['discussion'] ?? '') === 'un_peu' ? 'selected' : '' ?>">
+                        <label class="gp-preference-option <?= ($preferences['discussion'] ?? '') === 'un_peu' ? 'selected' : '' ?>">
                             <input type="radio" name="discussion" value="un_peu" <?= ($preferences['discussion'] ?? '') === 'un_peu' ? 'checked' : '' ?>>
                             <div class="radio-custom"></div>
                             <div class="option-content">
@@ -173,7 +167,7 @@ try {
                             </div>
                         </label>
 
-                        <label class="preference-option <?= ($preferences['discussion'] ?? '') === 'silence' ? 'selected' : '' ?>">
+                        <label class="gp-preference-option <?= ($preferences['discussion'] ?? '') === 'silence' ? 'selected' : '' ?>">
                             <input type="radio" name="discussion" value="silence" <?= ($preferences['discussion'] ?? '') === 'silence' ? 'checked' : '' ?>>
                             <div class="radio-custom"></div>
                             <div class="option-content">
@@ -185,13 +179,13 @@ try {
                 </div>
 
                 <!-- Fumeur -->
-                <div class="preference-card">
+                <div class="gp-preference-card">
                     <h3>
                         <span class="material-icons">smoking_rooms</span>
                         Tabac
                     </h3>
-                    <div class="preference-options">
-                        <label class="preference-option <?= ($preferences['fumeur'] ?? '') === 'oui' ? 'selected' : '' ?>">
+                    <div class="gp-preference-options">
+                        <label class="gp-preference-option <?= ($preferences['fumeur'] ?? '') === 'oui' ? 'selected' : '' ?>">
                             <input type="radio" name="fumeur" value="oui" <?= ($preferences['fumeur'] ?? '') === 'oui' ? 'checked' : '' ?>>
                             <div class="radio-custom"></div>
                             <div class="option-content">
@@ -200,7 +194,7 @@ try {
                             </div>
                         </label>
 
-                        <label class="preference-option <?= ($preferences['fumeur'] ?? '') === 'non' ? 'selected' : '' ?>">
+                        <label class="gp-preference-option <?= ($preferences['fumeur'] ?? '') === 'non' ? 'selected' : '' ?>">
                             <input type="radio" name="fumeur" value="non" <?= ($preferences['fumeur'] ?? '') === 'non' ? 'checked' : '' ?>>
                             <div class="radio-custom"></div>
                             <div class="option-content">
@@ -212,16 +206,16 @@ try {
                 </div>
             </div>
 
-            <div class="preferences-actions">
-                <button type="submit" class="btn-save-preferences" id="save-btn">
+            <div class="gp-preferences-actions">
+                <button type="submit" class="gp-btn-save-preferences" id="save-btn">
                     <span class="material-icons">save</span>
                     Enregistrer les préférences
                 </button>
             </div>
         </form>
 
-        <div class="back-link" style="text-align:center;margin-top:40px;">
-            <a href="/frontend/public/pages/profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">
+        <div class="back-link">
+            <a href="/pages/profil.php" class="link-primary">
                 <span class="material-icons">arrow_back</span>
                 Retour au profil
             </a>
@@ -248,12 +242,12 @@ try {
             const successMessage = document.getElementById('success-message');
 
             // Gestion des options de préférences
-            document.querySelectorAll('.preference-option').forEach(option => {
+            document.querySelectorAll('.gp-preference-option').forEach(option => {
                 option.addEventListener('click', function() {
                     const radio = this.querySelector('input[type="radio"]');
                     const groupName = radio.name;
                     document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
-                        r.closest('.preference-option').classList.remove('selected');
+                        r.closest('.gp-preference-option').classList.remove('selected');
                     });
                     this.classList.add('selected');
                     radio.checked = true;

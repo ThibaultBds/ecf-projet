@@ -17,7 +17,9 @@ if (!isset($_SESSION['user'])) {
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-<?php require_once __DIR__ . '/includes/header.php'; ?>
+<header class="container-header">
+  <!-- ...existing code for header/nav... -->
+</header>
 <div class="member-container">
   <h2>Bienvenue dans votre espace membre</h2>
   <p>Bonjour <strong><?php echo htmlspecialchars($_SESSION['email']); ?></strong> !</p>
@@ -26,6 +28,5 @@ if (!isset($_SESSION['user'])) {
 </div>
 </body>
 </html>
-
 
 

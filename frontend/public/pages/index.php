@@ -14,29 +14,7 @@ session_start();     // démarre la session PHP
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-  <header class="container-header">
-    <h1>
-      <a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
-        <span class="material-icons">eco</span> EcoRide
-      </a>
-    </h1>
-  </header>
-
-  <script>
-    // 🔹 2. Ce code JS affiche les infos de session côté front
-    window.ecorideUser = <?php
-      if (isset($_SESSION['user'])) {
-        $u = $_SESSION['user'];
-        echo json_encode([
-          'email' => $u['email'],
-          'pseudo' => $u['pseudo'],
-          'type' => $u['type']
-        ]);
-      } else {
-        echo 'null';
-      }
-    ?>;
-  </script>
+  <?php require_once __DIR__ . '/../includes/header.php'; ?>
 
   <main>
     <section class="hero">
@@ -180,8 +158,7 @@ session_start();     // démarre la session PHP
     </form>
   </dialog>
 
-  <script src="../assets/js/script.js"></script>
-  <script src="../assets/js/navbar.js"></script>
+  <?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
 
   <script>
     // 🔹 3. Gère dynamiquement le bouton selon la session

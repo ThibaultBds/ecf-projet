@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 require_once __DIR__ . '/../../../backend/config/autoload.php';
 useClass('Database');
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $stmt->execute([$trip_id, $user['id']]);
             $stmt = $pdo->prepare("UPDATE trips SET places_restantes = places_restantes + 1 WHERE id = ?");
             $stmt->execute([$trip_id]);
-            $success = "Votre participation a été annulée.";
+            $success = "Votre participation a Ã©tÃ© annulÃ©e.";
 
         } elseif ($_POST['action'] === 'update_trip_status') {
             $new_status = $_POST['status'] ?? '';
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     $stmt = $pdo->prepare("DELETE FROM trip_participants WHERE trip_id = ?");
                     $stmt->execute([$trip_id]);
                 }
-                $success = "Le statut du trajet a été mis à jour.";
+                $success = "Le statut du trajet a Ã©tÃ© mis Ã  jour.";
             }
         }
 
@@ -92,7 +92,14 @@ try {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <?php require_once __DIR__ . '/../includes/header.php'; ?>
+    <header class="container-header">
+        <h1>
+            <a href="/pages/index.php" class="site-brand">
+                <span class="material-icons">eco</span> EcoRide
+            </a>
+        </h1>
+        <nav id="navbar"></nav>
+    </header>
 
     <script>
     window.ecorideUser = <?php echo json_encode([
@@ -127,19 +134,17 @@ try {
                                     <?= htmlspecialchars($trajet['ville_depart']) ?>  <?= htmlspecialchars($trajet['ville_arrivee']) ?>
                                 </p>
                                 <p class="small-muted">
-                                    Départ : <?= date('d/m/Y H:i', strtotime($trajet['date_depart'])) ?>
+                                    DÃ©part : <?= date('d/m/Y H:i', strtotime($trajet['date_depart'])) ?>
                                     <span class="muted-status">Statut: <strong><?= ucfirst($trajet['status']) ?></strong></span>
                                 </p>
                             </div>
                             <form method="POST" class="ride-actions">
                                 <input type="hidden" name="trip_id" value="<?= $trajet['id'] ?>">
                                 <?php if ($trajet['status'] === 'planifie'): ?>
-                                        <input type="hidden" name="status" value="en_cours">
-                                        <button type="submit" name="action" value="update_trip_status" class="btn-secondary">Démarrer</button>
-                                        <!-- Make sure the 'annule' value is sent as 'status' when cancelling -->
-                                        <input type="hidden" name="status_annule" value="annule">
-                                        <button type="submit" name="action" value="update_trip_status" formaction="/pages/mes_trajets.php" formmethod="post" class="btn-danger" onclick="(function(btn){var f=btn.form;var s=f.querySelector('[name=status]'); if(!s){s=document.createElement('input');s.type='hidden';s.name='status';f.appendChild(s);} var a=f.querySelector('[name=status_annule]'); if(a) s.value=a.value;})(this);">Annuler le trajet</button>
-                                    <?php elseif ($trajet['status'] === 'en_cours'): ?>
+                                    <input type="hidden" name="status" value="en_cours">
+                                    <button type="submit" name="action" value="update_trip_status" class="btn-secondary">DÃ©marrer</button>
+                                    <button type="submit" name="action" value="update_trip_status" formaction="/pages/mes_trajets.php" formmethod="post" class="btn-danger" value="annule">Annuler le trajet</button>
+                                <?php elseif ($trajet['status'] === 'en_cours'): ?>
                                     <input type="hidden" name="status" value="termine">
                                     <button type="submit" name="action" value="update_trip_status" class="btn-primary">Terminer</button>
                                 <?php endif; ?>
@@ -151,9 +156,9 @@ try {
         </div>
 
         <div class="trajets-section section-block">
-            <h3 class="section-title">Trajets où je suis passager</h3>
+            <h3 class="section-title">Trajets oÃ¹ je suis passager</h3>
             <?php if (empty($participations)): ?>
-                <p class="no-participation">Vous ne participez à aucun trajet.
+                <p class="no-participation">Vous ne participez Ã  aucun trajet.
                     <a href="/pages/covoiturages.php" class="link-highlight">Trouver un trajet</a>
                 </p>
             <?php else: ?>
@@ -186,7 +191,7 @@ try {
                                         <label for="commentaire-<?= $trajet['id'] ?>">Commentaire</label>
                                         <textarea id="commentaire-<?= $trajet['id'] ?>" name="commentaire" required></textarea>
                                         <label class="checkbox-row">
-                                            <input type="checkbox" name="is_problem"> Signaler un problème
+                                            <input type="checkbox" name="is_problem"> Signaler un problÃ¨me
                                         </label>
                                         <button type="submit" class="btn-primary">Envoyer</button>
                                     </form>

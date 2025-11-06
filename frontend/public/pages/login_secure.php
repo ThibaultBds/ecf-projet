@@ -84,13 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-<header class="container-header">
-    <h1>
-        <a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
-            <span class="material-icons">eco</span> EcoRide
-        </a>
-    </h1>
-</header>
+<?php require_once __DIR__ . '/../includes/header.php'; ?>
 
 <main>
     <div class="login-container">
@@ -120,15 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </main>
 
-<!-- Nav dynamique -->
-<script>
-window.ecorideUser = <?php
-    echo !empty($_SESSION['user'])
-        ? json_encode($_SESSION['user'], JSON_UNESCAPED_UNICODE)
-        : 'null';
-?>;
-</script>
-<script src="../assets/js/navbar.js"></script>
+<?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
 <script>
 if (typeof renderMenu === 'function') renderMenu(window.ecorideUser);
 </script>

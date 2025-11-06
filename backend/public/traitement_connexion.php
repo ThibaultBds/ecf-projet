@@ -21,7 +21,7 @@ foreach ($Utilisateurs as $user) {
 <head>
   <meta charset="UTF-8">
   <title>Résultat de la connexion</title>
-  <link rel="stylesheet" href="/Ecoridegit/frontend/public/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
 <div class="result-container">

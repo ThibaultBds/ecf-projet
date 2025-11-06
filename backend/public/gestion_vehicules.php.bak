@@ -46,10 +46,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
             throw new Exception("Format de plaque invalide (ex: AB-123-CD).");
         }
 
-        $stmt = $pdo->prepare("
-            INSERT INTO vehicles (user_id, marque, modele, couleur, plaque, energie, places_disponibles, date_immatriculation)
-            VALUES (?, ?, ?, ?, ?, ?, ?, '2020-01-01')
-        ");
+        $stmt = $pdo->prepare("\n            INSERT INTO vehicles (user_id, marque, modele, couleur, plaque, energie, places_disponibles, date_immatriculation)\n            VALUES (?, ?, ?, ?, ?, ?, ?, '2020-01-01')\n        ");
         $stmt->execute([$user['id'], $marque, $modele, $couleur, strtoupper($plaque), $energie, $places]);
 
         $success = "Véhicule ajouté avec succès !";
@@ -76,7 +73,13 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <?php require_once __DIR__ . '/includes/header.php'; ?>
+    <header class="container-header">
+        <h1>
+            <a href="/pages/index.php" class="site-brand">
+                <span class="material-icons">eco</span> EcoRide
+            </a>
+        </h1>
+    </header>
 
     <main class="vh-vehicles-container">
         <div class="page-header">

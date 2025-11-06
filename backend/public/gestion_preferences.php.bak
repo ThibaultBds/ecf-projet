@@ -6,7 +6,7 @@ useClass('Database');
 
 // --- Vérif connexion utilisateur ---
 if (!isset($_SESSION['user'])) {
-    header('Location: login_secure.php');
+    header('Location: /pages/login_secure.php');
     exit();
 }
 
@@ -33,15 +33,7 @@ try {
             throw new Exception('Options invalides sélectionnées.');
         }
 
-        $stmt = $pdo->prepare("
-            INSERT INTO user_preferences (user_id, musique, animaux, discussion, fumeur)
-            VALUES (?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-            musique = VALUES(musique),
-            animaux = VALUES(animaux),
-            discussion = VALUES(discussion),
-            fumeur = VALUES(fumeur)
-        ");
+        $stmt = $pdo->prepare("\n            INSERT INTO user_preferences (user_id, musique, animaux, discussion, fumeur)\n            VALUES (?, ?, ?, ?, ?)\n            ON DUPLICATE KEY UPDATE\n            musique = VALUES(musique),\n            animaux = VALUES(animaux),\n            discussion = VALUES(discussion),\n            fumeur = VALUES(fumeur)\n        ");
         $stmt->execute([$user['id'], $musique, $animaux, $discussion, $fumeur]);
         $success = 'Vos préférences ont bien été enregistrées.';
     }
@@ -60,10 +52,17 @@ try {
     <title>Mes Préférences - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/assets/css/style.css?v=2025">
+    <link rel="stylesheet" href="/assets/css/style.css?v=2025">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <?php require_once __DIR__ . '/includes/header.php'; ?>
+    <header class="container-header">
+        <h1>
+            <a href="/pages/index.php" class="site-brand">
+                <span class="material-icons">eco</span> EcoRide
+            </a>
+        </h1>
+    </header>
 
     <main class="gp-preferences-container">
         <div class="page-header">
@@ -222,12 +221,18 @@ try {
     </main>
 
     <script>
+        // DEBUG: Afficher les données de session
+        console.log('DEBUG SESSION:', <?= json_encode($_SESSION['user'] ?? null) ?>);
         window.ecorideUser = <?= isset($_SESSION['user']) ? json_encode($_SESSION['user']) : 'null' ?>;
+        console.log('DEBUG window.ecorideUser:', window.ecorideUser);
     </script>
     <script src="/assets/js/navbar.js"></script>
-    <script src="/assets/js/script.js"></script>
-
     <script>
+        // Rendu du menu avec navbar.js
+        if (typeof renderMenu === 'function') {
+            renderMenu(window.ecorideUser);
+        }
+
         // JavaScript pour l'interactivité des préférences
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('preferences-form');
@@ -237,14 +242,11 @@ try {
             // Gestion des options de préférences
             document.querySelectorAll('.gp-preference-option').forEach(option => {
                 option.addEventListener('click', function() {
-                    // Désélectionner les autres options du même groupe
                     const radio = this.querySelector('input[type="radio"]');
                     const groupName = radio.name;
                     document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
                         r.closest('.gp-preference-option').classList.remove('selected');
                     });
-
-                    // Sélectionner cette option
                     this.classList.add('selected');
                     radio.checked = true;
                 });
@@ -261,14 +263,10 @@ try {
             if (successMessage) {
                 setTimeout(() => {
                     successMessage.style.opacity = '0';
-                    setTimeout(() => {
-                        successMessage.style.display = 'none';
-                    }, 300);
+                    setTimeout(() => successMessage.style.display = 'none', 300);
                 }, 3000);
             }
         });
     </script>
-
-    <!-- Styles migrés vers frontend/public/assets/css/style.css -->
 </body>
 </html>

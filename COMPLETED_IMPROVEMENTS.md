@@ -8,7 +8,8 @@ Améliorer les trois pages principales d'EcoRide (Gestion Préférences, Gestion
 ### **📁 Fichiers Créés**
 
 #### **1. Styles Spécialisés**
-- `frontend/public/assets/css/pages.css` - Nouveau fichier CSS avec variables et composants
+- Les variables CSS et styles page‑spécifiques ont été migrées dans `frontend/public/assets/css/style.css`.
+	Le fichier `frontend/public/assets/css/pages.css` a été consolidé et supprimé pour éviter les duplications.
 
 #### **2. Pages Améliorées**
 - `backend/public/gestion_preferences_new.php` - Préférences avec interface moderne

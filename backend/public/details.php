@@ -73,18 +73,11 @@ $credit_requis = (int)$covoiturage['prix'];
     <meta charset="UTF-8">
     <title>Détail du covoiturage - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/Ecoridegit/frontend/public/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <header class="container-header">
-        <h1>
-            <a href="index.php" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
-                <span class="material-icons">eco</span> EcoRide
-            </a>
-        </h1>
-        <!-- Le menu sera injecté par navbar.js -->
-    </header>
+    <?php require_once __DIR__ . '/includes/header.php'; ?>
 
     <main>
         <section class="detail-container" style="max-width:800px;margin:0 auto;padding:20px;">
@@ -219,7 +212,7 @@ $credit_requis = (int)$covoiturage['prix'];
                                         <span class="material-icons">login</span>
                                         Se connecter
                                     </a>
-                                    <a href="/Ecoridegit/frontend/src/pages/register.php" class="register-cta-btn" style="display:inline-flex;align-items:center;gap:8px;background:white;color:#00b894;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:500;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                                    <a href="/pages/register.php" class="register-cta-btn" style="display:inline-flex;align-items:center;gap:8px;background:white;color:#00b894;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:500;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(0,0,0,0.1);">
                                         <span class="material-icons">person_add</span>
                                         Créer un compte
                                     </a>
@@ -283,8 +276,8 @@ $credit_requis = (int)$covoiturage['prix'];
         </div>
     </dialog>
 
-    <script src="/Ecoridegit/frontend/public/assets/js/script.js"></script>
-    <script src="/Ecoridegit/frontend/public/assets/js/navbar.js"></script>
+    <script src="/assets/js/script.js"></script>
+    <script src="/assets/js/navbar.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Animation au hover pour les boutons de connexion

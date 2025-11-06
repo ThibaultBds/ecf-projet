@@ -65,14 +65,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->commit();
 
-        header('Location: mes_trajets.php?success=' . urlencode("Merci pour votre retour !"));
+    header('Location: /pages/mes_trajets.php?success=' . urlencode("Merci pour votre retour !"));
         exit();
 
     } catch (Exception $e) {
         if (isset($pdo) && $pdo->inTransaction()) {
             $pdo->rollBack();
         }
-        header('Location: mes_trajets.php?error=' . urlencode($e->getMessage()));
+    header('Location: /pages/mes_trajets.php?error=' . urlencode($e->getMessage()));
         exit();
     }
 }

@@ -64,6 +64,77 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
         $error = $e->getMessage();
     }
 }
+// Traitement unifié : ajout, modification et suppression de véhicules
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $action = $_POST['action'];
+    try {
+        if ($action === 'add_vehicle' || $action === 'edit_vehicle') {
+            $marque = trim($_POST['marque'] ?? '');
+            $modele = trim($_POST['modele'] ?? '');
+            $couleur = trim($_POST['couleur'] ?? '');
+            $plaque = trim($_POST['plaque'] ?? '');
+            $energie = $_POST['energie'] ?? '';
+            $places = (int)($_POST['places'] ?? 4);
+            $vehicle_id = (int)($_POST['vehicle_id'] ?? 0);
+
+            if (empty($marque) || empty($modele) || empty($couleur) || empty($plaque) || empty($energie)) {
+                throw new Exception("Tous les champs sont obligatoires.");
+            }
+
+            if ($places < 1 || $places > 8) {
+                throw new Exception("Le nombre de places doit être entre 1 et 8.");
+            }
+
+            // Validation de la plaque d'immatriculation (format français basique)
+            if (!preg_match('/^[A-Z]{2}-\d{3}-[A-Z]{2}$/', strtoupper($plaque))) {
+                throw new Exception("Format de plaque invalide (ex: AB-123-CD).");
+            }
+
+            if ($action === 'add_vehicle') {
+                $stmt = $pdo->prepare("INSERT INTO vehicles (user_id, marque, modele, couleur, plaque, energie, places_disponibles, date_immatriculation) VALUES (?, ?, ?, ?, ?, ?, ?, '2020-01-01')");
+                $stmt->execute([$user['id'], $marque, $modele, $couleur, strtoupper($plaque), $energie, $places]);
+                $success = "Véhicule ajouté avec succès !";
+                $_POST = [];
+            } else {
+                // Modification : vérifier la propriété
+                if ($vehicle_id <= 0) throw new Exception('ID de véhicule invalide.');
+                $stmt = $pdo->prepare("SELECT user_id FROM vehicles WHERE id = ?");
+                $stmt->execute([$vehicle_id]);
+                $owner = $stmt->fetchColumn();
+                if (!$owner || $owner != $user['id']) throw new Exception('Véhicule introuvable ou accès refusé.');
+
+                $stmt = $pdo->prepare("UPDATE vehicles SET marque = ?, modele = ?, couleur = ?, plaque = ?, energie = ?, places_disponibles = ? WHERE id = ? AND user_id = ?");
+                $stmt->execute([$marque, $modele, $couleur, strtoupper($plaque), $energie, $places, $vehicle_id, $user['id']]);
+                $success = "Véhicule mis à jour avec succès.";
+            }
+
+            // Recharger la liste
+            $stmt = $pdo->prepare("SELECT * FROM vehicles WHERE user_id = ? ORDER BY created_at DESC");
+            $stmt->execute([$user['id']]);
+            $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } elseif ($action === 'delete_vehicle') {
+            $vehicle_id = (int)($_POST['vehicle_id'] ?? 0);
+            if ($vehicle_id <= 0) throw new Exception('ID de véhicule invalide.');
+
+            $stmt = $pdo->prepare("SELECT user_id FROM vehicles WHERE id = ?");
+            $stmt->execute([$vehicle_id]);
+            $owner = $stmt->fetchColumn();
+            if (!$owner || $owner != $user['id']) throw new Exception('Véhicule introuvable ou accès refusé.');
+
+            $stmt = $pdo->prepare("DELETE FROM vehicles WHERE id = ? AND user_id = ?");
+            $stmt->execute([$vehicle_id, $user['id']]);
+            $success = "Véhicule supprimé.";
+
+            // Recharger la liste
+            $stmt = $pdo->prepare("SELECT * FROM vehicles WHERE user_id = ? ORDER BY created_at DESC");
+            $stmt->execute([$user['id']]);
+            $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -71,14 +142,13 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
     <meta charset="UTF-8">
     <title>Mes Véhicules - EcoRide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../frontend/public/assets/css/style.css?v=2025">
-    <link rel="stylesheet" href="../../frontend/public/assets/css/pages.css?v=2025">
+    <link rel="stylesheet" href="/assets/css/style.css?v=2025">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <header class="container-header"></header>
+    <?php require_once __DIR__ . '/includes/header.php'; ?>
 
-    <main class="vehicles-container">
+    <main class="vh-vehicles-container">
         <div class="page-header">
             <h2><span class="material-icons">directions_car</span> Mes Véhicules</h2>
             <p>Gérez vos véhicules pour proposer des trajets écologiques</p>
@@ -100,16 +170,31 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
 
         <!-- Liste des véhicules -->
         <?php if (!empty($vehicles)): ?>
-            <div class="vehicles-grid">
-                <?php foreach ($vehicles as $vehicle): ?>
-                    <div class="vehicle-card">
-                        <div class="vehicle-image <?= $vehicle['energie'] === 'electrique' ? 'ecological' : '' ?>">
-                            <span class="material-icons">
-                                <?= $vehicle['energie'] === 'electrique' ? 'electric_car' : 'local_shipping' ?>
-                            </span>
+            <div class="vh-vehicles-grid">
+                <?php foreach ($vehicles as $vehicle): 
+                    // Préparer quelques variables pour l'affichage (plus lisible que des ternaires imbriqués)
+                    $energie = strtolower(trim($vehicle['energie'] ?? ''));
+                    $energie_icon = 'local_gas_station';
+                    $energie_class = '';
+                    if ($energie === 'electrique') {
+                        $energie_icon = 'electric_bolt';
+                        $energie_class = 'ecological';
+                    } elseif ($energie === 'hybride') {
+                        $energie_icon = 'battery_charging_full';
+                    }
+                ?>
+                <div class="vh-vehicle-card" 
+                    data-vehicle-id="<?= $vehicle['id'] ?>"
+                    data-marque="<?= htmlspecialchars($vehicle['marque'], ENT_QUOTES) ?>"
+                    data-modele="<?= htmlspecialchars($vehicle['modele'], ENT_QUOTES) ?>"
+                    data-couleur="<?= htmlspecialchars($vehicle['couleur'], ENT_QUOTES) ?>"
+                    data-plaque="<?= htmlspecialchars($vehicle['plaque'], ENT_QUOTES) ?>"
+                    data-energie="<?= htmlspecialchars($vehicle['energie'], ENT_QUOTES) ?>"
+                    data-places="<?= (int)$vehicle['places_disponibles'] ?>">
+                        <div class="vh-vehicle-image <?= $energie_class ?>">
+                            <span class="material-icons"><?= $energie_icon ?></span>
                         </div>
-
-                        <div class="vehicle-info">
+                        <div class="vh-vehicle-info">
                             <h3>
                                 <?= htmlspecialchars($vehicle['marque']) ?> <?= htmlspecialchars($vehicle['modele']) ?>
                                 <?php if ($vehicle['energie'] === 'electrique'): ?>
@@ -117,52 +202,48 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
                                 <?php endif; ?>
                             </h3>
 
-                            <div class="vehicle-details">
-                                <div class="vehicle-detail">
+                            <div class="vh-vehicle-details">
+                                <div class="vh-vehicle-detail">
                                     <span class="material-icons">palette</span>
                                     <?= htmlspecialchars($vehicle['couleur']) ?>
                                 </div>
-                                <div class="vehicle-detail">
+                                <div class="vh-vehicle-detail">
                                     <span class="material-icons">tag</span>
                                     <?= htmlspecialchars($vehicle['plaque']) ?>
                                 </div>
-                                <div class="vehicle-detail">
-                                    <span class="material-icons">
-                                        <?= $vehicle['energie'] === 'electrique' ? 'electric_bolt' :
-                                           ($vehicle['energie'] === 'hybride' ? 'battery_charging_full' : 'local_gas_station') ?>
-                                    </span>
+                                <div class="vh-vehicle-detail">
+                                    <span class="material-icons"><?= $energie_icon ?></span>
                                     <?= htmlspecialchars(ucfirst($vehicle['energie'])) ?>
                                 </div>
-                                <div class="vehicle-detail">
+                                <div class="vh-vehicle-detail">
                                     <span class="material-icons">group</span>
                                     <?= (int)$vehicle['places_disponibles'] ?> places
                                 </div>
                             </div>
-
-                            <div class="vehicle-stats">
+                            <div class="vh-vehicle-stats">
                                 <h4><span class="material-icons">analytics</span> Statistiques</h4>
-                                <div class="vehicle-stats-grid">
-                                    <div class="stat-item">
-                                        <div class="stat-number">0</div>
-                                        <div class="stat-label">Trajets</div>
+                                <div class="vh-vehicle-stats-grid">
+                                    <div class="vh-stat-item">
+                                        <div class="vh-stat-number">0</div>
+                                        <div class="vh-stat-label">Trajets</div>
                                     </div>
-                                    <div class="stat-item">
-                                        <div class="stat-number">0</div>
-                                        <div class="stat-label">Passagers</div>
+                                    <div class="vh-stat-item">
+                                        <div class="vh-stat-number">0</div>
+                                        <div class="vh-stat-label">Passagers</div>
                                     </div>
-                                    <div class="stat-item">
-                                        <div class="stat-number">0€</div>
-                                        <div class="stat-label">Revenus</div>
+                                    <div class="vh-stat-item">
+                                        <div class="vh-stat-number">0€</div>
+                                        <div class="vh-stat-label">Revenus</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="vehicle-actions">
-                                <button class="btn-vehicle-edit" onclick="editVehicle(<?= $vehicle['id'] ?>)">
+                            <div class="vh-vehicle-actions">
+                                <button class="vh-btn-vehicle-edit" onclick="editVehicle(<?= $vehicle['id'] ?>)">
                                     <span class="material-icons">edit</span>
                                     Modifier
                                 </button>
-                                <button class="btn-vehicle-delete" onclick="deleteVehicle(<?= $vehicle['id'] ?>)">
+                                <button class="vh-btn-vehicle-delete" onclick="deleteVehicle(<?= $vehicle['id'] ?>)">
                                     <span class="material-icons">delete</span>
                                     Supprimer
                                 </button>
@@ -175,13 +256,14 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
 
         <!-- Section d'ajout de véhicule -->
         <div class="add-vehicle-section">
-            <h3 style="text-align: center; margin-bottom: 30px; color: #2d3436;">
-                <span class="material-icons" style="vertical-align: middle; margin-right: 10px;">add_circle</span>
+            <h3 class="section-title-center">
+                <span class="material-icons icon-inline">add_circle</span>
                 Ajouter un véhicule
             </h3>
 
             <form method="POST" class="add-vehicle-form" id="add-vehicle-form" novalidate>
-                <input type="hidden" name="action" value="add_vehicle">
+                <input type="hidden" name="action" id="form-action" value="add_vehicle">
+                <input type="hidden" name="vehicle_id" id="vehicle_id" value="">
 
                 <div class="form-group">
                     <label for="marque">Marque *</label>
@@ -206,11 +288,11 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
 
                 <div class="form-group">
                     <label for="plaque">Plaque d'immatriculation *</label>
-                    <input type="text" id="plaque" name="plaque" required
-                           value="<?= htmlspecialchars($_POST['plaque'] ?? '') ?>"
-                           placeholder="Ex: AB-123-CD" pattern="[A-Z]{2}-\d{3}-[A-Z]{2}"
-                           style="text-transform: uppercase;">
-                    <small style="color: #636e72; font-size: 0.9rem;">Format: AB-123-CD</small>
+              <input type="text" id="plaque" name="plaque" required maxlength="9" inputmode="text" autocomplete="off"
+                  value="<?= htmlspecialchars($_POST['plaque'] ?? '') ?>"
+                  placeholder="Ex: AB-123-CD" pattern="[A-Z]{2}-\d{3}-[A-Z]{2}"
+                  class="text-uppercase" style="width:100%;">
+              <small class="small-muted">Format: AB-123-CD</small>
                 </div>
 
                 <div class="form-group">
@@ -236,7 +318,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
                     <label for="places">Nombre de places disponibles *</label>
                     <input type="number" id="places" name="places" min="1" max="8"
                            value="<?= htmlspecialchars($_POST['places'] ?? '4') ?>" required>
-                    <small style="color: #636e72; font-size: 0.9rem;">Places pour les passagers (1-8)</small>
+                    <small class="small-muted">Places pour les passagers (1-8)</small>
                 </div>
 
                 <button type="submit" class="btn-add-vehicle" id="add-btn">
@@ -246,19 +328,15 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
             </form>
         </div>
 
-        <div class="back-link" style="text-align:center;margin-top:40px;">
-            <a href="/frontend/public/pages/profil.php" style="color:#00b894;text-decoration:none;font-weight:600;">
+        <div class="back-link">
+            <a href="/pages/profil.php" class="link-primary">
                 <span class="material-icons">arrow_back</span>
                 Retour au profil
             </a>
         </div>
     </main>
 
-    <script>
-        window.ecorideUser = <?= isset($_SESSION['user']) ? json_encode($_SESSION['user']) : 'null' ?>;
-    </script>
-    <script src="../../frontend/public/assets/js/navbar.js"></script>
-    <script src="../../frontend/public/assets/js/script.js"></script>
+    <?php require_once __DIR__ . '/includes/footer-scripts.php'; ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -267,24 +345,49 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
             const successMessage = document.getElementById('success-message');
             const plaqueInput = document.getElementById('plaque');
 
-            // Format automatique de la plaque
+            // Format automatique de la plaque (préserve la position du curseur)
             plaqueInput.addEventListener('input', function(e) {
-                let value = e.target.value.toUpperCase();
-                // Supprimer tous les caractères non alphanumériques
-                value = value.replace(/[^A-Z0-9]/g, '');
+                const tgt = e.target;
+                const raw = tgt.value;
+                const sel = tgt.selectionStart || 0;
 
-                // Appliquer le format AB-123-CD
-                if (value.length >= 2) {
-                    value = value.substring(0, 2) + '-' + value.substring(2);
-                }
-                if (value.length >= 6) {
-                    value = value.substring(0, 6) + '-' + value.substring(6);
-                }
-                if (value.length > 9) {
-                    value = value.substring(0, 9);
+                // Count alnum characters before the caret in the raw value
+                const alnumBefore = (raw.slice(0, sel).toUpperCase().replace(/[^A-Z0-9]/g, '')).length;
+
+                // Clean value to letters+digits and uppercase
+                let clean = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                // Trim to max 7 alnum (2+3+2 = 7), we'll add 2 dashes -> total length 9
+                if (clean.length > 7) clean = clean.substring(0, 7);
+
+                // Apply formatting AB-123-CD
+                let formatted = clean;
+                if (formatted.length >= 2) formatted = formatted.substring(0,2) + '-' + formatted.substring(2);
+                if (formatted.replace(/[^A-Z0-9]/g,'').length >= 5) {
+                    // after the second block exists (2 + 3), insert second dash
+                    // compute position in the clean string and insert
+                    const c = formatted.replace(/[^A-Z0-9]/g,'');
+                    if (c.length > 5) {
+                        // ensure we have AB-123-CD
+                        const first = c.substring(0,2);
+                        const mid = c.substring(2,5);
+                        const last = c.substring(5);
+                        formatted = first + '-' + mid + (last ? '-' + last : '');
+                    }
                 }
 
-                e.target.value = value;
+                // compute new caret position based on alnumBefore
+                let caretPos = 0;
+                let seen = 0;
+                for (let i = 0; i < formatted.length; i++) {
+                    if (/[A-Z0-9]/.test(formatted[i])) seen++;
+                    caretPos = i + 1;
+                    if (seen >= alnumBefore) break;
+                }
+                // if we didn't reach the desired count, put at end
+                if (seen < alnumBefore) caretPos = formatted.length;
+
+                tgt.value = formatted;
+                try { tgt.setSelectionRange(caretPos, caretPos); } catch (err) { /* ignore */ }
             });
 
             // Animation du bouton d'ajout
@@ -305,98 +408,46 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'add_vehicle') {
             }
         });
 
-        // Fonctions pour gérer les véhicules (à implémenter)
+        // Fonctions pour gérer les véhicules (édition et suppression)
         function editVehicle(vehicleId) {
-            alert('Fonctionnalité de modification à venir pour le véhicule #' + vehicleId);
+            // trouver la carte correspondante
+            const card = document.querySelector('.vh-vehicle-card[data-vehicle-id="' + vehicleId + '"]');
+            if (!card) return alert('Véhicule introuvable sur la page');
+
+            // pré-remplir le formulaire
+            document.getElementById('marque').value = card.dataset.marque || '';
+            document.getElementById('modele').value = card.dataset.modele || '';
+            document.getElementById('couleur').value = card.dataset.couleur || '';
+            document.getElementById('plaque').value = card.dataset.plaque || '';
+            document.getElementById('energie').value = card.dataset.energie || '';
+            document.getElementById('places').value = card.dataset.places || '4';
+
+            // switcher le formulaire en mode édition
+            document.getElementById('form-action').value = 'edit_vehicle';
+            document.getElementById('vehicle_id').value = vehicleId;
+            const addBtn = document.getElementById('add-btn');
+            addBtn.innerHTML = '<span class="material-icons">save</span> Enregistrer les modifications';
+            addBtn.disabled = false;
+            addBtn.style.opacity = '1';
+
+            // scroller vers le formulaire
+            document.querySelector('.add-vehicle-section').scrollIntoView({ behavior: 'smooth' });
         }
 
         function deleteVehicle(vehicleId) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.')) {
-                alert('Fonctionnalité de suppression à venir pour le véhicule #' + vehicleId);
-            }
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.')) return;
+
+            // créer un formulaire POST pour supprimer sans JS fetch
+            const f = document.createElement('form');
+            f.method = 'POST';
+            f.style.display = 'none';
+            const a = document.createElement('input'); a.type = 'hidden'; a.name = 'action'; a.value = 'delete_vehicle'; f.appendChild(a);
+            const v = document.createElement('input'); v.type = 'hidden'; v.name = 'vehicle_id'; v.value = vehicleId; f.appendChild(v);
+            document.body.appendChild(f);
+            f.submit();
         }
     </script>
 
-    <style>
-        .spinning {
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .message-success, .message-error {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            animation: slideIn 0.3s ease;
-        }
-
-        .message-success {
-            background: #e8f7f2;
-            color: #219150;
-            border: 1px solid #00b894;
-        }
-
-        .message-error {
-            background: #ffeaea;
-            color: #b8002e;
-            border: 1px solid #ff4d6d;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .page-header h2 {
-            color: #2d3436;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .page-header p {
-            color: #636e72;
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .ecological-badge {
-            color: var(--primary-color);
-            font-size: 18px;
-            vertical-align: middle;
-            margin-left: 8px;
-        }
-
-        .back-link a {
-            transition: all 0.3s ease;
-        }
-
-        .back-link a:hover {
-            transform: translateX(-5px);
-        }
-    </style>
+    <!-- Styles migrés vers frontend/public/assets/css/style.css -->
 </body>
 </html>

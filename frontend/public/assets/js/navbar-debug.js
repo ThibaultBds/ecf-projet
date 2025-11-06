@@ -15,13 +15,13 @@ document.addEventListener('DOMContentLoaded', function() {
     nav.className = 'header-nav';
     nav.innerHTML = `
         <ul class="nav-links">
-            <li><a href="/Ecoridegit/">Accueil</a></li>
-            <li><a href="/Ecoridegit/frontend/src/pages/covoiturages.php">Covoiturages</a></li>
-            <li><a href="/Ecoridegit/frontend/src/pages/contact.php">Contact</a></li>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="/pages/covoiturages.php">Covoiturages</a></li>
+            <li><a href="/pages/contact.php">Contact</a></li>
         </ul>
         <ul class="auth-links" id="auth-links">
-            <li><a href="/Ecoridegit/frontend/src/pages/login_secure.php">Connexion</a></li>
-            <li><a href="/Ecoridegit/frontend/src/pages/register.php">Inscription</a></li>
+            <li><a href="/pages/login_secure.php">Connexion</a></li>
+            <li><a href="/pages/register.php">Inscription</a></li>
         </ul>
     `;
     header.appendChild(nav);
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function loadAuthState() {
     console.log('🔍 Vérification de l\'état de connexion...');
     
-    fetch('/Ecoridegit/backend/public/check_auth.php')
+    fetch('/backend/public/check_auth.php')
         .then(response => {
             console.log('📡 Réponse reçue:', response.status);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -47,8 +47,8 @@ function loadAuthState() {
             if (authLinks) {
                 if (data.isLoggedIn) {
                     authLinks.innerHTML = `
-                        <li><a href="/Ecoridegit/backend/public/profil.php">Mon Profil</a></li>
-                        <li><a href="/Ecoridegit/backend/public/logout.php">Déconnexion</a></li>
+                        <li><a href="/backend/public/profil.php">Mon Profil</a></li>
+                        <li><a href="/backend/public/logout.php">Déconnexion</a></li>
                     `;
                     console.log('✅ Utilisateur connecté');
                 } else {
