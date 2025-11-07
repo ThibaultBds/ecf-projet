@@ -43,13 +43,10 @@
     padding: 10px 14px;
     border-radius: 8px;
     color: #ffffff;
-    /* léger fond translucide blanc pour bien détacher les items quand nécessaire */
-    background: rgba(255,255,255,0.06);
     text-decoration: none;
   }
-  #navbar a:hover {
-    background: rgba(255,255,255,0.12);
-  }
+  /* keep hover/background behaviour controlled by header-specific rules
+     (so nav items don't create white pills against the gradient by default) */
   .navbar ul {
       gap: 6px;
       overflow-x: auto;
