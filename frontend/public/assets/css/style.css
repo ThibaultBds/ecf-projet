@@ -144,19 +144,8 @@
     transition: all 0.22s ease;
     background: transparent; /* par défaut transparent pour laisser transparaître le header */
   }
-
-  .navbar ul li a:hover {
-    background: rgba(255,255,255,0.12);
-    transform: translateY(-2px);
-  }
-
-  .header-nav {
-    display: flex !important;
-    align-items: center !important;
-    gap: 20px !important;
-    flex-direction: row !important;
-  }
-
+  /* NOTE: finer navbar list/link sizing is handled by the header-specific
+     rules later in this file to avoid conflicting declarations. */
   .header-nav ul {
     display: flex !important;
     flex-direction: row !important;
