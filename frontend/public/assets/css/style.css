@@ -203,9 +203,8 @@
     width: 100%;
     box-sizing: border-box;
     min-height: 60px; /* slightly reduced to keep header compact */
-    /* Ensure header uses the same gradient as the hero for a continuous look */
-    background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
-    border-radius: 0;
+    /* Visual properties (background/border-radius) are set authoritatively later
+       to avoid duplicate/conflicting declarations. */
   }
 
   header.container-header h1 { margin: 0; }
