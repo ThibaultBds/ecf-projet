@@ -1197,15 +1197,7 @@
     background: #b8002e;
     color: #fff;
   }
-
-  .navbar {
-    background: #2e5a63;
-    padding: 18px 32px;
-    border-bottom: 3px solid #00ffff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  /* duplicate .navbar block removed (kept initial definition above) */
 
   .logout-link:hover {
     background: #b8002e;
