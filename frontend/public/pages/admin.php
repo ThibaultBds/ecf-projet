@@ -198,7 +198,7 @@ if ($_POST && isset($_POST['action'])) {
     </div>
 </main>
 
-<?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
             if (typeof renderMenu === 'function') renderMenu(window.ecorideUser || null);

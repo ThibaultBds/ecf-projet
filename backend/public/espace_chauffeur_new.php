@@ -355,11 +355,7 @@ function getStatusLabel($status) {
         </div>
     </main>
 
-    <script>
-        window.ecorideUser = <?= isset($_SESSION['user']) ? json_encode($_SESSION['user']) : 'null' ?>;
-    </script>
-    <script src="/assets/js/navbar.js"></script>
-    <script src="/assets/js/script.js"></script>
+    <?php require_once __DIR__ . '/includes/footer.php'; ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

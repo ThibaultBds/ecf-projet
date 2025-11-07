@@ -131,34 +131,7 @@ session_start();     // démarre la session PHP
     </section>
   </main>
 
-  <footer>
-    <p>&copy; 2025 EcoRide - Tous droits réservés</p>
-    <div><a href="#" id="openModalLegal">Mentions légales</a></div>
-  </footer>
-
-  <dialog id="modal-legal" class="modal-legal-dialog">
-    <form method="dialog" class="modal-legal-content">
-      <button class="modal-legal-close" id="closeModalLegal" aria-label="Fermer la fenêtre" type="button">×</button>
-      <h2>Mentions légales</h2>
-      <div class="modal-legal-body">
-        <p>
-          <strong>Nom de l'entreprise</strong> : EcoRide<br>
-          <strong>Statut</strong> : Société fictive dans le cadre d'un projet étudiant<br>
-          <strong>Adresse</strong> : 123 rue de la Planète Verte, 75000 Paris<br>
-          <strong>SIREN</strong> : 000 000 000<br>
-          <strong>Responsable de publication</strong> : Jules Fictif<br>
-          <strong>Email</strong> : contact@ecoride.fr<br>
-          <strong>Hébergeur</strong> : OVH, 2 rue Kellermann, 59100 Roubaix, France<br>
-        </p>
-        <p>
-          Ce site a été réalisé dans le cadre d'un projet étudiant et n'a pas vocation commerciale.<br>
-          Pour toute question, contactez-nous via le formulaire de contact.
-        </p>
-      </div>
-    </form>
-  </dialog>
-
-  <?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
+  <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 
   <script>
     // 🔹 3. Gère dynamiquement le bouton selon la session
