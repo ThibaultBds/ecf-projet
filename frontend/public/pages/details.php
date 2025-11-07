@@ -299,7 +299,7 @@ $credit_requis = (int)$covoiturage['prix'];
         </div>
     </dialog>
 
-    <?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
+    <?php require_once __DIR__ . '/../includes/footer.php'; ?>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Le menu est géré automatiquement par navbar.js avec window.ecorideUser

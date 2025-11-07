@@ -203,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </dialog>
 
-<?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>
     <script>
         // Rendu du menu avec navbar.js
         if (typeof renderMenu === 'function') {

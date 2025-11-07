@@ -72,6 +72,9 @@
     --primary-color: #00b894;
     --primary-dark: #019d7e;
     --primary-light: #00cec9;
+    /* Exact gradient endpoints for header/hero */
+    --primary-start: #00b894;
+    --primary-end:   #00cec9;
     --secondary-color: #636e72;
     --success-color: #219150;
     --error-color: #b8002e;
@@ -99,12 +102,14 @@
   }
 
   .container-header {
-    background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); /* Retour au vert d'origine */
+    /* Use the same exact gradient endpoints as .hero via variables */
+    background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%);
     padding: 20px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0,184,148,0.3);
+    /* remove shadow so header visually matches hero */
+    box-shadow: none;
     flex-wrap: wrap;
   }
 
@@ -186,16 +191,21 @@
     transform: translateY(-2px) !important;
   }
 
-  /* Header: flex layout to keep brand left and nav/actions on the right for all pages */
+  /* Header: flex layout to keep brand left and nav/actions on the right for all pages
+     Keep the visual theme identical to the hero so header + hero appear as one block */
   header.container-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    padding: 20px 36px; /* more vertical space: top/bottom increased */
+    /* match padding to the authoritative rule later in the file to avoid a seam */
+    padding: 14px 28px;
     width: 100%;
     box-sizing: border-box;
-    min-height: 72px; /* ensure a comfortable header height */
+    min-height: 60px; /* slightly reduced to keep header compact */
+    /* Ensure header uses the same gradient as the hero for a continuous look */
+    background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+    border-radius: 0;
   }
 
   header.container-header h1 { margin: 0; }
@@ -340,13 +350,13 @@
 
 
   .hero {
-    background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); /* Retour au vert d'origine */
+    background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%); /* Retour au vert d'origine */
     color: white;
     text-align: center;
     padding: 80px 20px;
-    margin-bottom: 40px;
-    border-radius: 12px; /* arrondir les coins du gros bloc */
-    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    margin-bottom: 0; /* keep flush with following section */
+    border-radius: 0; /* remove rounding so hero sits flush with adjacent blocks */
+    box-shadow: none; /* remove shadow that could reveal body background */
   }
 
   .hero h2 {
@@ -3122,8 +3132,10 @@
 header.container-header {
   position: relative;
   z-index: 40; /* ensure header stays above content */
-  background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+  /* Use same gradient as the hero so header + hero appear as one block */
+  background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%);
   padding: 14px 28px;
+  border-radius: 0; /* ensure no rounding that would separate the two blocks */
 }
 
 /* Keep brand left, menu right; minimal padding and no extra box around nav */
@@ -3136,11 +3148,11 @@ header.container-header > nav.navbar {
   box-sizing: border-box;
   justify-content: flex-end;
   padding: 10px 14px;
-  /* elevated but flat card behind menu */
-  background: rgba(0,0,0,0.12);
-  border: none;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-  border-radius: 8px;
+  /* Make nav transparent so it doesn't create a separate rounded/boxed layer */
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
 /* Compact menu list */
@@ -3338,13 +3350,13 @@ nav.navbar #user-profile, nav.navbar #auth-links {
    Kept intentionally small so the hero/page-header stays visually connected
    with the header but no longer touches it directly. */
 .container-header + .page-header {
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 /* Also add a small padding to the main element when it immediately follows the header.
    This covers pages where the first block is inside <main> (most frontend pages). */
 .container-header + main {
-  padding-top: 20px !important;
+  padding-top: 0 !important;
 }
 
 /* === Layout: align actions to right on ride cards === */
@@ -3390,16 +3402,15 @@ nav.navbar #user-profile, nav.navbar #auth-links {
    background, have no shadow, and remain compact on desktop. */
 header.container-header nav#navbar.navbar,
 header.container-header nav.navbar {
-  /* elevated but flat: semi-transparent dark card */
-  background: rgba(0,0,0,0.12) !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+  /* keep nav transparent so header is visually continuous with hero */
+  background: transparent !important;
+  box-shadow: none !important;
   border: none !important;
-  border-radius: 8px !important;
+  border-radius: 0 !important;
   padding: 6px 10px !important;
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
-  backdrop-filter: blur(6px);
 }
 
 @media (min-width: 700px) {
@@ -3419,6 +3430,87 @@ header.container-header nav.navbar {
     background: transparent !important;
     border: 1px solid rgba(255,255,255,0.06) !important;
   }
+}
+
+/* Authoritative header background to ensure header and .hero share the same gradient
+   This rule is placed at the end of the file so it wins over earlier conflicting rules. */
+header.container-header {
+  background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%) !important;
+  color: #ffffff !important;
+  border-radius: 0 !important;
+  box-shadow: none !important; /* ensure no shadow causes visual difference */
+}
+
+/* Ensure nav links inside header don't render translucent white pills */
+header.container-header a,
+header.container-header nav#navbar a,
+header.container-header nav.navbar a,
+header.container-header #navbar a {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+/* Targeted header cleanup: remove translucent pills/shadows only on nav and action links
+   instead of forcing every child to be transparent. This preserves input/background
+   for any controls that intentionally need a background while removing the visual
+   artifacts (pills) caused by nav link backgrounds. */
+header.container-header nav#navbar,
+header.container-header nav.navbar,
+header.container-header nav#navbar a,
+header.container-header nav.navbar a,
+header.container-header #navbar a,
+header.container-header a.logout-link,
+header.container-header a.login,
+header.container-header a.register {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+/* Make controls and small cards inside the hero blend with the gradient
+   Use low-opacity white backgrounds, remove heavy shadows and keep text white
+   so elements feel part of the same green block rather than stark white boxes. */
+.hero .search-bar,
+.hero .card,
+.hero .search-card,
+.hero .search-panel {
+  background: rgba(255,255,255,0.08) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+.hero .search-bar input,
+.hero .search-bar select,
+.hero .search-bar button,
+.hero .search-bar textarea {
+  background: transparent !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.hero .search-bar input::placeholder,
+.hero .search-bar textarea::placeholder {
+  color: rgba(255,255,255,0.9) !important;
+}
+
+.hero .cta-btn.secondary {
+  background: rgba(255,255,255,0.12) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  box-shadow: none !important;
+}
+
+/* Slightly reduce shadow on any other small white boxes inside hero */
+.hero .card .box, .hero .card .panel {
+  background: rgba(255,255,255,0.06) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
 }
 
 

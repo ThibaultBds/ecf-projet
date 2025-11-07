@@ -166,7 +166,7 @@ try {
         <div><a href="#" id="openModalLegal">Mentions légales</a></div>
     </footer>
 
-    <?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
+    <?php require_once __DIR__ . '/../includes/footer.php'; ?>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (window.ecorideUser) {

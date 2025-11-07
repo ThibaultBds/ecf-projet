@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </main>
 
-<?php require_once __DIR__ . '/../includes/footer-scripts.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>
 <script>
 if (typeof renderMenu === 'function') renderMenu(window.ecorideUser);
 </script>
