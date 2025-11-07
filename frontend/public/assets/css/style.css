@@ -146,36 +146,9 @@
   }
   /* NOTE: finer navbar list/link sizing is handled by the header-specific
      rules later in this file to avoid conflicting declarations. */
-  .header-nav ul {
-    display: flex !important;
-    flex-direction: row !important;
-    list-style: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 20px !important;
-    align-items: center !important;
-  }
-
-  .header-nav ul li {
-    margin: 0 !important;
-    display: inline-block !important;
-  }
-
-  .header-nav ul li a {
-    color: white !important;
-    text-decoration: none !important;
-    font-weight: 500 !important;
-    padding: 8px 16px !important;
-    border-radius: 6px !important;
-    transition: all 0.3s ease !important;
-    font-size: 0.95rem !important;
-    display: inline-block !important;
-  }
-
-  .header-nav ul li a:hover {
-    background: rgba(255,255,255,0.2) !important;
-    transform: translateY(-2px) !important;
-  }
+  /* header-nav layout and item styles are centralized in the 'NAVBAR FLEX FINAL'
+     block later in this file to avoid conflicting declarations. See
+     the "NAVBAR FLEX FINAL - version propre" section near the middle of the file. */
 
   /* Header: flex layout to keep brand left and nav/actions on the right for all pages
      Keep the visual theme identical to the hero so header + hero appear as one block */
@@ -775,19 +748,8 @@
       max-width: 300px;
     }
     
-    .header-nav {
-      width: 100%;
-      justify-content: center;
-    }
-    
-    .header-nav ul {
-      gap: 15px;
-    }
-    
-    .header-nav ul li a {
-      padding: 6px 12px;
-      font-size: 0.9rem;
-    }
+    /* header-nav sizing for small screens is handled by the central header/nav
+       rules; keep this media behavior minimal to avoid conflicts. */
   }
 
   /* ANIMATIONS POUR LOGIN */
