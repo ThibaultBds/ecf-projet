@@ -161,11 +161,6 @@ try {
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 EcoRide - Tous droits réservés</p>
-        <div><a href="#" id="openModalLegal">Mentions légales</a></div>
-    </footer>
-
     <?php require_once __DIR__ . '/../includes/footer.php'; ?>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
