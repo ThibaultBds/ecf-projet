@@ -1,0 +1,41 @@
+# --------------------------------------------------------------------------------
+# 🌿 EcoRide - .gitignore propre et sécurisé
+# --------------------------------------------------------------------------------
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Composer vendor (si utilisé)
+vendor/
+
+# SQL Dumps & backups
+*.sql
+backup/
+
+# Screenshots / fichiers lourds
+docs/screenshots/
+tools/
+
+# Environnement
+.env
+
+# PHP logs
+*.log
+
+# System files Windows / Mac
+.DS_Store
+Thumbs.db
+
+# IDE / éditeurs
+.idea/
+.vscode/
+
+# Cache
+*.cache
+*.tmp
+
+# Output temporaire
+dist/
