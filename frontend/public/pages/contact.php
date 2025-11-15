@@ -174,36 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </main>
 
-    <footer>
-        <p>&copy; 2025 EcoRide – Tous droits réservés</p>
-        <div>
-            <a href="#" id="openModalLegal">Mentions légales</a>
-        </div>
-    </footer>
-
-    <!-- Modal Mentions légales -->
-    <dialog id="modal-legal" class="modal-legal-dialog">
-        <form method="dialog" class="modal-legal-content">
-            <button id="closeModalLegal" class="modal-legal-close" type="button" aria-label="Fermer">×</button>
-            <h2>Mentions légales</h2>
-            <div class="modal-legal-body">
-                <p>
-                  <strong>Nom de l'entreprise</strong> : EcoRide<br>
-                  <strong>Statut</strong> : Société fictive (projet étudiant)<br>
-                  <strong>Adresse</strong> : 123 rue de la Planète Verte, 75000 Paris<br>
-                  <strong>SIREN</strong> : 000 000 000<br>
-                  <strong>Responsable de publication</strong> : Jules Fictif<br>
-                  <strong>Email</strong> : contact@ecoride.fr<br>
-                  <strong>Hébergeur</strong> : OVH, 2 rue Kellermann, 59100 Roubaix, France<br>
-                </p>
-                <p>
-                  Ce site est développé dans le cadre d’un projet étudiant et n’a pas vocation commerciale.
-                </p>
-            </div>
-        </form>
-    </dialog>
-
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+    <?php require_once __DIR__ . '/../includes/footer.php'; ?>
     <script>
         // Rendu du menu avec navbar.js
         if (typeof renderMenu === 'function') {
