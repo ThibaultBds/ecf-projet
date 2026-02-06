@@ -3,6 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Redirection HTTP vers pages/index.php
-header('Location: pages/index.php');
-exit;
+require_once __DIR__ . '/../../src/Core/Router.php';
+
+$router = new Router();
+$router->dispatch();
