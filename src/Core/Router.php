@@ -11,6 +11,7 @@ class Router
             (new HomeController())->index(); 
             return; 
         }
+
         echo '404 - Page non trouvée';
     } 
 }

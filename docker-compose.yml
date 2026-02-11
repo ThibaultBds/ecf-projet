@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   web:
     build:
@@ -12,18 +10,8 @@ services:
     depends_on:
       - db
     environment:
-      - APACHE_DOCUMENT_ROOT=/var/www/html/frontend/public
+      - APACHE_DOCUMENT_ROOT=/var/www/html/public
     restart: always
-    command: >
-      bash -c "
-        # 🔹 création d’un alias Apache pour le backend
-        echo 'Alias /backend /var/www/html/backend/public' > /etc/apache2/conf-enabled/ecoride.conf &&
-        echo '<Directory /var/www/html/backend/public>' >> /etc/apache2/conf-enabled/ecoride.conf &&
-        echo '    AllowOverride All' >> /etc/apache2/conf-enabled/ecoride.conf &&
-        echo '    Require all granted' >> /etc/apache2/conf-enabled/ecoride.conf &&
-        echo '</Directory>' >> /etc/apache2/conf-enabled/ecoride.conf &&
-        apache2-foreground
-      "
 
   db:
     image: mysql:8.0
@@ -39,6 +27,18 @@ services:
     volumes:
       - db_data:/var/lib/mysql               # 🔹 persistance des données
       - ./docker/mysql-init:/docker-entrypoint-initdb.d  # 🔹 scripts SQL auto
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ecoride-phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"                            # 🔹 phpMyAdmin sur http://localhost:8080
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    depends_on:
+      - db
 
 volumes:
   db_data:
