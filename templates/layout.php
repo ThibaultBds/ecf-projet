@@ -55,8 +55,22 @@
     </form>
 </dialog>
 
-<!-- On charge ton ancien navbar.js -->
+<!-- Injection session utilisateur pour le JS -->
+<script>
+<?php if (!empty($_SESSION['user'])): ?>
+window.ecorideUser = {
+    id: <?= (int)$_SESSION['user']['id'] ?>,
+    pseudo: <?= json_encode($_SESSION['user']['pseudo'] ?? $_SESSION['user']['username'] ?? '') ?>,
+    email: <?= json_encode($_SESSION['user']['email'] ?? '') ?>,
+    role: <?= json_encode($_SESSION['user']['role'] ?? 'passager') ?>
+};
+<?php else: ?>
+window.ecorideUser = null;
+<?php endif; ?>
+</script>
+
 <script src="/assets/js/navbar.js"></script>
+<script src="/assets/js/script.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function(){

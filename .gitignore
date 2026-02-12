@@ -29,6 +29,7 @@ tools/
 # System files Windows / Mac
 .DS_Store
 Thumbs.db
+nul
 
 # IDE / éditeurs
 .idea/
