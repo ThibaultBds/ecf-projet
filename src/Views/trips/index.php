@@ -54,34 +54,34 @@
     <?php else: ?>
         <?php foreach ($covoiturages as $c): ?>
             <div class="ride-card"
-                 data-price="<?= $c['prix'] ?>"
-                 data-ecological="<?= $c['is_ecological'] ? 'true' : 'false' ?>"
-                 data-rating="<?= $c['rating'] ?? 0 ?>">
+                 data-price="<?= $c['price'] ?>"
+                 data-ecological="<?= $c['energy_type'] === 'electrique' ? 'true' : 'false' ?>"
+                 data-rating="<?= $c['note_conducteur'] ?? 0 ?>">
 
                 <div class="ride-header">
                     <h3><?= htmlspecialchars($c['ville_depart']) ?> → <?= htmlspecialchars($c['ville_arrivee']) ?></h3>
-                    <div class="ride-price"><?= number_format($c['prix'], 2) ?>€</div>
+                    <div class="ride-price"><?= number_format($c['price'], 2) ?>€</div>
                 </div>
 
                 <div class="ride-details">
-                    <p><span class="material-icons">schedule</span> <?= date('d/m/Y à H:i', strtotime($c['date_depart'])) ?></p>
+                    <p><span class="material-icons">schedule</span> <?= date('d/m/Y à H:i', strtotime($c['departure_datetime'])) ?></p>
                     <p>
                         <span class="material-icons">person</span>
-                        <img src="<?= htmlspecialchars($c['conducteur_avatar_url'] ?? '/assets/images/default_avatar.png') ?>"
-                             alt="Avatar"
-                             style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:8px;vertical-align:middle;">
                         <?= htmlspecialchars($c['conducteur']) ?>
+                        <?php if (round($c['note_conducteur'], 1) > 0): ?>
+                            <span style="color:#ffd700;margin-left:8px;">★ <?= round($c['note_conducteur'], 1) ?>/5</span>
+                        <?php endif; ?>
                     </p>
-                    <p><span class="material-icons">directions_car</span> <?= htmlspecialchars($c['marque']) ?> <?= htmlspecialchars($c['modele']) ?></p>
-                    <p><span class="material-icons">people</span> <?= (int)$c['places_restantes'] ?> places restantes</p>
+                    <p><span class="material-icons">directions_car</span> <?= htmlspecialchars($c['brand']) ?> <?= htmlspecialchars($c['model']) ?></p>
+                    <p><span class="material-icons">people</span> <?= (int)$c['available_seats'] ?> places restantes</p>
                 </div>
 
-                <?php if ($c['is_ecological']): ?>
+                <?php if ($c['energy_type'] === 'electrique'): ?>
                     <div class="eco-badge">⚡ Écologique</div>
                 <?php endif; ?>
 
                 <div class="ride-actions">
-                    <a href="/trip/<?= (int)$c['id'] ?>" class="btn-primary">Voir détails</a>
+                    <a href="/trip/<?= (int)$c['trip_id'] ?>" class="btn-primary">Voir détails</a>
                 </div>
             </div>
         <?php endforeach; ?>

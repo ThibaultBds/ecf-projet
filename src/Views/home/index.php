@@ -16,8 +16,8 @@
         action="/covoiturages"
         method="get">
 
-    <input type="text" name="depart" placeholder="Départ" list="villes" autocomplete="on">
-    <input type="text" name="arrivee" placeholder="Arrivée" list="villes" autocomplete="on">
+    <input type="text" id="depart" name="depart" placeholder="Départ" list="villes" autocomplete="on">
+    <input type="text" id="arrivee" name="arrivee" placeholder="Arrivée" list="villes" autocomplete="on">
 
     <datalist id="villes">
       <option value="Paris">
@@ -32,7 +32,8 @@
       <option value="Strasbourg">
     </datalist>
 
-    <input type="text" name="date" placeholder="JJ / MM / AAAA" autocomplete="off" readonly>
+    <input type="text" id="dateInput" name="date" placeholder="JJ / MM / AAAA" autocomplete="off" readonly>
+    <div id="calendarPopup" style="display:none;position:absolute;z-index:1000;background:white;border:1px solid #ddd;border-radius:8px;padding:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15);"></div>
 
     <select name="places">
       <option value="">Places</option>
@@ -44,6 +45,36 @@
 
     <button type="submit">Rechercher</button>
   </form>
+</div>
+
+<!-- Résultats du calculateur -->
+<div id="calculation-results" style="display:none;max-width:900px;margin:0 auto 30px auto;padding:20px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+  <h3 style="text-align:center;color:#2d3436;margin-bottom:20px;">
+    <span class="material-icons" style="vertical-align:middle;color:#00b894;">calculate</span>
+    Estimation du trajet
+  </h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px;text-align:center;">
+    <div>
+      <span class="material-icons" style="font-size:32px;color:#00b894;">straighten</span>
+      <p style="font-size:24px;font-weight:bold;color:#2d3436;" id="calc-distance">-</p>
+      <p style="color:#636e72;font-size:14px;">Distance</p>
+    </div>
+    <div>
+      <span class="material-icons" style="font-size:32px;color:#00b894;">schedule</span>
+      <p style="font-size:24px;font-weight:bold;color:#2d3436;" id="calc-time">-</p>
+      <p style="color:#636e72;font-size:14px;">Durée estimée</p>
+    </div>
+    <div>
+      <span class="material-icons" style="font-size:32px;color:#00b894;">euro</span>
+      <p style="font-size:24px;font-weight:bold;color:#00b894;" id="calc-price">-</p>
+      <p style="color:#636e72;font-size:14px;">Prix / personne</p>
+    </div>
+    <div>
+      <span class="material-icons" style="font-size:32px;color:#00b894;">eco</span>
+      <p style="font-size:24px;font-weight:bold;color:#00b894;" id="calc-co2">-</p>
+      <p style="color:#636e72;font-size:14px;">CO2 économisé</p>
+    </div>
+  </div>
 </div>
 
 <section class="presentation-entreprise">
