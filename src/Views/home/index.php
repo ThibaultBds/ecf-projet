@@ -1,5 +1,3 @@
-<?php echo "HOME VIEW OK"; ?>
-
 <section class="hero">
   <h2>Voyagez vert, partagez vos trajets !</h2>
 
