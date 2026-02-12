@@ -57,7 +57,7 @@ class TripController extends BaseController
             $isParticipating = TripParticipant::isParticipating($id, AuthManager::id());
         }
 
-        $credit_requis = (int) $covoiturage['prix'];
+        $credit_requis = (int) $covoiturage['price'];
 
         // Décoder les préférences
         $preferences = [

@@ -7,12 +7,10 @@
                 <?= htmlspecialchars($covoiturage['ville_depart']) ?> → <?= htmlspecialchars($covoiturage['ville_arrivee']) ?>
             </h2>
             <p style="margin:5px 0;color:#636e72;font-size:18px;display:flex;align-items:center;gap:10px;">
-                <img src="<?= htmlspecialchars($covoiturage['conducteur_avatar_url'] ?? '/assets/images/default_avatar.png') ?>"
-                     alt="Avatar"
-                     style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #f1f2f6;">
+                <span class="material-icons" style="font-size:48px;color:#00b894;">account_circle</span>
                 <span>Conducteur : <?= htmlspecialchars($covoiturage['conducteur']) ?></span>
             </p>
-            <?php if ($covoiturage['is_ecological']): ?>
+            <?php if ($covoiturage['energy_type'] === 'electrique'): ?>
                 <div style="display:inline-block;background:#00b894;color:white;padding:4px 12px;border-radius:15px;font-size:12px;font-weight:600;margin-top:10px;">
                     ⚡ Trajet écologique
                 </div>
@@ -25,26 +23,26 @@
                 <h4 style="margin:0 0 10px 0;color:#2d3436;">
                     <span class="material-icons" style="vertical-align:middle;color:#00b894;">schedule</span> Date et heure
                 </h4>
-                <p><?= date('d/m/Y à H:i', strtotime($covoiturage['date_depart'])) ?></p>
+                <p><?= date('d/m/Y à H:i', strtotime($covoiturage['departure_datetime'])) ?></p>
             </div>
             <div class="info-item">
                 <h4 style="margin:0 0 10px 0;color:#2d3436;">
                     <span class="material-icons" style="vertical-align:middle;color:#00b894;">directions_car</span> Véhicule
                 </h4>
-                <p><?= htmlspecialchars($covoiturage['marque']) ?> <?= htmlspecialchars($covoiturage['modele']) ?></p>
-                <p style="font-size:14px;color:#636e72;"><?= ucfirst(htmlspecialchars($covoiturage['energie'])) ?></p>
+                <p><?= htmlspecialchars($covoiturage['brand']) ?> <?= htmlspecialchars($covoiturage['model']) ?></p>
+                <p style="font-size:14px;color:#636e72;"><?= ucfirst(htmlspecialchars($covoiturage['energy_type'])) ?></p>
             </div>
             <div class="info-item">
                 <h4 style="margin:0 0 10px 0;color:#2d3436;">
                     <span class="material-icons" style="vertical-align:middle;color:#00b894;">people</span> Places disponibles
                 </h4>
-                <p><?= $covoiturage['places_restantes'] ?> / <?= $covoiturage['places_totales'] ?> places</p>
+                <p><?= (int)$covoiturage['available_seats'] ?> / <?= (int)$covoiturage['seats_available'] ?> places</p>
             </div>
             <div class="info-item">
                 <h4 style="margin:0 0 10px 0;color:#2d3436;">
                     <span class="material-icons" style="vertical-align:middle;color:#00b894;">euro</span> Prix
                 </h4>
-                <p style="font-size:24px;font-weight:bold;color:#00b894;"><?= number_format($covoiturage['prix'], 2) ?>€</p>
+                <p style="font-size:24px;font-weight:bold;color:#00b894;"><?= number_format($covoiturage['price'], 2) ?>€</p>
                 <p style="font-size:14px;color:#636e72;">Crédits requis : <?= $credit_requis ?></p>
             </div>
         </div>
@@ -80,11 +78,11 @@
                             <strong><?= htmlspecialchars($review['reviewer_name']) ?></strong>
                             <div style="display:flex;align-items:center;gap:2px;">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <span class="material-icons" style="font-size:16px;color:<?= $i <= $review['note'] ? '#ffd700' : '#ddd' ?>;">star</span>
+                                    <span class="material-icons" style="font-size:16px;color:<?= $i <= $review['rating'] ? '#ffd700' : '#ddd' ?>;">star</span>
                                 <?php endfor; ?>
                             </div>
                         </div>
-                        <p style="margin:5px 0 0 0;font-style:italic;color:#636e72;">"<?= htmlspecialchars($review['commentaire']) ?>"</p>
+                        <p style="margin:5px 0 0 0;font-style:italic;color:#636e72;">"<?= htmlspecialchars($review['comment']) ?>"</p>
                         <small style="color:#b2bec3;"><?= date('d/m/Y', strtotime($review['created_at'])) ?></small>
                     </div>
                 <?php endforeach; ?>
@@ -104,7 +102,7 @@
                         <span class="material-icons" style="vertical-align:middle;">directions_car</span>
                         Vous êtes le conducteur de ce trajet
                     </p>
-                <?php elseif ($covoiturage['places_restantes'] > 0): ?>
+                <?php elseif ((int)$covoiturage['available_seats'] > 0): ?>
                     <?php if ($user_credit >= $credit_requis): ?>
                         <p style="color:#00b894;margin-bottom:15px;">
                             <span class="material-icons" style="vertical-align:middle;">account_balance_wallet</span>
@@ -154,7 +152,7 @@
         <span class="material-icons" style="font-size:48px;color:#00b894;margin-bottom:10px;">check_circle</span>
         <h3 style="margin:0 0 18px 0;color:#2d3436;">Confirmer votre participation</h3>
         <p><strong>Trajet :</strong> <?= htmlspecialchars($covoiturage['ville_depart']) ?> → <?= htmlspecialchars($covoiturage['ville_arrivee']) ?></p>
-        <p><strong>Prix :</strong> <?= number_format($covoiturage['prix'], 2) ?>€</p>
+        <p><strong>Prix :</strong> <?= number_format($covoiturage['price'], 2) ?>€</p>
         <p><strong>Crédits :</strong> <?= $credit_requis ?></p>
         <div style="display:flex;gap:12px;justify-content:center;margin-top:22px;">
             <button type="button" id="cancel-btn" class="btn-secondary" style="padding:12px 24px;border-radius:8px;">Annuler</button>
@@ -191,11 +189,11 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmBtn.addEventListener('click', function() {
             confirmBtn.disabled = true;
             var fd = new FormData();
-            fd.append('trip_id', '<?= (int)$covoiturage['id'] ?>');
+            fd.append('trip_id', '<?= (int)$covoiturage['trip_id'] ?>');
             fd.append('credits', '<?= $credit_requis ?>');
             fd.append('csrf_token', '<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>');
 
-            fetch('/api/trip/<?= (int)$covoiturage['id'] ?>/join', { method: 'POST', body: fd })
+            fetch('/api/trip/<?= (int)$covoiturage['trip_id'] ?>/join', { method: 'POST', body: fd })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     confirmModal.close();

@@ -82,10 +82,14 @@ class Trip extends BaseModel
                     v.model,
                     v.color,
                     v.energy_type,
-                    v.seats_available
+                    v.seats_available,
+                    cd.name AS ville_depart,
+                    ca.name AS ville_arrivee
              FROM trips t
              JOIN users u ON t.chauffeur_id = u.user_id
              JOIN vehicles v ON t.vehicle_id = v.vehicle_id
+             JOIN cities cd ON t.city_depart_id = cd.city_id
+             JOIN cities ca ON t.city_arrival_id = ca.city_id
              WHERE t.trip_id = ?",
             [$id]
         )->fetch() ?: null;

@@ -12,10 +12,10 @@ class Review extends BaseModel
     public static function byDriver($driverId)
     {
         return static::query(
-            "SELECT r.*, u.pseudo as reviewer_name
+            "SELECT r.*, u.username AS reviewer_name
              FROM reviews r
-             JOIN users u ON r.reviewer_id = u.id
-             WHERE r.reviewed_id = ?
+             JOIN users u ON r.reviewer_id = u.user_id
+             WHERE r.driver_id = ? AND r.status = 'approved'
              ORDER BY r.created_at DESC",
             [$driverId]
         )->fetchAll();
@@ -27,9 +27,9 @@ class Review extends BaseModel
     public static function averageRating($driverId)
     {
         $result = static::query(
-            "SELECT AVG(note) as avg_rating, COUNT(*) as total
+            "SELECT AVG(rating) as avg_rating, COUNT(*) as total
              FROM reviews
-             WHERE reviewed_id = ? AND status != 'rejete'",
+             WHERE driver_id = ? AND status != 'rejected'",
             [$driverId]
         )->fetch();
 
