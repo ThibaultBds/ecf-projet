@@ -1,3 +1,11 @@
+<?php
+$statusLabels = [
+    'scheduled' => 'Planifié',
+    'started' => 'En cours',
+    'completed' => 'Terminé',
+    'cancelled' => 'Annulé',
+];
+?>
 <main class="member-container">
     <h2 class="page-title-hero">
         <span class="material-icons page-icon-large">directions_car</span> Espace Chauffeur
@@ -42,12 +50,12 @@
                             <?= htmlspecialchars($trip['ville_depart']) ?> → <?= htmlspecialchars($trip['ville_arrivee']) ?>
                         </p>
                         <p class="small-muted">
-                            <?= date('d/m/Y H:i', strtotime($trip['date_depart'])) ?>
-                            | <?= $trip['prix'] ?>€
+                            <?= date('d/m/Y H:i', strtotime($trip['departure_datetime'])) ?>
+                            | <?= $trip['price'] ?>€
                             | <?= $trip['nb_participants'] ?? 0 ?> passager(s)
                         </p>
                     </div>
-                    <span class="admin-badge <?= $trip['status'] ?>"><?= ucfirst($trip['status']) ?></span>
+                    <span class="admin-badge <?= $trip['status'] ?>"><?= $statusLabels[$trip['status']] ?? ucfirst($trip['status']) ?></span>
                 </div>
             <?php endforeach; ?>
         </div>

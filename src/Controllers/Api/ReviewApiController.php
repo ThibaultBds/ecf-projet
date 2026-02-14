@@ -1,9 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../BaseController.php';
-require_once __DIR__ . '/../../Models/Review.php';
-require_once __DIR__ . '/../../Models/TripParticipant.php';
-require_once __DIR__ . '/../../Core/Auth/AuthManager.php';
+namespace App\Controllers\Api;
+
+use App\Controllers\BaseController;
+use App\Models\Review;
+use App\Models\TripParticipant;
+use App\Core\Auth\AuthManager;
+use Exception;
 
 class ReviewApiController extends BaseController
 {
@@ -14,19 +17,18 @@ class ReviewApiController extends BaseController
     {
         $userId = AuthManager::id();
         $tripId = (int) ($_POST['trip_id'] ?? 0);
-        $reviewedId = (int) ($_POST['reviewed_id'] ?? 0);
-        $note = (int) ($_POST['note'] ?? 0);
-        $commentaire = trim($_POST['commentaire'] ?? '');
-        $isProblem = isset($_POST['is_problem']);
+        $driverId = (int) ($_POST['driver_id'] ?? 0);
+        $rating = (int) ($_POST['rating'] ?? 0);
+        $comment = trim($_POST['comment'] ?? '');
 
         // Validation
-        if ($note < 1 || $note > 5) {
+        if ($rating < 1 || $rating > 5) {
             $_SESSION['flash_error'] = 'La note doit être entre 1 et 5.';
             header('Location: /my-trips');
             exit;
         }
 
-        if (strlen($commentaire) > 1000) {
+        if (strlen($comment) > 1000) {
             $_SESSION['flash_error'] = 'Le commentaire ne doit pas dépasser 1000 caractères.';
             header('Location: /my-trips');
             exit;
@@ -46,35 +48,19 @@ class ReviewApiController extends BaseController
         }
 
         try {
-            BaseModel::beginTransaction();
-
             // Créer l'avis
             Review::create([
                 'trip_id' => $tripId,
                 'reviewer_id' => $userId,
-                'reviewed_id' => $reviewedId,
-                'note' => $note,
-                'commentaire' => $commentaire,
-                'status' => 'en_attente'
+                'driver_id' => $driverId,
+                'rating' => $rating,
+                'comment' => $comment,
+                'status' => 'pending'
             ]);
-
-            // Si problème signalé, créer un signalement
-            if ($isProblem) {
-                BaseModel::query(
-                    "INSERT INTO reports (trip_id, user_id, type, message, status) VALUES (?, ?, 'avis', ?, 'ouvert')",
-                    [$tripId, $userId, $commentaire]
-                );
-            }
-
-            // Marquer comme noté
-            TripParticipant::markReviewed($tripId, $userId);
-
-            BaseModel::commit();
 
             header('Location: /my-trips?success=Avis envoyé avec succès !');
             exit;
         } catch (Exception $e) {
-            BaseModel::rollback();
             error_log("Erreur soumission avis : " . $e->getMessage());
             $_SESSION['flash_error'] = 'Erreur lors de l\'envoi de l\'avis.';
             header('Location: /my-trips');

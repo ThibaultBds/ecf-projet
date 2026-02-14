@@ -1,9 +1,7 @@
 <?php
 
-/**
- * Middleware de protection CSRF
- * Vérifie le token CSRF sur les requêtes POST
- */
+namespace App\Middleware;
+
 class CsrfMiddleware
 {
     /**

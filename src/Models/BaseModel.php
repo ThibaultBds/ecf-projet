@@ -1,11 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../Core/Database.php';
+namespace App\Models;
 
-/**
- * Classe de base pour tous les modèles
- * Pattern Active Record simplifié
- */
+use App\Core\Database;
+
 abstract class BaseModel
 {
     protected static $table;
@@ -23,7 +21,7 @@ abstract class BaseModel
     /**
      * Exécuter une requête préparée
      */
-    protected static function query($sql, $params = [])
+    public static function query($sql, $params = [])
     {
         $pdo = static::getConnection();
         $stmt = $pdo->prepare($sql);

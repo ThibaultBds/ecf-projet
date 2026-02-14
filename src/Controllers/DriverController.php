@@ -1,10 +1,14 @@
 <?php
 
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../Models/Trip.php';
-require_once __DIR__ . '/../Models/Vehicle.php';
-require_once __DIR__ . '/../Models/User.php';
-require_once __DIR__ . '/../Core/Auth/AuthManager.php';
+namespace App\Controllers;
+
+use App\Core\Auth\AuthManager;
+use App\Core\Database;
+use App\Models\User;
+use App\Models\Trip;
+use App\Models\Vehicle;
+use App\Models\BaseModel;
+use Exception;
 
 class DriverController extends BaseController
 {
@@ -41,6 +45,28 @@ class DriverController extends BaseController
     }
 
     /**
+     * Trouver ou créer une ville, retourne son city_id
+     */
+    private function findOrCreateCity($cityName)
+    {
+        $result = BaseModel::query(
+            "SELECT city_id FROM cities WHERE name = ? LIMIT 1",
+            [trim($cityName)]
+        )->fetch();
+
+        if ($result) {
+            return $result['city_id'];
+        }
+
+        BaseModel::query(
+            "INSERT INTO cities (name) VALUES (?)",
+            [trim($cityName)]
+        );
+
+        return Database::getInstance()->getConnection()->lastInsertId();
+    }
+
+    /**
      * Enregistrer un nouveau trajet
      */
     public function storeTrip()
@@ -54,7 +80,6 @@ class DriverController extends BaseController
         $heureDepart = $_POST['heure_depart'] ?? '';
         $places = (int) ($_POST['places'] ?? 0);
         $prix = (float) ($_POST['prix'] ?? 0);
-        $description = trim($_POST['description'] ?? '');
 
         // Validation
         if (empty($villeDepart) || empty($villeArrivee) || empty($dateDepart) || empty($heureDepart)) {
@@ -84,8 +109,8 @@ class DriverController extends BaseController
             ]);
         }
 
-        $dateTimeDepart = $dateDepart . ' ' . $heureDepart . ':00';
-        if (strtotime($dateTimeDepart) <= time()) {
+        $departureDateTime = $dateDepart . ' ' . $heureDepart . ':00';
+        if (strtotime($departureDateTime) <= time()) {
             return $this->render('driver/create-trip', [
                 'title' => 'Créer un trajet - EcoRide',
                 'user' => $user,
@@ -108,35 +133,40 @@ class DriverController extends BaseController
         // Récupérer ou créer un véhicule
         $vehicle = Vehicle::firstByUser($userId);
         if (!$vehicle) {
-            // Créer un véhicule par défaut
             $vehicleId = Vehicle::create([
                 'user_id' => $userId,
-                'marque' => 'Non renseigné',
-                'modele' => 'Non renseigné',
-                'couleur' => 'Non renseigné',
-                'plaque' => 'AA-000-AA',
-                'energie' => 'essence',
-                'places_disponibles' => $places
+                'brand' => 'Non renseigné',
+                'model' => 'Non renseigné',
+                'color' => 'Non renseigné',
+                'license_plate' => 'AA-000-AA',
+                'energy_type' => 'essence',
+                'seats_available' => $places,
+                'registration_date' => date('Y-m-d')
             ]);
         } else {
-            $vehicleId = $vehicle['id'];
+            $vehicleId = $vehicle['vehicle_id'];
         }
 
         try {
             BaseModel::beginTransaction();
 
+            // Trouver ou créer les villes
+            $cityDepartId = $this->findOrCreateCity($villeDepart);
+            $cityArrivalId = $this->findOrCreateCity($villeArrivee);
+
+            // Estimer l'heure d'arrivée (+2h par défaut)
+            $arrivalDateTime = date('Y-m-d H:i:s', strtotime($departureDateTime) + 7200);
+
             Trip::create([
                 'chauffeur_id' => $userId,
                 'vehicle_id' => $vehicleId,
-                'ville_depart' => $villeDepart,
-                'ville_arrivee' => $villeArrivee,
-                'date_depart' => $dateTimeDepart,
-                'prix' => $prix,
-                'places_totales' => $places,
-                'places_restantes' => $places,
-                'description' => $description,
-                'is_ecological' => ($vehicle && $vehicle['energie'] === 'electrique') ? 1 : 0,
-                'status' => 'planifie'
+                'city_depart_id' => $cityDepartId,
+                'city_arrival_id' => $cityArrivalId,
+                'departure_datetime' => $departureDateTime,
+                'arrival_datetime' => $arrivalDateTime,
+                'price' => $prix,
+                'available_seats' => $places,
+                'status' => 'scheduled'
             ]);
 
             User::deductCredits($userId, $totalCost);
@@ -159,50 +189,25 @@ class DriverController extends BaseController
     }
 
     /**
-     * Afficher les préférences
+     * Afficher les préférences (table non disponible)
      */
     public function preferences()
     {
-        $userId = AuthManager::id();
-        $prefs = BaseModel::query(
-            "SELECT * FROM user_preferences WHERE user_id = ?",
-            [$userId]
-        )->fetch();
-
         $this->render('driver/preferences', [
             'title' => 'Mes Préférences - EcoRide',
-            'prefs' => $prefs ?: [],
+            'prefs' => [],
             'success' => $_SESSION['flash_success'] ?? '',
-            'error' => ''
+            'error' => 'Les préférences ne sont pas encore disponibles.'
         ]);
         unset($_SESSION['flash_success']);
     }
 
     /**
-     * Sauvegarder les préférences
+     * Sauvegarder les préférences (table non disponible)
      */
     public function savePreferences()
     {
-        $userId = AuthManager::id();
-        $musique = $_POST['musique'] ?? 'non';
-        $animaux = $_POST['animaux'] ?? 'non';
-        $discussion = $_POST['discussion'] ?? 'un_peu';
-        $fumeur = $_POST['fumeur'] ?? 'non';
-
-        try {
-            BaseModel::query(
-                "INSERT INTO user_preferences (user_id, musique, animaux, discussion, fumeur)
-                 VALUES (?, ?, ?, ?, ?)
-                 ON DUPLICATE KEY UPDATE musique=?, animaux=?, discussion=?, fumeur=?",
-                [$userId, $musique, $animaux, $discussion, $fumeur,
-                 $musique, $animaux, $discussion, $fumeur]
-            );
-
-            $_SESSION['flash_success'] = 'Préférences sauvegardées avec succès !';
-        } catch (Exception $e) {
-            error_log("Erreur préférences : " . $e->getMessage());
-        }
-
+        $_SESSION['flash_error'] = 'Les préférences ne sont pas encore disponibles.';
         header('Location: /driver/preferences');
         exit;
     }
