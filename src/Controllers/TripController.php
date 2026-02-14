@@ -1,11 +1,14 @@
 <?php
 
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../Models/Trip.php';
-require_once __DIR__ . '/../Models/TripParticipant.php';
-require_once __DIR__ . '/../Models/Review.php';
-require_once __DIR__ . '/../Models/User.php';
-require_once __DIR__ . '/../Core/Auth/AuthManager.php';
+namespace App\Controllers;
+
+use App\Models\Trip;
+use App\Models\Review;
+use App\Models\User;
+use App\Models\TripParticipant;
+use App\Models\BaseModel;
+use App\Core\Auth\AuthManager;
+use Exception;
 
 class TripController extends BaseController
 {
@@ -59,21 +62,12 @@ class TripController extends BaseController
 
         $credit_requis = (int) $covoiturage['price'];
 
-        // Décoder les préférences
-        $preferences = [
-            'fumeur' => $covoiturage['fumeur'] ?? 'non',
-            'animaux' => $covoiturage['animaux'] ?? 'non',
-            'musique' => $covoiturage['musique'] ?? 'non',
-            'discussion' => $covoiturage['discussion'] ?? 'un_peu'
-        ];
-
         $this->render('trips/show', [
             'title' => $covoiturage['ville_depart'] . ' → ' . $covoiturage['ville_arrivee'] . ' - EcoRide',
             'covoiturage' => $covoiturage,
             'reviews' => $reviews,
             'user_credit' => $user_credit,
             'credit_requis' => $credit_requis,
-            'preferences' => $preferences,
             'isParticipating' => $isParticipating
         ]);
     }
@@ -122,20 +116,20 @@ class TripController extends BaseController
 
             // Supprimer la participation
             TripParticipant::query(
-                "DELETE FROM trip_participants WHERE trip_id = ? AND passager_id = ?",
+                "DELETE FROM trip_participants WHERE trip_id = ? AND user_id = ?",
                 [$tripId, $userId]
             );
 
             // Remettre une place
             Trip::query(
-                "UPDATE trips SET places_restantes = places_restantes + 1 WHERE id = ?",
+                "UPDATE trips SET available_seats = available_seats + 1 WHERE trip_id = ?",
                 [$tripId]
             );
 
             // Rembourser les crédits
             $trip = Trip::find($tripId);
             if ($trip) {
-                User::addCredits($userId, (int) $trip['prix']);
+                User::addCredits($userId, (int) $trip['price']);
             }
 
             BaseModel::commit();
@@ -150,7 +144,7 @@ class TripController extends BaseController
      */
     private function handleUpdateTripStatus($tripId, $userId, $newStatus)
     {
-        $validStatuses = ['en_cours', 'termine', 'annule'];
+        $validStatuses = ['completed', 'cancelled'];
         if (!in_array($newStatus, $validStatuses)) {
             return;
         }
@@ -166,10 +160,10 @@ class TripController extends BaseController
             Trip::update($tripId, ['status' => $newStatus]);
 
             // Si annulation, rembourser les passagers
-            if ($newStatus === 'annule') {
+            if ($newStatus === 'cancelled') {
                 $participants = TripParticipant::byTrip($tripId);
                 foreach ($participants as $p) {
-                    User::addCredits($p['passager_id'], (int) $trip['prix']);
+                    User::addCredits($p['user_id'], (int) $trip['price']);
                 }
                 // Rembourser les frais plateforme au chauffeur
                 User::addCredits($userId, 2);

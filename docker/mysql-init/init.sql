@@ -2,6 +2,7 @@
 -- RESET BASE
 -- ==========================================
 
+DROP TABLE IF EXISTS login_attempts;
 DROP TABLE IF EXISTS credit_logs;
 DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS trip_participants;
@@ -9,7 +10,6 @@ DROP TABLE IF EXISTS trips;
 DROP TABLE IF EXISTS vehicles;
 DROP TABLE IF EXISTS cities;
 DROP TABLE IF EXISTS users;
-
 
 -- ==========================================
 -- TABLE USERS
@@ -21,11 +21,13 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     telephone VARCHAR(20),
-    credits INT DEFAULT 20,
-    role ENUM('passager', 'chauffeur', 'admin', 'employe') DEFAULT 'passager',
+    credits INT NOT NULL DEFAULT 20 CHECK (credits >= 0),
+    role ENUM('user', 'admin', 'employe') DEFAULT 'user',
+    is_driver BOOLEAN DEFAULT FALSE,
+    is_passenger BOOLEAN DEFAULT TRUE,
+    suspended BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 -- ==========================================
 -- TABLE CITIES
@@ -40,7 +42,6 @@ CREATE TABLE cities (
     UNIQUE (name, postal_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
 -- ==========================================
 -- TABLE VEHICLES
 -- ==========================================
@@ -53,7 +54,7 @@ CREATE TABLE vehicles (
     color VARCHAR(30) NOT NULL,
     license_plate VARCHAR(20) NOT NULL UNIQUE,
     energy_type ENUM('essence', 'diesel', 'electrique') NOT NULL,
-    seats_available INT NOT NULL,
+    seats_available INT NOT NULL CHECK (seats_available > 0),
     registration_date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -64,7 +65,6 @@ CREATE TABLE vehicles (
         ON UPDATE CASCADE
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 -- ==========================================
 -- TABLE TRIPS
@@ -78,10 +78,12 @@ CREATE TABLE trips (
     city_arrival_id INT NOT NULL,
     departure_datetime DATETIME NOT NULL,
     arrival_datetime DATETIME NOT NULL,
-    price DECIMAL(6,2) NOT NULL,
-    available_seats INT NOT NULL,
-    status ENUM('scheduled', 'completed', 'cancelled') DEFAULT 'scheduled',
+    price DECIMAL(6,2) NOT NULL CHECK (price > 0),
+    available_seats INT NOT NULL CHECK (available_seats >= 0),
+    status ENUM('scheduled', 'started', 'completed', 'cancelled') DEFAULT 'scheduled',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    CHECK (arrival_datetime > departure_datetime),
 
     CONSTRAINT fk_trip_chauffeur
         FOREIGN KEY (chauffeur_id)
@@ -109,7 +111,6 @@ CREATE TABLE trips (
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
 -- ==========================================
 -- TABLE TRIP_PARTICIPANTS
 -- ==========================================
@@ -134,9 +135,7 @@ CREATE TABLE trip_participants (
         ON UPDATE CASCADE,
 
     UNIQUE (trip_id, user_id)
-
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 -- ==========================================
 -- TABLE REVIEWS
@@ -151,6 +150,8 @@ CREATE TABLE reviews (
     comment TEXT,
     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CHECK (reviewer_id <> driver_id),
 
     CONSTRAINT fk_review_trip
         FOREIGN KEY (trip_id)
@@ -168,9 +169,7 @@ CREATE TABLE reviews (
         ON DELETE CASCADE,
 
     UNIQUE (trip_id, reviewer_id)
-
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 -- ==========================================
 -- TABLE CREDIT_LOGS
@@ -180,7 +179,8 @@ CREATE TABLE credit_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     trip_id INT NULL,
-    amount INT NOT NULL,
+    amount INT NOT NULL CHECK (amount <> 0),
+    type ENUM('debit', 'credit', 'refund', 'platform_fee') NOT NULL,
     reason VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -194,4 +194,16 @@ CREATE TABLE credit_logs (
         REFERENCES trips(trip_id)
         ON DELETE SET NULL
 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================
+-- TABLE LOGIN_ATTEMPTS
+-- ==========================================
+
+CREATE TABLE login_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ip_address VARCHAR(45) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    success TINYINT(1) NOT NULL DEFAULT 0,
+    attempt_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,9 +1,7 @@
 <?php
 
-/**
- * Middleware Guest
- * Redirige les utilisateurs déjà connectés (pour les pages login/register)
- */
+namespace App\Middleware;
+
 class GuestMiddleware
 {
     /**

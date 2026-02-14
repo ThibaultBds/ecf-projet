@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Core;
+
 class Router
 {
     private static $routes = [];
@@ -132,39 +134,26 @@ class Router
 
         $middlewareClass = $this->getMiddlewareClass($middlewareName);
 
-        if (!$middlewareClass || !file_exists($middlewareClass['file'])) {
+        if (!$middlewareClass || !class_exists($middlewareClass)) {
             error_log("Middleware non trouvé : $middlewareName");
             return true;
         }
 
-        require_once $middlewareClass['file'];
-        $instance = new $middlewareClass['class']();
+        $instance = new $middlewareClass();
 
         return $param ? $instance->handle($param) : $instance->handle();
     }
 
     /**
-     * Obtenir la classe middleware
+     * Obtenir la classe middleware (FQCN via PSR-4)
      */
     private function getMiddlewareClass($name)
     {
         $middlewares = [
-            'auth' => [
-                'file' => __DIR__ . '/../Middleware/AuthMiddleware.php',
-                'class' => 'AuthMiddleware'
-            ],
-            'guest' => [
-                'file' => __DIR__ . '/../Middleware/GuestMiddleware.php',
-                'class' => 'GuestMiddleware'
-            ],
-            'role' => [
-                'file' => __DIR__ . '/../Middleware/RoleMiddleware.php',
-                'class' => 'RoleMiddleware'
-            ],
-            'csrf' => [
-                'file' => __DIR__ . '/../Middleware/CsrfMiddleware.php',
-                'class' => 'CsrfMiddleware'
-            ]
+            'auth'  => \App\Middleware\AuthMiddleware::class,
+            'guest' => \App\Middleware\GuestMiddleware::class,
+            'role'  => \App\Middleware\RoleMiddleware::class,
+            'csrf'  => \App\Middleware\CsrfMiddleware::class,
         ];
 
         return $middlewares[$name] ?? null;
@@ -174,40 +163,35 @@ class Router
      * Appeler l'action du contrôleur
      */
     private function callAction($action, $params = [])
-    {
-        if (is_callable($action)) {
-            return call_user_func_array($action, array_values($params));
-        }
-
-        if (is_string($action)) {
-            list($controller, $method) = explode('@', $action);
-
-            // Gérer les namespaces (ex: Api\TripController)
-            $controllerPath = str_replace('\\', '/', $controller);
-            $controllerFile = __DIR__ . '/../Controllers/' . $controllerPath . '.php';
-
-            if (!file_exists($controllerFile)) {
-                die("Contrôleur non trouvé : $controllerFile");
-            }
-
-            require_once $controllerFile;
-
-            // Extraire le nom de classe sans namespace pour l'instanciation
-            $controllerClass = basename($controller);
-
-            if (!class_exists($controllerClass)) {
-                die("Classe de contrôleur non trouvée : $controllerClass");
-            }
-
-            $controllerInstance = new $controllerClass();
-
-            if (!method_exists($controllerInstance, $method)) {
-                die("Méthode non trouvée : $method dans $controllerClass");
-            }
-
-            return call_user_func_array([$controllerInstance, $method], array_values($params));
-        }
+{
+    if (is_callable($action)) {
+        return call_user_func_array($action, array_values($params));
     }
+
+    if (is_string($action)) {
+
+        list($controller, $method) = explode('@', $action);
+
+        // Construire le namespace complet
+        $controllerClass = "App\\Controllers\\$controller";
+
+        if (!class_exists($controllerClass)) {
+            die("Classe de contrôleur non trouvée : $controllerClass");
+        }
+
+        $controllerInstance = new $controllerClass();
+
+        if (!method_exists($controllerInstance, $method)) {
+            die("Méthode non trouvée : $method dans $controllerClass");
+        }
+
+        return call_user_func_array(
+            [$controllerInstance, $method],
+            array_values($params)
+        );
+    }
+}
+
 
     /**
      * Afficher la page 404

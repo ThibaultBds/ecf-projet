@@ -1,8 +1,9 @@
 <?php
 
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../Models/Vehicle.php';
-require_once __DIR__ . '/../Core/Auth/AuthManager.php';
+namespace App\Controllers;
+
+use App\Core\Auth\AuthManager;
+use App\Models\Vehicle;
 
 class VehicleController extends BaseController
 {
@@ -23,26 +24,26 @@ class VehicleController extends BaseController
     public function store()
     {
         $userId = AuthManager::id();
-        $marque = trim($_POST['marque'] ?? '');
-        $modele = trim($_POST['modele'] ?? '');
-        $couleur = trim($_POST['couleur'] ?? '');
-        $plaque = strtoupper(trim($_POST['plaque'] ?? ''));
-        $energie = $_POST['energie'] ?? 'essence';
-        $places = (int) ($_POST['places_disponibles'] ?? 4);
+        $brand = trim($_POST['brand'] ?? '');
+        $model = trim($_POST['model'] ?? '');
+        $color = trim($_POST['color'] ?? '');
+        $licensePlate = strtoupper(trim($_POST['license_plate'] ?? ''));
+        $energyType = $_POST['energy_type'] ?? 'essence';
+        $seatsAvailable = (int) ($_POST['seats_available'] ?? 4);
 
-        if (empty($marque) || empty($modele) || empty($couleur) || empty($plaque)) {
+        if (empty($brand) || empty($model) || empty($color) || empty($licensePlate)) {
             $_SESSION['flash_error'] = 'Veuillez remplir tous les champs.';
             header('Location: /driver/vehicles');
             exit;
         }
 
-        if (!Vehicle::isValidPlate($plaque)) {
+        if (!Vehicle::isValidPlate($licensePlate)) {
             $_SESSION['flash_error'] = 'Format de plaque invalide (ex: AB-123-CD).';
             header('Location: /driver/vehicles');
             exit;
         }
 
-        if ($places < 1 || $places > 8) {
+        if ($seatsAvailable < 1 || $seatsAvailable > 8) {
             $_SESSION['flash_error'] = 'Le nombre de places doit être entre 1 et 8.';
             header('Location: /driver/vehicles');
             exit;
@@ -50,12 +51,13 @@ class VehicleController extends BaseController
 
         Vehicle::create([
             'user_id' => $userId,
-            'marque' => $marque,
-            'modele' => $modele,
-            'couleur' => $couleur,
-            'plaque' => $plaque,
-            'energie' => $energie,
-            'places_disponibles' => $places
+            'brand' => $brand,
+            'model' => $model,
+            'color' => $color,
+            'license_plate' => $licensePlate,
+            'energy_type' => $energyType,
+            'seats_available' => $seatsAvailable,
+            'registration_date' => date('Y-m-d')
         ]);
 
         $_SESSION['flash_success'] = 'Véhicule ajouté avec succès !';
@@ -74,21 +76,21 @@ class VehicleController extends BaseController
             exit;
         }
 
-        $plaque = strtoupper(trim($_POST['plaque'] ?? ''));
-        if (!empty($plaque) && !Vehicle::isValidPlate($plaque)) {
+        $licensePlate = strtoupper(trim($_POST['license_plate'] ?? ''));
+        if (!empty($licensePlate) && !Vehicle::isValidPlate($licensePlate)) {
             $_SESSION['flash_error'] = 'Format de plaque invalide.';
             header('Location: /driver/vehicles');
             exit;
         }
 
         $data = [];
-        foreach (['marque', 'modele', 'couleur', 'plaque', 'energie'] as $field) {
+        foreach (['brand', 'model', 'color', 'license_plate', 'energy_type'] as $field) {
             if (!empty($_POST[$field])) {
-                $data[$field] = $field === 'plaque' ? strtoupper(trim($_POST[$field])) : trim($_POST[$field]);
+                $data[$field] = $field === 'license_plate' ? strtoupper(trim($_POST[$field])) : trim($_POST[$field]);
             }
         }
-        if (isset($_POST['places_disponibles'])) {
-            $data['places_disponibles'] = max(1, min(8, (int) $_POST['places_disponibles']));
+        if (isset($_POST['seats_available'])) {
+            $data['seats_available'] = max(1, min(8, (int) $_POST['seats_available']));
         }
 
         if (!empty($data)) {

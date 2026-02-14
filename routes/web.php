@@ -1,12 +1,6 @@
 <?php
 
-/**
- * Définition de toutes les routes de l'application EcoRide
- */
-
-// -------------------------------------------------------
-// Routes publiques
-// -------------------------------------------------------
+use App\Core\Router;
 
 Router::get('/', 'HomeController@index');
 
@@ -82,7 +76,7 @@ Router::group(['middleware' => 'auth'], function () {
 // Routes admin
 // -------------------------------------------------------
 
-Router::group(['middleware' => 'role:Administrateur'], function () {
+Router::group(['middleware' => 'role:admin'], function () {
     Router::get('/admin', 'AdminController@index');
     Router::post('/admin/suspend-user', 'AdminController@suspendUser');
     Router::post('/admin/activate-user', 'AdminController@activateUser');
@@ -93,6 +87,8 @@ Router::group(['middleware' => 'role:Administrateur'], function () {
 // Routes modérateur
 // -------------------------------------------------------
 
-Router::group(['middleware' => 'role:Moderateur'], function () {
+Router::group(['middleware' => 'role:employe'], function () {
     Router::get('/moderator', 'ModeratorController@index');
+    Router::post('/moderator/approve-review', 'ModeratorController@approveReview');
+    Router::post('/moderator/reject-review', 'ModeratorController@rejectReview');
 });

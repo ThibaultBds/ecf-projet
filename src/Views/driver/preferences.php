@@ -3,6 +3,10 @@
         <span class="material-icons page-icon-large">settings</span> Mes Préférences
     </h2>
 
+    <?php if (!empty($error)): ?>
+        <div class="message-error"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
+
     <?php if (!empty($success)): ?>
         <div class="message-success"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>

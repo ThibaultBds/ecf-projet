@@ -79,9 +79,18 @@
 
 <section class="presentation-entreprise">
   <h2>À propos de <span class="green">EcoRide</span></h2>
-  <p>
-    <strong>EcoRide</strong> a été imaginé pour répondre à la pollution générée par les trajets du quotidien.
-  </p>
+  <p><strong>EcoRide</strong> a été imaginé pour répondre à la pollution générée par les trajets du quotidien. Portée par une vraie ambition écologique, la plateforme propose des solutions de covoiturage accessibles à tous, que votre voiture soit écolo ou non.</p>
+  <p>Notre objectif : devenir la référence du covoiturage éco-responsable partout en France.<br> Ensemble, réduisons notre empreinte carbone, économisons, et voyageons plus intelligemment !</p>
+</section>
+
+<section class="benefits">
+  <h3>Pourquoi choisir EcoRide ?</h3>
+  <div class="benefit-list">
+    <div><span class="material-icons" aria-hidden="true">eco</span><p>Réduisez votre empreinte carbone</p></div>
+    <div><span class="material-icons" aria-hidden="true">savings</span><p>Faites des économies</p></div>
+    <div><span class="material-icons" aria-hidden="true">groups</span><p>Rencontrez des gens sympas</p></div>
+    <div><span class="material-icons" aria-hidden="true">star</span><p>Trajets fiables & sécurisés</p></div>
+  </div>
 </section>
 
 <section class="story-cards">
@@ -89,7 +98,7 @@
     <img src="/assets/images/smartcar.jpeg" alt="Covoiturage écologique" class="alt-img">
     <div class="alt-desc">
       <h4>Voyagez écologique</h4>
-      <p>Réduisez votre empreinte carbone en partageant vos trajets.</p>
+      <p>Réduisez votre empreinte carbone en partageant vos trajets. Chaque voyage en covoiturage permet d'économiser en moyenne 2,3 kg de CO2.</p>
     </div>
   </div>
 
@@ -97,7 +106,7 @@
     <img src="/assets/images/voitureencharge.jpeg" alt="Économies covoiturage" class="alt-img">
     <div class="alt-desc">
       <h4>Économisez sur vos trajets</h4>
-      <p>Divisez vos frais de transport par le nombre de passagers.</p>
+      <p>Divisez vos frais de transport par le nombre de passagers. En moyenne, nos utilisateurs économisent 60% sur leurs frais de déplacement.</p>
     </div>
   </div>
 
@@ -105,7 +114,7 @@
     <img src="/assets/images/pub.jpg" alt="Communauté EcoRide" class="alt-img">
     <div class="alt-desc">
       <h4>Rejoignez notre communauté</h4>
-      <p>Créez des liens et voyagez en toute confiance.</p>
+      <p>Plus de 10 000 utilisateurs actifs partagent leurs trajets quotidiennement. Créez des liens et voyagez en toute confiance.</p>
     </div>
   </div>
 </section>

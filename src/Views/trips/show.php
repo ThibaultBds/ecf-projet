@@ -47,25 +47,6 @@
             </div>
         </div>
 
-        <!-- Préférences -->
-        <div class="preferences-section" style="margin-bottom:30px;">
-            <h3 style="border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px;">Préférences du conducteur</h3>
-            <div style="display:flex;gap:20px;flex-wrap:wrap;">
-                <span>
-                    <span class="material-icons" style="vertical-align:middle;"><?= ($preferences['fumeur'] ?? 'non') === 'oui' ? 'smoke_free' : 'smoking_rooms' ?></span>
-                    <?= ($preferences['fumeur'] ?? 'non') === 'oui' ? 'Non-fumeur' : 'Fumeur accepté' ?>
-                </span>
-                <span>
-                    <span class="material-icons" style="vertical-align:middle;"><?= ($preferences['animaux'] ?? 'non') === 'oui' ? 'pets' : 'do_not_disturb_on' ?></span>
-                    <?= ($preferences['animaux'] ?? 'non') === 'oui' ? 'Animaux acceptés' : 'Pas d\'animaux' ?>
-                </span>
-                <span>
-                    <span class="material-icons" style="vertical-align:middle;">music_note</span>
-                    <?= ($preferences['musique'] ?? 'non') === 'oui' ? 'Musique : oui' : 'Musique : non' ?>
-                </span>
-            </div>
-        </div>
-
         <!-- Avis -->
         <div class="reviews-section" style="margin-bottom:30px;">
             <h3 style="border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px;">Avis sur le conducteur</h3>

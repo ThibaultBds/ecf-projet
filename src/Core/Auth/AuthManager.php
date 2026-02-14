@@ -1,121 +1,102 @@
 <?php
 
-require_once __DIR__ . '/../Database.php';
+namespace App\Core\Auth;
 
-/**
- * Gestionnaire d'authentification centralisé
- * Gère login, logout, vérification de session et rate limiting
- */
+use App\Core\Database;
+use PDO;
+use Exception;
+
 class AuthManager
 {
     private static $maxLoginAttempts = 5;
     private static $lockoutDuration = 900; // 15 minutes
 
-    /**
-     * Vérifier si l'utilisateur est connecté
-     */
+    // -------------------------------------------------------
+    // Vérification session
+    // -------------------------------------------------------
+
     public static function check()
     {
         return isset($_SESSION['user']) && isset($_SESSION['user']['id']);
     }
 
-    /**
-     * Obtenir l'ID de l'utilisateur connecté
-     */
     public static function id()
     {
         return $_SESSION['user']['id'] ?? null;
     }
 
-    /**
-     * Obtenir les données de l'utilisateur connecté
-     */
     public static function user()
     {
         return $_SESSION['user'] ?? null;
     }
 
-    /**
-     * Vérifier si l'utilisateur a un rôle spécifique
-     */
     public static function hasRole($role)
     {
         if (!self::check()) {
             return false;
         }
 
-        $userRole = strtolower($_SESSION['user']['role'] ?? '');
+        $userRole = strtolower($_SESSION['user']['role']);
         $requiredRole = strtolower($role);
 
         // Admin a accès à tout
-        if ($userRole === 'administrateur') {
+        if ($userRole === 'admin') {
             return true;
         }
 
         return $userRole === $requiredRole;
     }
 
-    /**
-     * Tenter une connexion
-     *
-     * @return array ['success' => bool, 'message' => string]
-     */
+    // -------------------------------------------------------
+    // LOGIN
+    // -------------------------------------------------------
+
     public static function login($email, $password)
     {
         $pdo = Database::getInstance()->getConnection();
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
-        // Vérifier le rate limiting
         if (!self::checkLoginAttempts($pdo, $ip)) {
             return [
                 'success' => false,
-                'message' => 'Trop de tentatives de connexion. Réessayez dans 15 minutes.'
+                'message' => 'Trop de tentatives. Réessayez dans 15 minutes.'
             ];
         }
 
-        // Valider l'email
         $email = strtolower(trim($email));
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             self::logAttempt($pdo, $ip, $email, false);
-            return ['success' => false, 'message' => 'Adresse email invalide.'];
+            return ['success' => false, 'message' => 'Email invalide.'];
         }
 
-        // Rechercher l'utilisateur
         $stmt = $pdo->prepare(
-            "SELECT id, email, password, pseudo, role, credits, status, user_type
+            "SELECT user_id, username, email, password, role, credits
              FROM users WHERE email = ? LIMIT 1"
         );
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
 
-        // Vérifier le mot de passe
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if (!$user || !password_verify($password, $user['password'])) {
             self::logAttempt($pdo, $ip, $email, false);
             return ['success' => false, 'message' => 'Identifiants incorrects.'];
-        }
-
-        // Vérifier si le compte est actif
-        if ($user['status'] !== 'actif') {
-            self::logAttempt($pdo, $ip, $email, false);
-            return ['success' => false, 'message' => 'Votre compte a été suspendu.'];
         }
 
         // Connexion réussie
         self::logAttempt($pdo, $ip, $email, true);
         self::clearAttempts($pdo, $ip);
 
-        // Créer la session
         session_regenerate_id(true);
+
         $_SESSION['user'] = [
-            'id' => (int) $user['id'],
+            'id' => (int) $user['user_id'],
+            'username' => $user['username'],
             'email' => $user['email'],
-            'pseudo' => $user['pseudo'],
             'role' => $user['role'],
-            'type' => $user['user_type'] ?? 'passager',
             'credits' => (int) $user['credits']
         ];
 
-        // Générer un token CSRF
         if (!isset($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
@@ -123,53 +104,40 @@ class AuthManager
         return ['success' => true, 'message' => 'Connexion réussie.'];
     }
 
-    /**
-     * Déconnecter l'utilisateur
-     */
+    // -------------------------------------------------------
+    // LOGOUT
+    // -------------------------------------------------------
+
     public static function logout()
     {
-        // Logger la déconnexion
-        if (self::check()) {
-            try {
-                $pdo = Database::getInstance()->getConnection();
-                $stmt = $pdo->prepare(
-                    "INSERT INTO activity_logs (user_id, action, details, ip_address)
-                     VALUES (?, 'logout', 'Déconnexion', ?)"
-                );
-                $stmt->execute([
-                    $_SESSION['user']['id'],
-                    $_SERVER['REMOTE_ADDR'] ?? 'unknown'
-                ]);
-            } catch (Exception $e) {
-                // Ne pas bloquer la déconnexion en cas d'erreur de log
-            }
-        }
-
-        // Détruire la session
         session_unset();
         session_destroy();
     }
 
-    /**
-     * Obtenir l'URL de redirection selon le rôle
-     */
+    // -------------------------------------------------------
+    // Redirection selon rôle
+    // -------------------------------------------------------
+
     public static function redirectUrlByRole()
     {
-        $role = strtolower($_SESSION['user']['role'] ?? 'utilisateur');
+        if (!self::check()) {
+            return '/login';
+        }
+
+        $role = $_SESSION['user']['role'];
 
         switch ($role) {
-            case 'administrateur':
+            case 'admin':
                 return '/admin';
-            case 'moderateur':
+            case 'employe':
                 return '/moderator';
+            case 'chauffeur':
+                return '/driver';
             default:
                 return '/profile';
         }
     }
 
-    /**
-     * Récupérer l'URL initialement demandée (avant redirection vers login)
-     */
     public static function intendedUrl($default = '/profile')
     {
         $url = $_SESSION['intended_url'] ?? $default;
@@ -177,9 +145,10 @@ class AuthManager
         return $url;
     }
 
-    /**
-     * Rafraîchir les crédits depuis la BDD
-     */
+    // -------------------------------------------------------
+    // Rafraîchir crédits
+    // -------------------------------------------------------
+
     public static function refreshCredits()
     {
         if (!self::check()) {
@@ -187,9 +156,13 @@ class AuthManager
         }
 
         $pdo = Database::getInstance()->getConnection();
-        $stmt = $pdo->prepare("SELECT credits FROM users WHERE id = ?");
+
+        $stmt = $pdo->prepare(
+            "SELECT credits FROM users WHERE user_id = ?"
+        );
+
         $stmt->execute([self::id()]);
-        $result = $stmt->fetch();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($result) {
             $_SESSION['user']['credits'] = (int) $result['credits'];
@@ -197,18 +170,20 @@ class AuthManager
     }
 
     // -------------------------------------------------------
-    // Rate Limiting
+    // RATE LIMITING
     // -------------------------------------------------------
 
     private static function checkLoginAttempts($pdo, $ip)
     {
         $stmt = $pdo->prepare(
             "SELECT COUNT(*) as attempts FROM login_attempts
-             WHERE ip_address = ? AND success = FALSE
+             WHERE ip_address = ?
+             AND success = 0
              AND attempt_time > DATE_SUB(NOW(), INTERVAL ? SECOND)"
         );
+
         $stmt->execute([$ip, self::$lockoutDuration]);
-        $result = $stmt->fetch();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $result['attempts'] < self::$maxLoginAttempts;
     }
@@ -217,27 +192,29 @@ class AuthManager
     {
         try {
             $stmt = $pdo->prepare(
-                "INSERT INTO login_attempts (ip_address, email, success, user_agent)
-                 VALUES (?, ?, ?, ?)"
+                "INSERT INTO login_attempts (ip_address, email, success)
+                 VALUES (?, ?, ?)"
             );
+
             $stmt->execute([
                 $ip,
                 $email,
-                $success ? 1 : 0,
-                $_SERVER['HTTP_USER_AGENT'] ?? ''
+                $success ? 1 : 0
             ]);
         } catch (Exception $e) {
-            // Table login_attempts peut ne pas exister - ignorer silencieusement
+            // Ignore si table absente
         }
     }
 
     private static function clearAttempts($pdo, $ip)
     {
         try {
-            $stmt = $pdo->prepare("DELETE FROM login_attempts WHERE ip_address = ?");
+            $stmt = $pdo->prepare(
+                "DELETE FROM login_attempts WHERE ip_address = ?"
+            );
             $stmt->execute([$ip]);
         } catch (Exception $e) {
-            // Ignorer
+            // Ignore
         }
     }
 }

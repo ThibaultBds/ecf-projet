@@ -1,9 +1,9 @@
 <?php
 
-/**
- * Middleware de vérification de rôle
- * Vérifie si l'utilisateur a le rôle requis
- */
+namespace App\Middleware;
+
+use App\Core\Router;
+
 class RoleMiddleware
 {
     /**
@@ -30,7 +30,7 @@ class RoleMiddleware
         // Vérifier le rôle
         if ($userRole !== $requiredRole) {
             // Si admin, autoriser tout
-            if ($userRole === 'administrateur') {
+            if ($userRole === 'admin') {
                 return true;
             }
 

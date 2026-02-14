@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Controllers;
+
 class ContactController extends BaseController
 {
     public function show()
@@ -49,20 +51,6 @@ class ContactController extends BaseController
                 'success' => '',
                 'old' => $_POST
             ]);
-        }
-
-        // Log dans activity_logs
-        try {
-            $pdo = Database::getInstance()->getConnection();
-            $stmt = $pdo->prepare("
-                INSERT INTO activity_logs (user_id, action, details, ip_address)
-                VALUES (?, ?, ?, ?)
-            ");
-            $userId = $_SESSION['user']['id'] ?? null;
-            $details = "De: $email, Sujet: $sujet";
-            $stmt->execute([$userId, 'Contact formulaire', $details, $_SERVER['REMOTE_ADDR'] ?? '']);
-        } catch (Exception $e) {
-            // Silencieux
         }
 
         $_SESSION['flash_success'] = 'Votre message a été envoyé avec succès ! Nous vous recontacterons bientôt.';

@@ -17,34 +17,33 @@
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
 
             <div class="input-group">
-                <label for="marque">Marque *</label>
-                <input type="text" id="marque" name="marque" required placeholder="Ex: Renault">
+                <label for="brand">Marque *</label>
+                <input type="text" id="brand" name="brand" required placeholder="Ex: Renault">
             </div>
             <div class="input-group">
-                <label for="modele">Modèle *</label>
-                <input type="text" id="modele" name="modele" required placeholder="Ex: Clio">
+                <label for="model">Modèle *</label>
+                <input type="text" id="model" name="model" required placeholder="Ex: Clio">
             </div>
             <div class="input-group">
-                <label for="couleur">Couleur *</label>
-                <input type="text" id="couleur" name="couleur" required placeholder="Ex: Bleu">
+                <label for="color">Couleur *</label>
+                <input type="text" id="color" name="color" required placeholder="Ex: Bleu">
             </div>
             <div class="input-group">
-                <label for="plaque">Plaque d'immatriculation * (format: AB-123-CD)</label>
-                <input type="text" id="plaque" name="plaque" required placeholder="AB-123-CD"
+                <label for="license_plate">Plaque d'immatriculation * (format: AB-123-CD)</label>
+                <input type="text" id="license_plate" name="license_plate" required placeholder="AB-123-CD"
                        pattern="[A-Z]{2}-[0-9]{3}-[A-Z]{2}" style="text-transform:uppercase;">
             </div>
             <div class="input-group">
-                <label for="energie">Type d'énergie</label>
-                <select id="energie" name="energie" class="select-field">
+                <label for="energy_type">Type d'énergie</label>
+                <select id="energy_type" name="energy_type" class="select-field">
                     <option value="essence">Essence</option>
                     <option value="diesel">Diesel</option>
                     <option value="electrique">Électrique</option>
-                    <option value="hybride">Hybride</option>
                 </select>
             </div>
             <div class="input-group">
-                <label for="places_disponibles">Places disponibles (1-8)</label>
-                <input type="number" id="places_disponibles" name="places_disponibles" min="1" max="8" value="4">
+                <label for="seats_available">Places disponibles (1-8)</label>
+                <input type="number" id="seats_available" name="seats_available" min="1" max="8" value="4">
             </div>
 
             <button type="submit" class="btn-primary">Ajouter le véhicule</button>
@@ -60,21 +59,21 @@
                     <div class="ride-content">
                         <p class="ride-title">
                             <span class="material-icons ride-icon">directions_car</span>
-                            <?= htmlspecialchars($v['marque']) ?> <?= htmlspecialchars($v['modele']) ?>
+                            <?= htmlspecialchars($v['brand']) ?> <?= htmlspecialchars($v['model']) ?>
                         </p>
                         <p class="small-muted">
-                            Couleur : <?= htmlspecialchars($v['couleur']) ?>
-                            | Plaque : <?= htmlspecialchars($v['plaque']) ?>
-                            | <?= ucfirst(htmlspecialchars($v['energie'])) ?>
-                            | <?= $v['places_disponibles'] ?> places
+                            Couleur : <?= htmlspecialchars($v['color']) ?>
+                            | Plaque : <?= htmlspecialchars($v['license_plate']) ?>
+                            | <?= ucfirst(htmlspecialchars($v['energy_type'])) ?>
+                            | <?= $v['seats_available'] ?> places
                         </p>
-                        <?php if ($v['energie'] === 'electrique'): ?>
+                        <?php if ($v['energy_type'] === 'electrique'): ?>
                             <span class="eco-badge" style="display:inline-block;margin-top:5px;">⚡ Écologique</span>
                         <?php endif; ?>
                     </div>
                     <form method="POST" action="/driver/vehicles/delete" style="display:inline;">
                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                        <input type="hidden" name="vehicle_id" value="<?= $v['id'] ?>">
+                        <input type="hidden" name="vehicle_id" value="<?= $v['vehicle_id'] ?>">
                         <button type="submit" class="btn-danger" onclick="return confirm('Supprimer ce véhicule ?');">Supprimer</button>
                     </form>
                 </div>

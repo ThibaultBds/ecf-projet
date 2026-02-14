@@ -60,12 +60,6 @@
                        value="<?= htmlspecialchars($_POST['prix'] ?? '') ?>">
             </div>
 
-            <div class="input-group">
-                <label for="description">Description (optionnel, max 500 caractères)</label>
-                <textarea id="description" name="description" maxlength="500" rows="3"
-                          placeholder="Détails du trajet, point de rendez-vous..."><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
-            </div>
-
             <button type="submit" class="btn-primary" style="width:100%;padding:15px;">
                 <span class="material-icons" style="vertical-align:middle;">add_circle</span> Créer le trajet
             </button>

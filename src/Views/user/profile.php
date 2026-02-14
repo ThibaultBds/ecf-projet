@@ -1,3 +1,16 @@
+<?php
+$statusLabels = [
+    'scheduled' => 'Planifié',
+    'started' => 'En cours',
+    'completed' => 'Terminé',
+    'cancelled' => 'Annulé',
+];
+$roleLabels = [
+    'user' => 'Utilisateur',
+    'admin' => 'Administrateur',
+    'employe' => 'Employé',
+];
+?>
 <main class="page-wrapper">
     <h2 class="profile-hero">
         <span class="material-icons profile-icon">account_circle</span> Mon Profil
@@ -26,7 +39,7 @@
                 <span class="material-icons profile-icon">person</span>
                 <div>
                     <strong class="profile-strong">Pseudo</strong>
-                    <p class="profile-value"><?= htmlspecialchars($userData['pseudo'] ?? '') ?></p>
+                    <p class="profile-value"><?= htmlspecialchars($userData['username'] ?? '') ?></p>
                 </div>
             </div>
             <div class="profile-item">
@@ -35,18 +48,7 @@
                     <strong class="profile-strong">Rôle</strong>
                     <p class="profile-value">
                         <span class="admin-badge <?= strtolower($userData['role'] ?? '') ?>">
-                            <?= htmlspecialchars($userData['role'] ?? '') ?>
-                        </span>
-                    </p>
-                </div>
-            </div>
-            <div class="profile-item">
-                <span class="material-icons profile-icon">check_circle</span>
-                <div>
-                    <strong class="profile-strong">Statut</strong>
-                    <p class="profile-value">
-                        <span class="admin-badge <?= htmlspecialchars($userData['status'] ?? '') ?>">
-                            <?= htmlspecialchars($userData['status'] ?? '') ?>
+                            <?= $roleLabels[$userData['role'] ?? ''] ?? htmlspecialchars($userData['role'] ?? '') ?>
                         </span>
                     </p>
                 </div>
@@ -58,30 +60,18 @@
                     <p class="profile-value profile-credits"><?= (int)($userData['credits'] ?? 0) ?></p>
                 </div>
             </div>
-            <div class="profile-item">
-                <span class="material-icons profile-icon">directions_car</span>
-                <div>
-                    <strong class="profile-strong">Type d'utilisateur</strong>
-                    <p class="profile-value">
-                        <span class="admin-badge <?= htmlspecialchars($userData['user_type'] ?? 'passager') ?>">
-                            <?= htmlspecialchars($userData['user_type'] ?? 'passager') ?>
-                        </span>
-                    </p>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Modifier type d'utilisateur -->
+    <!-- Modifier le rôle -->
     <div class="profile-box">
-        <h3 class="profil-titre">Modifier mon type d'utilisateur</h3>
+        <h3 class="profil-titre">Modifier mon rôle</h3>
         <form method="POST" action="/profile/update" class="form-max">
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-            <label for="user_type" class="form-label">Je suis :</label>
-            <select name="user_type" id="user_type" required class="select-field">
-                <option value="passager" <?= ($userData['user_type'] ?? 'passager') === 'passager' ? 'selected' : '' ?>>Passager</option>
-                <option value="chauffeur" <?= ($userData['user_type'] ?? 'passager') === 'chauffeur' ? 'selected' : '' ?>>Chauffeur</option>
-                <option value="les_deux" <?= ($userData['user_type'] ?? 'passager') === 'les_deux' ? 'selected' : '' ?>>Les deux</option>
+            <label for="role" class="form-label">Je suis :</label>
+            <select name="role" id="role" required class="select-field">
+                <option value="passager" <?= ($userData['role'] ?? 'passager') === 'passager' ? 'selected' : '' ?>>Passager</option>
+                <option value="chauffeur" <?= ($userData['role'] ?? 'passager') === 'chauffeur' ? 'selected' : '' ?>>Chauffeur</option>
             </select>
             <button type="submit" class="btn-primary">Mettre à jour</button>
         </form>
@@ -92,8 +82,8 @@
         <h3 class="profil-titre">Gestion de mon compte</h3>
         <div class="profil-liens-grid">
             <?php
-            $user_type = $userData['user_type'] ?? 'passager';
-            $is_driver = ($user_type === 'chauffeur' || $user_type === 'les_deux');
+            $role = $userData['role'] ?? 'passager';
+            $is_driver = ($role === 'chauffeur');
             ?>
 
             <?php if ($is_driver): ?>
@@ -132,10 +122,10 @@
                             <span class="trajet-ville">
                                 <?= htmlspecialchars($t['ville_depart']) ?> → <?= htmlspecialchars($t['ville_arrivee']) ?>
                             </span>
-                            <span class="trajet-date"><?= date('d/m/Y', strtotime($t['date_depart'])) ?></span>
+                            <span class="trajet-date"><?= date('d/m/Y', strtotime($t['departure_datetime'])) ?></span>
                         </div>
                         <span class="admin-badge <?= htmlspecialchars($t['status']) ?>">
-                            <?= htmlspecialchars($t['status']) ?>
+                            <?= $statusLabels[$t['status']] ?? htmlspecialchars($t['status']) ?>
                         </span>
                     </div>
                 <?php endforeach; ?>

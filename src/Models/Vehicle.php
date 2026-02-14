@@ -1,10 +1,12 @@
 <?php
 
-require_once __DIR__ . '/BaseModel.php';
+namespace App\Models;
+
 
 class Vehicle extends BaseModel
 {
     protected static $table = 'vehicles';
+    protected static $primaryKey = 'vehicle_id';
 
     /**
      * Récupérer les véhicules d'un utilisateur
