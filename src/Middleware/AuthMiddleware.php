@@ -1,9 +1,7 @@
 <?php
 
-/**
- * Middleware d'authentification
- * Vérifie si l'utilisateur est connecté
- */
+namespace App\Middleware;
+
 class AuthMiddleware
 {
     /**

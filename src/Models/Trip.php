@@ -1,10 +1,11 @@
 <?php
 
-require_once __DIR__ . '/BaseModel.php';
+namespace App\Models;
 
 class Trip extends BaseModel
 {
     protected static $table = 'trips';
+    protected static $primaryKey = 'trip_id';
 
     /**
      * Rechercher des trajets avec filtres
@@ -102,10 +103,14 @@ class Trip extends BaseModel
     {
         return static::query(
             "SELECT t.*,
-                    (SELECT COUNT(*) 
-                     FROM trip_participants tp 
+                    cd.name AS ville_depart,
+                    ca.name AS ville_arrivee,
+                    (SELECT COUNT(*)
+                     FROM trip_participants tp
                      WHERE tp.trip_id = t.trip_id) AS nb_participants
              FROM trips t
+             JOIN cities cd ON t.city_depart_id = cd.city_id
+             JOIN cities ca ON t.city_arrival_id = ca.city_id
              WHERE t.chauffeur_id = ?
              ORDER BY t.departure_datetime DESC",
             [$driverId]
@@ -118,11 +123,15 @@ class Trip extends BaseModel
     public static function byPassenger($passengerId)
     {
         return static::query(
-            "SELECT t.*, 
-                    u.username AS conducteur
+            "SELECT t.*,
+                    u.username AS conducteur,
+                    cd.name AS ville_depart,
+                    ca.name AS ville_arrivee
              FROM trips t
              JOIN trip_participants tp ON t.trip_id = tp.trip_id
              JOIN users u ON t.chauffeur_id = u.user_id
+             JOIN cities cd ON t.city_depart_id = cd.city_id
+             JOIN cities ca ON t.city_arrival_id = ca.city_id
              WHERE tp.user_id = ?
              ORDER BY t.departure_datetime DESC",
             [$passengerId]

@@ -1,8 +1,9 @@
 <?php
 
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../Models/User.php';
-require_once __DIR__ . '/../Core/Auth/AuthManager.php';
+namespace App\Controllers;
+
+use App\Core\Auth\AuthManager;
+use App\Models\User;
 
 class UserController extends BaseController
 {
@@ -30,19 +31,19 @@ class UserController extends BaseController
     }
 
     /**
-     * Mettre à jour le type d'utilisateur
+     * Mettre à jour le rôle de l'utilisateur
      */
     public function update()
     {
         $userId = AuthManager::id();
-        $userType = $_POST['user_type'] ?? '';
+        $role = $_POST['role'] ?? '';
 
-        if (in_array($userType, ['passager', 'chauffeur', 'les_deux'])) {
-            User::update($userId, ['user_type' => $userType]);
-            $_SESSION['user']['type'] = $userType;
+        if (in_array($role, ['passager', 'chauffeur'])) {
+            User::update($userId, ['role' => $role]);
+            $_SESSION['user']['role'] = $role;
             $_SESSION['flash_success'] = 'Profil mis à jour avec succès !';
         } else {
-            $_SESSION['flash_error'] = 'Type d\'utilisateur invalide.';
+            $_SESSION['flash_error'] = 'Rôle invalide.';
         }
 
         header('Location: /profile');

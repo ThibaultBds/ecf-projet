@@ -1,9 +1,9 @@
 <?php
 
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../Models/User.php';
-require_once __DIR__ . '/../Models/BaseModel.php';
-require_once __DIR__ . '/../Core/Auth/AuthManager.php';
+namespace App\Controllers;
+
+use App\Models\User;
+use App\Models\BaseModel;
 
 class AdminController extends BaseController
 {
@@ -11,15 +11,15 @@ class AdminController extends BaseController
     {
         // Stats
         $stats = [
-            'users' => User::count("status = 'actif'"),
-            'trips' => BaseModel::query("SELECT COUNT(*) as total FROM trips WHERE status = 'planifie'")->fetch()['total'],
-            'reports' => BaseModel::query("SELECT COUNT(*) as total FROM reports WHERE status IN ('ouvert','en_cours')")->fetch()['total'] ?? 0,
-            'platform_credits' => BaseModel::query("SELECT COALESCE(SUM(credits), 0) as total FROM users")->fetch()['total']
+            'users' => User::count(),
+            'trips' => (int) BaseModel::query("SELECT COUNT(*) as total FROM trips WHERE status = 'scheduled'")->fetch()['total'],
+            'pending_reviews' => (int) BaseModel::query("SELECT COUNT(*) as total FROM reviews WHERE status = 'pending'")->fetch()['total'],
+            'platform_credits' => (int) BaseModel::query("SELECT COALESCE(SUM(credits), 0) as total FROM users")->fetch()['total']
         ];
 
         // Derniers utilisateurs
         $users = BaseModel::query(
-            "SELECT * FROM users ORDER BY id DESC LIMIT 20"
+            "SELECT * FROM users ORDER BY user_id DESC LIMIT 20"
         )->fetchAll();
 
         $this->render('admin/index', [
@@ -35,10 +35,12 @@ class AdminController extends BaseController
     public function suspendUser()
     {
         $userId = (int) ($_POST['user_id'] ?? 0);
-        if ($userId) {
-            User::update($userId, ['status' => 'suspendu']);
+
+        if ($userId > 0) {
+            User::update($userId, ['suspended' => 1]);
             $_SESSION['flash_success'] = 'Utilisateur suspendu.';
         }
+
         header('Location: /admin');
         exit;
     }
@@ -46,10 +48,12 @@ class AdminController extends BaseController
     public function activateUser()
     {
         $userId = (int) ($_POST['user_id'] ?? 0);
-        if ($userId) {
-            User::update($userId, ['status' => 'actif']);
+
+        if ($userId > 0) {
+            User::update($userId, ['suspended' => 0]);
             $_SESSION['flash_success'] = 'Utilisateur réactivé.';
         }
+
         header('Location: /admin');
         exit;
     }
@@ -58,38 +62,36 @@ class AdminController extends BaseController
     {
         $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
-        $pseudo = trim($_POST['pseudo'] ?? '');
-        $role = $_POST['role'] ?? 'Moderateur';
+        $username = trim($_POST['username'] ?? '');
+        $role = $_POST['role'] ?? 'employe';
 
-        if (empty($email) || empty($password) || empty($pseudo)) {
+        if (empty($email) || empty($password) || empty($username)) {
             $_SESSION['flash_error'] = 'Veuillez remplir tous les champs.';
             header('Location: /admin');
             exit;
         }
 
-        if (!in_array($role, ['Moderateur', 'Administrateur'])) {
+        if (!in_array($role, ['employe', 'admin'])) {
             $_SESSION['flash_error'] = 'Rôle invalide.';
             header('Location: /admin');
             exit;
         }
 
-        if (User::exists($email, $pseudo)) {
+        if (User::exists($email, $username)) {
             $_SESSION['flash_error'] = 'Email ou pseudo déjà utilisé.';
             header('Location: /admin');
             exit;
         }
 
         User::create([
-            'pseudo' => $pseudo,
+            'username' => $username,
             'email' => $email,
             'password' => password_hash($password, PASSWORD_DEFAULT),
             'credits' => 0,
-            'role' => $role,
-            'status' => 'actif',
-            'user_type' => 'passager'
+            'role' => $role
         ]);
 
-        $_SESSION['flash_success'] = "Employé ($role) créé avec succès !";
+        $_SESSION['flash_success'] = "Compte $role créé avec succès !";
         header('Location: /admin');
         exit;
     }

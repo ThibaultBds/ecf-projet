@@ -1,3 +1,12 @@
+<?php
+$statusLabels = [
+    'scheduled' => 'Planifié',
+    'started' => 'En cours',
+    'completed' => 'Terminé',
+    'cancelled' => 'Annulé',
+    'confirmed' => 'Confirmé',
+];
+?>
 <main class="member-container">
     <h2 class="page-title-hero">
         <span class="material-icons page-icon-large">history</span> Mes Trajets
@@ -24,24 +33,21 @@
                                 <?= htmlspecialchars($trajet['ville_depart']) ?> → <?= htmlspecialchars($trajet['ville_arrivee']) ?>
                             </p>
                             <p class="small-muted">
-                                Départ : <?= date('d/m/Y H:i', strtotime($trajet['date_depart'])) ?>
-                                <span class="muted-status">Statut: <strong><?= ucfirst($trajet['status']) ?></strong></span>
+                                Départ : <?= date('d/m/Y H:i', strtotime($trajet['departure_datetime'])) ?>
+                                <span class="muted-status">Statut: <strong><?= $statusLabels[$trajet['status']] ?? ucfirst($trajet['status']) ?></strong></span>
                             </p>
                         </div>
                         <form method="POST" action="/my-trips" class="ride-actions">
                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                            <input type="hidden" name="trip_id" value="<?= $trajet['id'] ?>">
+                            <input type="hidden" name="trip_id" value="<?= $trajet['trip_id'] ?>">
 
-                            <?php if ($trajet['status'] === 'planifie'): ?>
-                                <input type="hidden" name="status" value="en_cours">
-                                <button type="submit" name="action" value="update_trip_status" class="btn-secondary">Démarrer</button>
+                            <?php if ($trajet['status'] === 'scheduled'): ?>
+                                <input type="hidden" name="status" value="completed">
+                                <button type="submit" name="action" value="update_trip_status" class="btn-secondary">Terminer</button>
                                 <button type="submit" name="action" value="update_trip_status" class="btn-danger"
-                                        onclick="this.form.querySelector('[name=status]').value='annule';">
+                                        onclick="this.form.querySelector('[name=status]').value='cancelled';">
                                     Annuler le trajet
                                 </button>
-                            <?php elseif ($trajet['status'] === 'en_cours'): ?>
-                                <input type="hidden" name="status" value="termine">
-                                <button type="submit" name="action" value="update_trip_status" class="btn-primary">Terminer</button>
                             <?php endif; ?>
                         </form>
                     </div>
@@ -68,31 +74,28 @@
                                 <?= htmlspecialchars($trajet['ville_depart']) ?> → <?= htmlspecialchars($trajet['ville_arrivee']) ?>
                             </p>
                             <p class="small-muted">
-                                Départ : <?= date('d/m/Y H:i', strtotime($trajet['date_depart'])) ?>
-                                <span class="muted-status">Statut: <strong><?= ucfirst($trajet['status']) ?></strong></span>
+                                Départ : <?= date('d/m/Y H:i', strtotime($trajet['departure_datetime'])) ?>
+                                <span class="muted-status">Statut: <strong><?= $statusLabels[$trajet['status']] ?? ucfirst($trajet['status']) ?></strong></span>
                             </p>
                         </div>
 
-                        <?php if ($trajet['status'] === 'planifie'): ?>
+                        <?php if ($trajet['status'] === 'scheduled'): ?>
                             <form method="POST" action="/my-trips" class="ride-actions">
                                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                <input type="hidden" name="trip_id" value="<?= $trajet['id'] ?>">
+                                <input type="hidden" name="trip_id" value="<?= $trajet['trip_id'] ?>">
                                 <button type="submit" name="action" value="cancel_participation" class="btn-danger">Annuler ma participation</button>
                             </form>
-                        <?php elseif ($trajet['status'] === 'termine' && !$trajet['has_reviewed']): ?>
+                        <?php elseif ($trajet['status'] === 'completed'): ?>
                             <details class="details-compact">
                                 <summary class="details-summary">Noter ce trajet</summary>
                                 <form action="/api/review" method="POST" class="form-container form-small form-compact">
                                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                    <input type="hidden" name="trip_id" value="<?= $trajet['id'] ?>">
-                                    <input type="hidden" name="reviewed_id" value="<?= $trajet['chauffeur_id'] ?? '' ?>">
-                                    <label for="note-<?= $trajet['id'] ?>">Note (sur 5)</label>
-                                    <input type="number" id="note-<?= $trajet['id'] ?>" name="note" min="1" max="5" required>
-                                    <label for="commentaire-<?= $trajet['id'] ?>">Commentaire</label>
-                                    <textarea id="commentaire-<?= $trajet['id'] ?>" name="commentaire" required></textarea>
-                                    <label class="checkbox-row">
-                                        <input type="checkbox" name="is_problem"> Signaler un problème
-                                    </label>
+                                    <input type="hidden" name="trip_id" value="<?= $trajet['trip_id'] ?>">
+                                    <input type="hidden" name="driver_id" value="<?= $trajet['chauffeur_id'] ?? '' ?>">
+                                    <label for="rating-<?= $trajet['trip_id'] ?>">Note (sur 5)</label>
+                                    <input type="number" id="rating-<?= $trajet['trip_id'] ?>" name="rating" min="1" max="5" required>
+                                    <label for="comment-<?= $trajet['trip_id'] ?>">Commentaire</label>
+                                    <textarea id="comment-<?= $trajet['trip_id'] ?>" name="comment" required></textarea>
                                     <button type="submit" class="btn-primary">Envoyer</button>
                                 </form>
                             </details>

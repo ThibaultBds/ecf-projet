@@ -1,8 +1,10 @@
 <?php
 
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../Core/Auth/AuthManager.php';
-require_once __DIR__ . '/../Models/User.php';
+namespace App\Controllers;
+
+use App\Core\Auth\AuthManager;
+use App\Models\User;
+use Exception;
 
 class AuthController extends BaseController
 {
@@ -70,15 +72,15 @@ class AuthController extends BaseController
      */
     public function register()
     {
-        $pseudo = trim($_POST['pseudo'] ?? '');
+        $username = trim($_POST['username'] ?? '');
         $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
         $passwordConfirm = $_POST['password_confirm'] ?? '';
 
-        $old = ['pseudo' => $pseudo, 'email' => $email];
+        $old = ['username' => $username, 'email' => $email];
 
         // Validation
-        if (empty($pseudo) || empty($email) || empty($password) || empty($passwordConfirm)) {
+        if (empty($username) || empty($email) || empty($password) || empty($passwordConfirm)) {
             return $this->render('auth/register', [
                 'title' => 'Inscription - EcoRide',
                 'error' => 'Veuillez remplir tous les champs.',
@@ -114,8 +116,8 @@ class AuthController extends BaseController
             ]);
         }
 
-        // Vérifier si l'email ou pseudo existe déjà
-        if (User::exists($email, $pseudo)) {
+        // Vérifier si l'email ou username existe déjà
+        if (User::exists($email, $username)) {
             return $this->render('auth/register', [
                 'title' => 'Inscription - EcoRide',
                 'error' => 'Cet email ou ce pseudo est déjà utilisé.',
@@ -127,14 +129,15 @@ class AuthController extends BaseController
         // Créer l'utilisateur
         try {
             User::create([
-                'pseudo' => $pseudo,
-                'email' => $email,
-                'password' => password_hash($password, PASSWORD_DEFAULT),
-                'credits' => 20,
-                'role' => 'Utilisateur',
-                'status' => 'actif',
-                'user_type' => 'passager'
-            ]);
+            'username' => $username,
+            'email' => $email,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'credits' => 20,
+            'role' => 'user',
+            'is_driver' => 0,
+            'is_passenger' => 1
+]);
+
 
             return $this->render('auth/register', [
                 'title' => 'Inscription - EcoRide',

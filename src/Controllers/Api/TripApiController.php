@@ -1,10 +1,14 @@
 <?php
 
-require_once __DIR__ . '/../BaseController.php';
-require_once __DIR__ . '/../../Models/Trip.php';
-require_once __DIR__ . '/../../Models/TripParticipant.php';
-require_once __DIR__ . '/../../Models/User.php';
-require_once __DIR__ . '/../../Core/Auth/AuthManager.php';
+namespace App\Controllers\Api;
+
+use App\Controllers\BaseController;
+use App\Models\Trip;
+use App\Models\TripParticipant;
+use App\Models\User;
+use App\Models\BaseModel;
+use App\Core\Auth\AuthManager;
+use Exception;
 
 class TripApiController extends BaseController
 {
@@ -36,12 +40,12 @@ class TripApiController extends BaseController
                 return;
             }
 
-            if ($trip['places_restantes'] <= 0) {
+            if ($trip['available_seats'] <= 0) {
                 echo json_encode(['success' => false, 'message' => 'Plus de places disponibles.']);
                 return;
             }
 
-            $prix = (int) $trip['prix'];
+            $prix = (int) $trip['price'];
             if ($user['credits'] < $prix) {
                 echo json_encode(['success' => false, 'message' => 'Crédits insuffisants.']);
                 return;
@@ -54,12 +58,11 @@ class TripApiController extends BaseController
 
             TripParticipant::create([
                 'trip_id' => $id,
-                'passager_id' => $userId,
-                'credits_utilises' => $prix
+                'user_id' => $userId
             ]);
 
             Trip::query(
-                "UPDATE trips SET places_restantes = places_restantes - 1 WHERE id = ?",
+                "UPDATE trips SET available_seats = available_seats - 1 WHERE trip_id = ?",
                 [$id]
             );
 
@@ -97,19 +100,19 @@ class TripApiController extends BaseController
                 return;
             }
 
-            if ($trip['status'] !== 'planifie') {
+            if ($trip['status'] !== 'scheduled') {
                 echo json_encode(['success' => false, 'message' => 'Ce trajet ne peut plus être annulé.']);
                 return;
             }
 
             BaseModel::beginTransaction();
 
-            Trip::update($id, ['status' => 'annule']);
+            Trip::update($id, ['status' => 'cancelled']);
 
             // Rembourser les passagers
             $participants = TripParticipant::byTrip($id);
             foreach ($participants as $p) {
-                User::addCredits($p['passager_id'], (int) $trip['prix']);
+                User::addCredits($p['user_id'], (int) $trip['price']);
             }
 
             // Rembourser frais plateforme au chauffeur

@@ -14,9 +14,9 @@
         <?php endif; ?>
 
         <div class="input-group">
-            <label for="pseudo">Pseudo</label>
-            <input type="text" id="pseudo" name="pseudo" required
-                   value="<?= htmlspecialchars($old['pseudo'] ?? '') ?>">
+            <label for="username">Pseudo</label>
+            <input type="text" id="username" name="username" required
+                   value="<?= htmlspecialchars($old['username'] ?? '') ?>">
         </div>
 
         <div class="input-group">

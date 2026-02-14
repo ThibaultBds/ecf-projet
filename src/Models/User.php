@@ -1,10 +1,11 @@
 <?php
 
-require_once __DIR__ . '/BaseModel.php';
+namespace App\Models;
 
 class User extends BaseModel
 {
     protected static $table = 'users';
+    protected static $primaryKey = 'user_id';
 
     /**
      * Trouver un utilisateur par email
@@ -15,21 +16,21 @@ class User extends BaseModel
     }
 
     /**
-     * Trouver un utilisateur par pseudo
+     * Trouver un utilisateur par username
      */
-    public static function findByPseudo($pseudo)
+    public static function findByUsername($username)
     {
-        return static::findBy('pseudo', $pseudo);
+        return static::findBy('username', $username);
     }
 
     /**
-     * Vérifier si un email ou pseudo existe déjà
+     * Vérifier si un email ou username existe déjà
      */
-    public static function exists($email, $pseudo)
+    public static function exists($email, $username)
     {
         $stmt = static::query(
-            "SELECT id FROM users WHERE email = ? OR pseudo = ? LIMIT 1",
-            [strtolower(trim($email)), trim($pseudo)]
+            "SELECT user_id FROM users WHERE email = ? OR username = ? LIMIT 1",
+            [strtolower(trim($email)), trim($username)]
         );
         return $stmt->fetch() !== false;
     }
@@ -40,7 +41,7 @@ class User extends BaseModel
     public static function deductCredits($userId, $amount)
     {
         static::query(
-            "UPDATE users SET credits = credits - ? WHERE id = ? AND credits >= ?",
+            "UPDATE users SET credits = credits - ? WHERE user_id = ? AND credits >= ?",
             [$amount, $userId, $amount]
         );
     }
@@ -51,7 +52,7 @@ class User extends BaseModel
     public static function addCredits($userId, $amount)
     {
         static::query(
-            "UPDATE users SET credits = credits + ? WHERE id = ?",
+            "UPDATE users SET credits = credits + ? WHERE user_id = ?",
             [$amount, $userId]
         );
     }
@@ -61,15 +62,20 @@ class User extends BaseModel
      */
     public static function recentTrips($userId, $limit = 10)
     {
+        $limit = (int) $limit;
         return static::query(
             "SELECT t.*,
+                    cd.name AS ville_depart,
+                    ca.name AS ville_arrivee,
                     CASE WHEN t.chauffeur_id = ? THEN 'chauffeur' ELSE 'passager' END as role_trajet
              FROM trips t
-             LEFT JOIN trip_participants tp ON t.id = tp.trip_id AND tp.passager_id = ?
-             WHERE t.chauffeur_id = ? OR tp.passager_id = ?
-             ORDER BY t.date_depart DESC
-             LIMIT ?",
-            [$userId, $userId, $userId, $userId, $limit]
+             JOIN cities cd ON t.city_depart_id = cd.city_id
+             JOIN cities ca ON t.city_arrival_id = ca.city_id
+             LEFT JOIN trip_participants tp ON t.trip_id = tp.trip_id AND tp.user_id = ?
+             WHERE t.chauffeur_id = ? OR tp.user_id = ?
+             ORDER BY t.departure_datetime DESC
+             LIMIT {$limit}",
+            [$userId, $userId, $userId, $userId]
         )->fetchAll();
     }
 }
