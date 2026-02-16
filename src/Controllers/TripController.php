@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\TripParticipant;
 use App\Models\BaseModel;
 use App\Core\Auth\AuthManager;
+use App\Controllers\DriverController;
 use Exception;
 
 class TripController extends BaseController
@@ -17,21 +18,38 @@ class TripController extends BaseController
      */
     public function index()
     {
+        // Normaliser la date (le calendrier custom envoie "DD / MM / YYYY")
+        $rawDate = trim($_GET['date'] ?? '');
+        if (preg_match('#^(\d{2})\s*/\s*(\d{2})\s*/\s*(\d{4})$#', $rawDate, $m)) {
+            $rawDate = "{$m[3]}-{$m[2]}-{$m[1]}";
+        }
+
         $filters = [
             'depart' => $_GET['depart'] ?? '',
             'arrivee' => $_GET['arrivee'] ?? '',
-            'date' => $_GET['date'] ?? '',
+            'date' => $rawDate,
             'prix_max' => $_GET['prix_max'] ?? null,
             'note_min' => $_GET['note_min'] ?? null,
-            'ecologique' => $_GET['ecologique'] ?? ''
+            'ecologique' => $_GET['ecologique'] ?? '',
+            'duree_max' => $_GET['duree_max'] ?? null
         ];
 
-        $covoiturages = Trip::search($filters);
+        // Par défaut, aucun covoiturage affiché (l'utilisateur doit chercher)
+        $hasSearched = !empty($filters['depart']) || !empty($filters['arrivee']) || !empty($filters['date']);
+        $covoiturages = $hasSearched ? Trip::search($filters) : [];
+
+        // Si recherche sans résultat, suggérer la date la plus proche
+        $nearestDate = null;
+        if ($hasSearched && empty($covoiturages)) {
+            $nearestDate = Trip::nearestDate($filters['depart'], $filters['arrivee']);
+        }
 
         $this->render('trips/index', [
             'title' => 'Covoiturages - EcoRide',
             'covoiturages' => $covoiturages,
-            'filters' => $filters
+            'filters' => $filters,
+            'hasSearched' => $hasSearched,
+            'nearestDate' => $nearestDate
         ]);
     }
 
@@ -62,13 +80,21 @@ class TripController extends BaseController
 
         $credit_requis = (int) $covoiturage['price'];
 
+        // Préférences du conducteur (MongoDB)
+        try {
+            $driverPrefs = DriverController::getDriverPreferences((int) $covoiturage['chauffeur_id']);
+        } catch (\Throwable $e) {
+            $driverPrefs = [];
+}
+
         $this->render('trips/show', [
             'title' => $covoiturage['ville_depart'] . ' → ' . $covoiturage['ville_arrivee'] . ' - EcoRide',
             'covoiturage' => $covoiturage,
             'reviews' => $reviews,
             'user_credit' => $user_credit,
             'credit_requis' => $credit_requis,
-            'isParticipating' => $isParticipating
+            'isParticipating' => $isParticipating,
+            'driverPrefs' => $driverPrefs
         ]);
     }
 
@@ -89,6 +115,10 @@ class TripController extends BaseController
                 $this->handleCancelParticipation($tripId, $userId);
             } elseif ($action === 'update_trip_status') {
                 $this->handleUpdateTripStatus($tripId, $userId, $_POST['status'] ?? '');
+            } elseif ($action === 'validate_trip') {
+                $this->handleValidateTrip($tripId, $userId);
+            } elseif ($action === 'report_problem') {
+                $this->handleReportProblem($tripId, $userId);
             }
 
             header('Location: /my-trips?success=Action effectuée avec succès');
@@ -144,7 +174,7 @@ class TripController extends BaseController
      */
     private function handleUpdateTripStatus($tripId, $userId, $newStatus)
     {
-        $validStatuses = ['completed', 'cancelled'];
+        $validStatuses = ['started', 'completed', 'cancelled'];
         if (!in_array($newStatus, $validStatuses)) {
             return;
         }
@@ -154,18 +184,22 @@ class TripController extends BaseController
             return;
         }
 
+        // Transitions valides
+        if ($newStatus === 'started' && $trip['status'] !== 'scheduled') return;
+        if ($newStatus === 'completed' && $trip['status'] !== 'started') return;
+        if ($newStatus === 'cancelled' && !in_array($trip['status'], ['scheduled', 'started'])) return;
+
         try {
             BaseModel::beginTransaction();
 
             Trip::update($tripId, ['status' => $newStatus]);
 
-            // Si annulation, rembourser les passagers
+            $participants = TripParticipant::byTrip($tripId);
+
             if ($newStatus === 'cancelled') {
-                $participants = TripParticipant::byTrip($tripId);
                 foreach ($participants as $p) {
                     User::addCredits($p['user_id'], (int) $trip['price']);
                 }
-                // Rembourser les frais plateforme au chauffeur
                 User::addCredits($userId, 2);
             }
 
@@ -173,6 +207,70 @@ class TripController extends BaseController
         } catch (Exception $e) {
             BaseModel::rollback();
             error_log("Erreur mise à jour statut : " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Passager valide le trajet → crédits au chauffeur
+     */
+    private function handleValidateTrip($tripId, $userId)
+    {
+        $trip = Trip::find($tripId);
+        if (!$trip || $trip['status'] !== 'completed') return;
+        if (!TripParticipant::isParticipating($tripId, $userId)) return;
+
+        $participant = TripParticipant::query(
+            "SELECT * FROM trip_participants WHERE trip_id = ? AND user_id = ?",
+            [$tripId, $userId]
+        )->fetch();
+
+        if (!$participant || $participant['status'] === 'validated') return;
+
+        try {
+            BaseModel::beginTransaction();
+
+            TripParticipant::query(
+                "UPDATE trip_participants SET status = 'validated' WHERE trip_id = ? AND user_id = ?",
+                [$tripId, $userId]
+            );
+
+            User::addCredits($trip['chauffeur_id'], (int) $trip['price']);
+
+            BaseModel::commit();
+        } catch (Exception $e) {
+            BaseModel::rollback();
+            error_log("Erreur validation trajet : " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Passager signale un problème → stocké dans MongoDB pour l'employé
+     */
+    private function handleReportProblem($tripId, $userId)
+    {
+        $trip = Trip::find($tripId);
+        if (!$trip || $trip['status'] !== 'completed') return;
+        if (!TripParticipant::isParticipating($tripId, $userId)) return;
+
+        $comment = trim($_POST['problem_comment'] ?? '');
+
+        try {
+            $mongo = \App\Core\MongoDB::getInstance();
+            $mongo->insertOne('trip_incidents', [
+                'trip_id' => $tripId,
+                'reporter_id' => $userId,
+                'chauffeur_id' => $trip['chauffeur_id'],
+                'comment' => $comment,
+                'status' => 'pending',
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+
+            TripParticipant::query(
+                "UPDATE trip_participants SET status = 'disputed' WHERE trip_id = ? AND user_id = ?",
+                [$tripId, $userId]
+            );
+        } catch (Exception $e) {
+            error_log("Erreur signalement : " . $e->getMessage());
         }
     }
 }

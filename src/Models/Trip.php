@@ -57,6 +57,11 @@ class Trip extends BaseModel
             $sql .= " AND v.energy_type = 'electrique'";
         }
 
+        if (!empty($filters['duree_max'])) {
+            $sql .= " AND TIMESTAMPDIFF(MINUTE, t.departure_datetime, t.arrival_datetime) <= ?";
+            $params[] = (int) $filters['duree_max'] * 60;
+        }
+
         if (!empty($filters['note_min'])) {
             $sql .= " HAVING note_conducteur >= ?";
             $params[] = (float) $filters['note_min'];
@@ -68,6 +73,36 @@ class Trip extends BaseModel
         $stmt->execute($params);
 
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Trouver la date du prochain trajet disponible pour un itinéraire
+     */
+    public static function nearestDate($depart, $arrivee)
+    {
+        $sql = "SELECT DATE(t.departure_datetime) AS nearest_date
+                FROM trips t
+                JOIN cities cd ON t.city_depart_id = cd.city_id
+                JOIN cities ca ON t.city_arrival_id = ca.city_id
+                WHERE t.status = 'scheduled'
+                  AND t.available_seats > 0
+                  AND t.departure_datetime > NOW()";
+
+        $params = [];
+
+        if (!empty($depart)) {
+            $sql .= " AND cd.name LIKE ?";
+            $params[] = '%' . $depart . '%';
+        }
+        if (!empty($arrivee)) {
+            $sql .= " AND ca.name LIKE ?";
+            $params[] = '%' . $arrivee . '%';
+        }
+
+        $sql .= " ORDER BY t.departure_datetime ASC LIMIT 1";
+
+        $result = static::query($sql, $params)->fetch();
+        return $result ? $result['nearest_date'] : null;
     }
 
     /**
@@ -126,7 +161,8 @@ class Trip extends BaseModel
             "SELECT t.*,
                     u.username AS conducteur,
                     cd.name AS ville_depart,
-                    ca.name AS ville_arrivee
+                    ca.name AS ville_arrivee,
+                    tp.status AS participant_status
              FROM trips t
              JOIN trip_participants tp ON t.trip_id = tp.trip_id
              JOIN users u ON t.chauffeur_id = u.user_id
