@@ -49,6 +49,32 @@
             </div>
 
             <div class="input-group">
+                <label for="heure_arrivee">Heure d'arrivée *</label>
+                <input type="time" id="heure_arrivee" name="heure_arrivee" required
+                       value="<?= htmlspecialchars($_POST['heure_arrivee'] ?? '') ?>">
+            </div>
+
+
+            <div class="input-group">
+                <label for="vehicle_id">V&eacute;hicule *</label>
+                <?php if (!empty($vehicles)): ?>
+                    <select id="vehicle_id" name="vehicle_id" required class="select-field">
+                        <?php foreach ($vehicles as $v): ?>
+                            <option value="<?= $v['vehicle_id'] ?>">
+                                <?= htmlspecialchars($v['brand']) ?> <?= htmlspecialchars($v['model']) ?>
+                                (<?= htmlspecialchars($v['license_plate']) ?> - <?= ucfirst($v['energy_type']) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php else: ?>
+                    <p style="color:#e74c3c;">
+                        Aucun v&eacute;hicule enregistr&eacute;.
+                        <a href="/driver/vehicles" style="color:#00b894;font-weight:600;">Ajouter un v&eacute;hicule</a>
+                    </p>
+                <?php endif; ?>
+            </div>
+
+            <div class="input-group">
                 <label for="places">Nombre de places (1-4) *</label>
                 <input type="number" id="places" name="places" min="1" max="4" required
                        value="<?= htmlspecialchars($_POST['places'] ?? '3') ?>">

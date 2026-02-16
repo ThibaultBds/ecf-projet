@@ -45,8 +45,12 @@
                 <label for="seats_available">Places disponibles (1-8)</label>
                 <input type="number" id="seats_available" name="seats_available" min="1" max="8" value="4">
             </div>
+            <div class="input-group">
+                <label for="registration_date">Date de premi&egrave;re immatriculation *</label>
+                <input type="date" id="registration_date" name="registration_date" required>
+            </div>
 
-            <button type="submit" class="btn-primary">Ajouter le véhicule</button>
+            <button type="submit" class="btn-primary">Ajouter le v&eacute;hicule</button>
         </form>
     </div>
 

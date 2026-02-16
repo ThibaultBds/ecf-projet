@@ -14,8 +14,24 @@ class AdminController extends BaseController
             'users' => User::count(),
             'trips' => (int) BaseModel::query("SELECT COUNT(*) as total FROM trips WHERE status = 'scheduled'")->fetch()['total'],
             'pending_reviews' => (int) BaseModel::query("SELECT COUNT(*) as total FROM reviews WHERE status = 'pending'")->fetch()['total'],
-            'platform_credits' => (int) BaseModel::query("SELECT COALESCE(SUM(credits), 0) as total FROM users")->fetch()['total']
+            'platform_credits' => (int) BaseModel::query("SELECT COALESCE(SUM(amount), 0) as total FROM credit_logs WHERE type = 'platform_fee'")->fetch()['total']
         ];
+
+        // Graphique : covoiturages par jour (30 derniers jours)
+        $tripsPerDay = BaseModel::query(
+            "SELECT DATE(departure_datetime) AS jour, COUNT(*) AS total
+             FROM trips
+             WHERE departure_datetime >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+             GROUP BY jour ORDER BY jour"
+        )->fetchAll();
+
+        // Graphique : crédits plateforme par jour (30 derniers jours)
+        $creditsPerDay = BaseModel::query(
+            "SELECT DATE(created_at) AS jour, SUM(amount) AS total
+             FROM credit_logs
+             WHERE type = 'platform_fee' AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+             GROUP BY jour ORDER BY jour"
+        )->fetchAll();
 
         // Derniers utilisateurs
         $users = BaseModel::query(
@@ -26,6 +42,8 @@ class AdminController extends BaseController
             'title' => 'Administration - EcoRide',
             'stats' => $stats,
             'users' => $users,
+            'tripsPerDay' => $tripsPerDay,
+            'creditsPerDay' => $creditsPerDay,
             'success' => $_SESSION['flash_success'] ?? '',
             'error' => $_SESSION['flash_error'] ?? ''
         ]);
