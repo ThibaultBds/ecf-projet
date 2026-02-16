@@ -41,6 +41,73 @@ $roleLabels = [
         </div>
     </div>
 
+    <!-- Graphiques -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px;margin-bottom:30px;">
+        <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+            <h3 style="margin:0 0 15px 0;color:#2d3436;font-size:16px;">
+                <span class="material-icons" style="vertical-align:middle;color:#0984e3;">bar_chart</span>
+                Covoiturages par jour
+            </h3>
+            <canvas id="chart-trips" height="200"></canvas>
+        </div>
+        <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+            <h3 style="margin:0 0 15px 0;color:#2d3436;font-size:16px;">
+                <span class="material-icons" style="vertical-align:middle;color:#fdcb6e;">monetization_on</span>
+                Cr&eacute;dits plateforme par jour
+            </h3>
+            <canvas id="chart-credits" height="200"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tripsData = <?= json_encode($tripsPerDay ?? []) ?>;
+        var creditsData = <?= json_encode($creditsPerDay ?? []) ?>;
+
+        new Chart(document.getElementById('chart-trips'), {
+            type: 'bar',
+            data: {
+                labels: tripsData.map(function(r) { return r.jour; }),
+                datasets: [{
+                    label: 'Covoiturages',
+                    data: tripsData.map(function(r) { return parseInt(r.total); }),
+                    backgroundColor: 'rgba(9, 132, 227, 0.6)',
+                    borderColor: '#0984e3',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+
+        new Chart(document.getElementById('chart-credits'), {
+            type: 'line',
+            data: {
+                labels: creditsData.map(function(r) { return r.jour; }),
+                datasets: [{
+                    label: 'Cr\u00e9dits',
+                    data: creditsData.map(function(r) { return parseInt(r.total); }),
+                    borderColor: '#00b894',
+                    backgroundColor: 'rgba(0, 184, 148, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    });
+    </script>
+
     <!-- Créer un employé -->
     <div class="profile-box">
         <h3 class="profil-titre">Créer un compte Employé</h3>

@@ -15,16 +15,16 @@
         <form method="POST" action="/driver/preferences" class="form-container">
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
 
-            <!-- Musique -->
+            <!-- Fumeur -->
             <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
-                <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">music_note</span> Musique</h4>
+                <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">smoking_rooms</span> Cigarette</h4>
                 <label style="margin-right:20px;">
-                    <input type="radio" name="musique" value="oui" <?= ($prefs['musique'] ?? '') === 'oui' ? 'checked' : '' ?>>
-                    Avec plaisir
+                    <input type="radio" name="fumeur" value="oui" <?= ($prefs['fumeur'] ?? '') === 'oui' ? 'checked' : '' ?>>
+                    Fumeur accepté
                 </label>
                 <label>
-                    <input type="radio" name="musique" value="non" <?= ($prefs['musique'] ?? 'non') === 'non' ? 'checked' : '' ?>>
-                    Silence préféré
+                    <input type="radio" name="fumeur" value="non" <?= ($prefs['fumeur'] ?? 'non') === 'non' ? 'checked' : '' ?>>
+                    Non-fumeur
                 </label>
             </div>
 
@@ -38,6 +38,19 @@
                 <label>
                     <input type="radio" name="animaux" value="non" <?= ($prefs['animaux'] ?? 'non') === 'non' ? 'checked' : '' ?>>
                     Non acceptés
+                </label>
+            </div>
+
+            <!-- Musique -->
+            <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
+                <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">music_note</span> Musique</h4>
+                <label style="margin-right:20px;">
+                    <input type="radio" name="musique" value="oui" <?= ($prefs['musique'] ?? '') === 'oui' ? 'checked' : '' ?>>
+                    Avec plaisir
+                </label>
+                <label>
+                    <input type="radio" name="musique" value="non" <?= ($prefs['musique'] ?? 'non') === 'non' ? 'checked' : '' ?>>
+                    Silence préféré
                 </label>
             </div>
 
@@ -58,17 +71,18 @@
                 </label>
             </div>
 
-            <!-- Fumeur -->
+            <!-- Préférences personnalisées -->
             <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
-                <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">smoking_rooms</span> Cigarette</h4>
-                <label style="margin-right:20px;">
-                    <input type="radio" name="fumeur" value="oui" <?= ($prefs['fumeur'] ?? '') === 'oui' ? 'checked' : '' ?>>
-                    Fumeur
-                </label>
-                <label>
-                    <input type="radio" name="fumeur" value="non" <?= ($prefs['fumeur'] ?? 'non') === 'non' ? 'checked' : '' ?>>
-                    Non-fumeur
-                </label>
+                <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">edit_note</span> Préférences personnalisées</h4>
+                <p style="font-size:14px;color:#636e72;margin-bottom:10px;">Ajoutez vos propres préférences (une par ligne)</p>
+                <textarea name="custom_preferences" rows="4" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:12px;font-size:14px;resize:vertical;" placeholder="Ex: Pas de nourriture dans le véhicule&#10;Bagages légers uniquement&#10;Ponctualité exigée"><?php
+                    $custom = $prefs['custom_preferences'] ?? [];
+                    if (is_array($custom)) {
+                        echo htmlspecialchars(implode("\n", $custom));
+                    } else {
+                        echo htmlspecialchars((string) $custom);
+                    }
+                ?></textarea>
             </div>
 
             <button type="submit" class="btn-primary" style="width:100%;padding:15px;">Sauvegarder mes préférences</button>
