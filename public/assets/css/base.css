@@ -1,15 +1,8 @@
-/* ========================================
-   BASE.CSS - Fondations du site
-   ======================================== */
-
-/* Reset et box-sizing */
 * {
   box-sizing: border-box;
 }
 
-/* Variables globales */
 :root {
-  /* Couleurs principales */
   --primary-color: #00b894;
   --primary-dark: #019d7e;
   --primary-light: #00cec9;
@@ -20,20 +13,16 @@
   --error-color: #b8002e;
   --warning-color: #f39c12;
 
-  /* Backgrounds */
   --background-light: #e8f4f0;
   --background-white: #ffffff;
 
-  /* Textes */
   --text-primary: #2d3436;
   --text-secondary: #636e72;
 
-  /* Borders */
   --border-color: #e8f4f0;
   --border-radius: 12px;
   --border-radius-large: 20px;
 
-  /* Transitions & Easing */
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: 0.15s;
   --transition-base: 0.3s;
@@ -41,7 +30,6 @@
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-  /* Espacements cohérents */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -50,7 +38,6 @@
   --spacing-2xl: 48px;
   --spacing-3xl: 64px;
 
-  /* Ombres améliorées */
   --shadow-xs: 0 1px 4px rgba(0, 0, 0, 0.05);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
@@ -59,12 +46,10 @@
   --shadow-primary: 0 8px 24px rgba(0, 184, 148, 0.15);
   --shadow-primary-lg: 0 12px 40px rgba(0, 184, 148, 0.25);
 
-  /* Anciennes ombres (compatibilité) */
   --shadow-light: 0 4px 20px rgba(0,0,0,0.1);
   --shadow-medium: 0 8px 24px rgba(0,0,0,0.08);
   --shadow-heavy: 0 12px 40px rgba(0,184,148,0.15);
 
-  /* Z-index système */
   --z-dropdown: 1000;
   --z-sticky: 1020;
   --z-fixed: 1030;
@@ -74,7 +59,6 @@
   --z-tooltip: 1070;
 }
 
-/* Typography de base */
 body {
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
@@ -95,7 +79,6 @@ select, input, button {
   font-family: inherit;
 }
 
-/* Formulaires de base */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -146,7 +129,6 @@ textarea::placeholder {
   opacity: 0.7;
 }
 
-/* Input date personnalisé */
 input[type="date"] {
   width: 100%;
   max-width: 250px;
@@ -184,7 +166,6 @@ input[type="date"]:focus {
   background: #fff;
 }
 
-/* Messages de succès et d'erreur */
 .message-success {
   color: #219150;
   background: #e6f9ed;
@@ -213,12 +194,10 @@ input[type="date"]:focus {
   animation: slideDown var(--transition-slow) var(--ease-smooth);
 }
 
-/* Utilitaires de couleur */
 .green {
   color: var(--primary-color);
 }
 
-/* Utilitaires de texte */
 .small-muted {
   color: #636e72;
   font-size: 0.9rem;
@@ -238,7 +217,6 @@ input[type="date"]:focus {
   font-weight: 600;
 }
 
-/* Liens */
 a {
   color: inherit;
   text-decoration: none;
@@ -284,7 +262,6 @@ a {
   text-decoration: underline;
 }
 
-/* Icônes */
 .icon-inline {
   vertical-align: middle;
   margin-right: 10px;
@@ -299,9 +276,6 @@ a {
   vertical-align: middle;
 }
 
-/* Animations keyframes */
-
-/* Animations de base */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -312,7 +286,6 @@ a {
   to { opacity: 0; }
 }
 
-/* Animations de slide */
 @keyframes slideUp {
   from { transform: translateY(50px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -338,7 +311,6 @@ a {
   to { transform: translateY(-30px); opacity: 0; }
 }
 
-/* Animations de scale */
 @keyframes scaleIn {
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
@@ -349,7 +321,6 @@ a {
   to { transform: scale(0.95); opacity: 0; }
 }
 
-/* Animations de bounce */
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
@@ -362,21 +333,9 @@ a {
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* Animations de loading */
 @keyframes pulse-loading {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }
-}
-
-@keyframes subtle-pulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 4px 15px rgba(33,150,243,0.2);
-  }
-  50% {
-    transform: scale(1.02);
-    box-shadow: 0 6px 20px rgba(33,150,243,0.3);
-  }
 }
 
 @keyframes spin {
@@ -384,42 +343,17 @@ a {
   to { transform: rotate(360deg); }
 }
 
-@keyframes spinSmooth {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* Skeleton loading */
-@keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
-}
-
-@keyframes skeletonPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-/* Gradient animé */
 @keyframes gradientShift {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
 
-/* Shake animation */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
   20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
 
-/* Glow pulse */
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 5px rgba(0, 184, 148, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(0, 184, 148, 0.6); }
-}
-
-/* Utilitaires d'animation */
 .loading {
   animation: pulse-loading 1.5s infinite ease-in-out;
   will-change: opacity;
@@ -430,36 +364,6 @@ a {
   will-change: transform;
 }
 
-/* Skeleton loading */
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-  border-radius: 8px;
-}
-
-.skeleton-text {
-  height: 1em;
-  margin-bottom: 0.5em;
-}
-
-.skeleton-title {
-  height: 2em;
-  width: 60%;
-  margin-bottom: 1em;
-}
-
-.skeleton-card {
-  height: 200px;
-  border-radius: 12px;
-}
-
-/* Scroll smooth */
 html {
   scroll-behavior: smooth;
 }

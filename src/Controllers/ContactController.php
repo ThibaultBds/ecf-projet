@@ -22,7 +22,6 @@ class ContactController extends BaseController
         $sujet   = trim($_POST['sujet']   ?? '');
         $message = trim($_POST['message'] ?? '');
 
-        // Validation
         if (empty($nom) || empty($email) || empty($sujet) || empty($message)) {
             return $this->render('pages/contact', [
                 'error' => 'Veuillez remplir tous les champs.',

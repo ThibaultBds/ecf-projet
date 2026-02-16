@@ -11,10 +11,6 @@ class AuthManager
     private static $maxLoginAttempts = 5;
     private static $lockoutDuration = 900; // 15 minutes
 
-    // -------------------------------------------------------
-    // Vérification session
-    // -------------------------------------------------------
-
     public static function check()
     {
         return isset($_SESSION['user']) && isset($_SESSION['user']['id']);
@@ -39,17 +35,13 @@ class AuthManager
         $userRole = strtolower($_SESSION['user']['role']);
         $requiredRole = strtolower($role);
 
-        // Admin a accès à tout
+        // Admin has access to everything
         if ($userRole === 'admin') {
             return true;
         }
 
         return $userRole === $requiredRole;
     }
-
-    // -------------------------------------------------------
-    // LOGIN
-    // -------------------------------------------------------
 
     public static function login($email, $password)
     {
@@ -83,12 +75,10 @@ class AuthManager
             return ['success' => false, 'message' => 'Identifiants incorrects.'];
         }
 
-        // Vérifier si le compte est suspendu
         if (!empty($user['suspended'])) {
             return ['success' => false, 'message' => 'Votre compte a été suspendu. Contactez l\'administration.'];
         }
 
-        // Connexion réussie
         self::logAttempt($pdo, $ip, $email, true);
         self::clearAttempts($pdo, $ip);
 
@@ -111,19 +101,11 @@ class AuthManager
         return ['success' => true, 'message' => 'Connexion réussie.'];
     }
 
-    // -------------------------------------------------------
-    // LOGOUT
-    // -------------------------------------------------------
-
     public static function logout()
     {
         session_unset();
         session_destroy();
     }
-
-    // -------------------------------------------------------
-    // Redirection selon rôle
-    // -------------------------------------------------------
 
     public static function redirectUrlByRole()
     {
@@ -152,10 +134,6 @@ class AuthManager
         return $url;
     }
 
-    // -------------------------------------------------------
-    // Rafraîchir crédits
-    // -------------------------------------------------------
-
     public static function refreshCredits()
     {
         if (!self::check()) {
@@ -175,10 +153,6 @@ class AuthManager
             $_SESSION['user']['credits'] = (int) $result['credits'];
         }
     }
-
-    // -------------------------------------------------------
-    // RATE LIMITING
-    // -------------------------------------------------------
 
     private static function checkLoginAttempts($pdo, $ip)
     {
@@ -209,7 +183,7 @@ class AuthManager
                 $success ? 1 : 0
             ]);
         } catch (Exception $e) {
-            // Ignore si table absente
+            // Ignore if table doesn't exist
         }
     }
 

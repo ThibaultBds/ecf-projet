@@ -9,7 +9,6 @@ class AdminController extends BaseController
 {
     public function index()
     {
-        // Stats
         $stats = [
             'users' => User::count(),
             'trips' => (int) BaseModel::query("SELECT COUNT(*) as total FROM trips WHERE status = 'scheduled'")->fetch()['total'],
@@ -17,7 +16,6 @@ class AdminController extends BaseController
             'platform_credits' => (int) BaseModel::query("SELECT COALESCE(SUM(amount), 0) as total FROM credit_logs WHERE type = 'platform_fee'")->fetch()['total']
         ];
 
-        // Graphique : covoiturages par jour (30 derniers jours)
         $tripsPerDay = BaseModel::query(
             "SELECT DATE(departure_datetime) AS jour, COUNT(*) AS total
              FROM trips
@@ -25,7 +23,6 @@ class AdminController extends BaseController
              GROUP BY jour ORDER BY jour"
         )->fetchAll();
 
-        // Graphique : crédits plateforme par jour (30 derniers jours)
         $creditsPerDay = BaseModel::query(
             "SELECT DATE(created_at) AS jour, SUM(amount) AS total
              FROM credit_logs
@@ -33,7 +30,6 @@ class AdminController extends BaseController
              GROUP BY jour ORDER BY jour"
         )->fetchAll();
 
-        // Derniers utilisateurs
         $users = BaseModel::query(
             "SELECT * FROM users ORDER BY user_id DESC LIMIT 20"
         )->fetchAll();

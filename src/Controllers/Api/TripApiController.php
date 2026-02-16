@@ -14,9 +14,6 @@ use App\Core\Mailer;
 
 class TripApiController extends BaseController
 {
-    /**
-     * Participer à un trajet (AJAX)
-     */
     public function join($id)
     {
         header('Content-Type: application/json');
@@ -56,12 +53,10 @@ class TripApiController extends BaseController
                 return;
             }
 
-            // Transaction
             BaseModel::beginTransaction();
 
             try {
 
-                // Débit prix
                 if (!User::deductCredits(
                     $userId,
                     $prix,
@@ -72,7 +67,6 @@ class TripApiController extends BaseController
                     throw new Exception("Erreur débit prix");
                 }
 
-                // Débit frais plateforme
                 if (!User::deductCredits(
                     $userId,
                     $fraisPlateforme,
@@ -83,7 +77,6 @@ class TripApiController extends BaseController
                     throw new Exception("Erreur frais plateforme");
                 }
 
-                // Crédit chauffeur
                 if (!User::addCredits(
                     $trip['chauffeur_id'],
                     $prix,
@@ -94,13 +87,11 @@ class TripApiController extends BaseController
                     throw new Exception("Erreur crédit chauffeur");
                 }
 
-                // Ajouter participation
                 TripParticipant::create([
                     'trip_id' => $id,
                     'user_id' => $userId
                 ]);
 
-                // Retirer une place
                 Trip::query(
                     "UPDATE trips SET available_seats = available_seats - 1 WHERE trip_id = ?",
                     [$id]
@@ -108,7 +99,7 @@ class TripApiController extends BaseController
 
                 BaseModel::commit();
 
-                // Recharger crédits depuis la base (plus fiable)
+                // Reload credits from DB instead of doing arithmetic in session
                 $updatedUser = User::find($userId);
                 $newCredits = (int) $updatedUser['credits'];
                 $_SESSION['user']['credits'] = $newCredits;
@@ -133,9 +124,6 @@ class TripApiController extends BaseController
         }
     }
 
-    /**
-     * Annuler un trajet (chauffeur)
-     */
     public function cancel($id)
     {
         header('Content-Type: application/json');
@@ -161,34 +149,30 @@ class TripApiController extends BaseController
 
                 Trip::update($id, ['status' => 'cancelled']);
 
-                // Rembourser les passagers
                 $participants = TripParticipant::byTrip($id);
 
                 foreach ($participants as $p) {
 
-    // 🔥 Remboursement
-    User::addCredits(
-        $p['user_id'],
-        (int) $trip['price'],
-        'refund',
-        'Remboursement annulation',
-        $id
-    );
+                User::addCredits(
+                $p['user_id'],
+                (int) $trip['price'],
+                'refund',
+                'Remboursement annulation',
+                $id
+                );
 
-    // 🔥 Récupérer passager
-    $passenger = User::find($p['user_id']);
+                $passenger = User::find($p['user_id']);
 
-    if ($passenger) {
-        Mailer::send(
-            $passenger['email'],
-            "Trajet annulé - EcoRide",
-            "Bonjour {$passenger['username']},\n\nLe trajet #{$id} a été annulé par le chauffeur.\nVous avez été remboursé de {$trip['price']} crédits.\n\nEcoRide"
-        );
+                if ($passenger) {
+                Mailer::send(
+                $passenger['email'],
+                "Trajet annulé - EcoRide",
+                "Bonjour {$passenger['username']},\n\nLe trajet #{$id} a été annulé par le chauffeur.\nVous avez été remboursé de {$trip['price']} crédits.\n\nEcoRide"
+            );
+        }
     }
-}
 
 
-                // Rembourser frais plateforme au chauffeur
                 User::addCredits(
                     $userId,
                     2,

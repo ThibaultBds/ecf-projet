@@ -1,12 +1,12 @@
 services:
   web:
     build:
-      context: ./docker                      # Dockerfile dans ./docker
+      context: ./docker
     container_name: ecoride-web
     ports:
-      - "8081:80"                            # 🔹 site sur http://localhost:8081
+      - "8081:80"
     volumes:
-      - .:/var/www/html                      # 🔹 monte tout le projet (frontend + backend)
+      - .:/var/www/html
     depends_on:
       - db
       - mongo
@@ -25,17 +25,17 @@ services:
       MYSQL_USER: ecoride_user
       MYSQL_PASSWORD: ecoride_pass
     ports:
-      - "3306:3306"                          # 🔹 accès via DBeaver / PHPMyAdmin
+      - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql               # 🔹 persistance des données
-      - ./docker/mysql-init:/docker-entrypoint-initdb.d  # 🔹 scripts SQL auto
+      - db_data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d
 
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: ecoride-phpmyadmin
     restart: always
     ports:
-      - "8080:80"                            # 🔹 phpMyAdmin sur http://localhost:8080
+      - "8080:80"
     environment:
       PMA_HOST: db
       PMA_PORT: 3306

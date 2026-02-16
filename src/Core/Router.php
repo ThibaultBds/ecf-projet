@@ -8,41 +8,26 @@ class Router
     private static $groupMiddleware = [];
     private static $namedRoutes = [];
 
-    /**
-     * Enregistrer une route GET
-     */
     public static function get($uri, $action)
     {
         return self::addRoute('GET', $uri, $action);
     }
 
-    /**
-     * Enregistrer une route POST
-     */
     public static function post($uri, $action)
     {
         return self::addRoute('POST', $uri, $action);
     }
 
-    /**
-     * Enregistrer une route PUT
-     */
     public static function put($uri, $action)
     {
         return self::addRoute('PUT', $uri, $action);
     }
 
-    /**
-     * Enregistrer une route DELETE
-     */
     public static function delete($uri, $action)
     {
         return self::addRoute('DELETE', $uri, $action);
     }
 
-    /**
-     * Groupe de routes avec middleware partagé
-     */
     public static function group($attributes, $callback)
     {
         $previousMiddleware = self::$groupMiddleware;
@@ -59,9 +44,6 @@ class Router
         self::$groupMiddleware = $previousMiddleware;
     }
 
-    /**
-     * Ajouter une route
-     */
     private static function addRoute($method, $uri, $action)
     {
         $uri = '/' . trim($uri, '/');
@@ -79,18 +61,12 @@ class Router
         return new Route($route);
     }
 
-    /**
-     * Compiler le pattern d'URI pour la regex
-     */
     private static function compilePattern($uri)
     {
         $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<$1>[^/]+)', $uri);
         return '#^' . $pattern . '$#';
     }
 
-    /**
-     * Dispatcher la requête
-     */
     public function dispatch()
     {
         $method = $_SERVER['REQUEST_METHOD'];
@@ -99,32 +75,25 @@ class Router
 
         foreach (self::$routes as $route) {
             if ($route['method'] === $method && preg_match($route['pattern'], $uri, $matches)) {
-                // Extraire les paramètres
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
-                // Exécuter les middlewares
                 foreach ($route['middleware'] as $middleware) {
                     $middlewareResult = $this->runMiddleware($middleware);
                     if ($middlewareResult === false) {
-                        return; // Middleware a bloqué la requête
+                        return;
                     }
                 }
 
-                // Dispatcher vers le contrôleur
                 return $this->callAction($route['action'], $params);
             }
         }
 
-        // 404 - Route non trouvée
         $this->render404();
     }
 
-    /**
-     * Exécuter un middleware
-     */
     private function runMiddleware($middleware)
     {
-        // Parse middleware avec paramètres (ex: "role:Administrateur")
+        // Parse middleware with parameters (e.g. "role:admin")
         if (strpos($middleware, ':') !== false) {
             list($middlewareName, $param) = explode(':', $middleware, 2);
         } else {
@@ -144,9 +113,6 @@ class Router
         return $param ? $instance->handle($param) : $instance->handle();
     }
 
-    /**
-     * Obtenir la classe middleware (FQCN via PSR-4)
-     */
     private function getMiddlewareClass($name)
     {
         $middlewares = [
@@ -159,9 +125,6 @@ class Router
         return $middlewares[$name] ?? null;
     }
 
-    /**
-     * Appeler l'action du contrôleur
-     */
     private function callAction($action, $params = [])
 {
     if (is_callable($action)) {
@@ -172,7 +135,6 @@ class Router
 
         list($controller, $method) = explode('@', $action);
 
-        // Construire le namespace complet
         $controllerClass = "App\\Controllers\\$controller";
 
         if (!class_exists($controllerClass)) {
@@ -193,18 +155,12 @@ class Router
 }
 
 
-    /**
-     * Afficher la page 404
-     */
     private function render404()
     {
         http_response_code(404);
         self::renderErrorWithLayout(404);
     }
 
-    /**
-     * Afficher la page 403
-     */
     public static function abort($code = 403, $message = 'Accès interdit')
     {
         http_response_code($code);
@@ -212,9 +168,6 @@ class Router
         exit;
     }
 
-    /**
-     * Rendre une page d'erreur dans le layout
-     */
     private static function renderErrorWithLayout($code)
     {
         $errorView = __DIR__ . "/../Views/errors/$code.php";
@@ -233,9 +186,6 @@ class Router
     }
 }
 
-/**
- * Classe Route pour le chaînage fluide
- */
 class Route
 {
     private $route;
@@ -245,9 +195,6 @@ class Route
         $this->route = &$route;
     }
 
-    /**
-     * Ajouter un middleware à la route
-     */
     public function middleware(...$middleware)
     {
         $this->route['middleware'] = array_merge(
@@ -257,9 +204,6 @@ class Route
         return $this;
     }
 
-    /**
-     * Nommer la route
-     */
     public function name($name)
     {
         Router::$namedRoutes[$name] = $this->route;

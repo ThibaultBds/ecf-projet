@@ -1,1 +1,0 @@
-<?php echo 'backend ok'; ?>

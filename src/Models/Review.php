@@ -6,9 +6,6 @@ class Review extends BaseModel
 {
     protected static $table = 'reviews';
 
-    /**
-     * Récupérer les avis d'un chauffeur
-     */
     public static function byDriver($driverId)
     {
         return static::query(
@@ -21,9 +18,6 @@ class Review extends BaseModel
         )->fetchAll();
     }
 
-    /**
-     * Calculer la note moyenne d'un chauffeur
-     */
     public static function averageRating($driverId)
     {
         $result = static::query(

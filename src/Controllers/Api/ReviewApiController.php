@@ -10,9 +10,6 @@ use Exception;
 
 class ReviewApiController extends BaseController
 {
-    /**
-     * Soumettre un avis
-     */
     public function submit()
     {
         $userId = AuthManager::id();
@@ -21,7 +18,6 @@ class ReviewApiController extends BaseController
         $rating = (int) ($_POST['rating'] ?? 0);
         $comment = trim($_POST['comment'] ?? '');
 
-        // Validation
         if ($rating < 1 || $rating > 5) {
             $_SESSION['flash_error'] = 'La note doit être entre 1 et 5.';
             header('Location: /my-trips');
@@ -34,7 +30,6 @@ class ReviewApiController extends BaseController
             exit;
         }
 
-        // Vérifier que l'utilisateur participe et n'a pas déjà noté
         if (!TripParticipant::isParticipating($tripId, $userId)) {
             $_SESSION['flash_error'] = 'Vous ne participez pas à ce trajet.';
             header('Location: /my-trips');
@@ -48,7 +43,6 @@ class ReviewApiController extends BaseController
         }
 
         try {
-            // Créer l'avis
             Review::create([
                 'trip_id' => $tripId,
                 'reviewer_id' => $userId,

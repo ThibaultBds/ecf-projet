@@ -1,16 +1,3 @@
-/* ========================================
-   ECORIDE - Fichier CSS principal
-   ======================================== */
-
-/* Ce fichier importe tous les styles modulaires de l'application.
-   Les styles ont été divisés en 4 fichiers pour une meilleure organisation :
-
-   - base.css : Variables, reset, typographie, formulaires de base
-   - layout.css : Header, navbar, hero, footer, grids, sections
-   - components.css : Boutons, cards, badges, search bar, etc.
-   - pages.css : Styles spécifiques aux pages (profil, trajets, admin, etc.)
-*/
-
 @import url('base.css');
 @import url('layout.css');
 @import url('components.css');

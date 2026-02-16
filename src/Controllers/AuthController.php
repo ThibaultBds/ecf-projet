@@ -8,9 +8,6 @@ use Exception;
 
 class AuthController extends BaseController
 {
-    /**
-     * Afficher le formulaire de connexion
-     */
     public function showLogin()
     {
         $this->render('auth/login', [
@@ -20,15 +17,11 @@ class AuthController extends BaseController
         ]);
     }
 
-    /**
-     * Traiter la connexion
-     */
     public function login()
     {
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
-        // Validation basique
         if (empty($email) || empty($password)) {
             return $this->render('auth/login', [
                 'title' => 'Connexion - EcoRide',
@@ -37,7 +30,6 @@ class AuthController extends BaseController
             ]);
         }
 
-        // Tenter la connexion
         $result = AuthManager::login($email, $password);
 
         if (!$result['success']) {
@@ -48,15 +40,11 @@ class AuthController extends BaseController
             ]);
         }
 
-        // Redirection selon le rôle
         $redirectUrl = AuthManager::intendedUrl(AuthManager::redirectUrlByRole());
         header('Location: ' . $redirectUrl);
         exit;
     }
 
-    /**
-     * Afficher le formulaire d'inscription
-     */
     public function showRegister()
     {
         $this->render('auth/register', [
@@ -67,9 +55,6 @@ class AuthController extends BaseController
         ]);
     }
 
-    /**
-     * Traiter l'inscription
-     */
     public function register()
     {
         $username = trim($_POST['username'] ?? '');
@@ -79,7 +64,6 @@ class AuthController extends BaseController
 
         $old = ['username' => $username, 'email' => $email];
 
-        // Validation
         if (empty($username) || empty($email) || empty($password) || empty($passwordConfirm)) {
             return $this->render('auth/register', [
                 'title' => 'Inscription - EcoRide',
@@ -116,7 +100,6 @@ class AuthController extends BaseController
             ]);
         }
 
-        // Vérifier si l'email ou username existe déjà
         if (User::exists($email, $username)) {
             return $this->render('auth/register', [
                 'title' => 'Inscription - EcoRide',
@@ -126,7 +109,6 @@ class AuthController extends BaseController
             ]);
         }
 
-        // Créer l'utilisateur
         try {
             User::create([
             'username' => $username,
@@ -156,14 +138,11 @@ class AuthController extends BaseController
         }
     }
 
-    /**
-     * Déconnexion
-     */
     public function logout()
     {
         AuthManager::logout();
 
-        // Redémarrer une session propre
+        // Restart a clean session for CSRF token persistence
         session_start();
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 

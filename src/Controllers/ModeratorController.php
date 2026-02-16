@@ -28,13 +28,11 @@ class ModeratorController extends BaseController
             $pendingReviews = [];
         }
 
-        // Incidents de trajets (MongoDB)
         $incidents = [];
         try {
             $mongo = MongoDB::getInstance();
             $incidents = $mongo->find('trip_incidents', ['status' => 'pending']);
 
-            // Enrichir avec les infos SQL
             foreach ($incidents as &$inc) {
                 $tripInfo = BaseModel::query(
                     "SELECT t.trip_id, t.departure_datetime, t.arrival_datetime,
@@ -114,26 +112,23 @@ class ModeratorController extends BaseController
                 ['status' => 'resolved', 'resolved_at' => date('Y-m-d H:i:s')]
             );
 
-            // Remettre le statut du participant
             BaseModel::query(
-                "UPDATE trip_participants 
-                 SET status = 'validated' 
+                "UPDATE trip_participants
+                 SET status = 'validated'
                  WHERE trip_id = ? AND user_id = ?",
                 [$tripId, $reporterId]
             );
 
-            // 🔥 RÉCUPÉRER LE TRAJET
             $trip = BaseModel::query(
-                "SELECT chauffeur_id, price 
-                 FROM trips 
-                 WHERE trip_id = ? 
+                "SELECT chauffeur_id, price
+                 FROM trips
+                 WHERE trip_id = ?
                  LIMIT 1",
                 [$tripId]
             )->fetch();
 
             if ($trip) {
 
-                // 🔥 CRÉDITER LE CHAUFFEUR
                 User::addCredits(
                     $trip['chauffeur_id'],
                     (int)$trip['price'],
@@ -142,7 +137,6 @@ class ModeratorController extends BaseController
                     $tripId
                 );
 
-                // 🔥 RÉCUPÉRER LE CHAUFFEUR
                 $driver = User::find($trip['chauffeur_id']);
 
                 if ($driver) {
@@ -164,4 +158,3 @@ class ModeratorController extends BaseController
     exit;
 }
 }
-

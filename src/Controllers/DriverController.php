@@ -13,9 +13,6 @@ use Exception;
 
 class DriverController extends BaseController
 {
-    /**
-     * Dashboard chauffeur
-     */
     public function dashboard()
     {
         $userId = AuthManager::id();
@@ -29,9 +26,6 @@ class DriverController extends BaseController
         ]);
     }
 
-    /**
-     * Formulaire de création de trajet
-     */
     public function createTrip()
     {
         $userId = AuthManager::id();
@@ -47,9 +41,6 @@ class DriverController extends BaseController
         ]);
     }
 
-    /**
-     * Trouver ou créer une ville, retourne son city_id
-     */
     private function findOrCreateCity($cityName)
     {
         $result = BaseModel::query(
@@ -69,9 +60,6 @@ class DriverController extends BaseController
         return Database::getInstance()->getConnection()->lastInsertId();
     }
 
-    /**
-     * Enregistrer un nouveau trajet
-     */
     public function storeTrip()
     {
         $userId = AuthManager::id();
@@ -85,13 +73,12 @@ class DriverController extends BaseController
         $places = (int) ($_POST['places'] ?? 0);
         $prix = (float) ($_POST['prix'] ?? 0);
 
-        // Validation
         if (
             empty($villeDepart) ||
             empty($villeArrivee) ||
             empty($dateDepart) ||
             empty($heureDepart) ||
-            empty($heureArrivee)) 
+            empty($heureArrivee))
             {
             return $this->render('driver/create-trip', [
                 'title' => 'Créer un trajet - EcoRide',
@@ -129,7 +116,7 @@ class DriverController extends BaseController
             ]);
         }
 
-        // Vérifier les crédits (prix + 2€ frais plateforme)
+        // Price + 2 EUR platform fee
         $totalCost = $prix + 2;
         if ($user['credits'] < $totalCost) {
             return $this->render('driver/create-trip', [
@@ -140,7 +127,6 @@ class DriverController extends BaseController
             ]);
         }
 
-        // Véhicule sélectionné
         $vehicleId = (int) ($_POST['vehicle_id'] ?? 0);
         if ($vehicleId > 0) {
             if (!Vehicle::belongsToUser($vehicleId, $userId)) {
@@ -169,11 +155,9 @@ class DriverController extends BaseController
         try {
             BaseModel::beginTransaction();
 
-            // Trouver ou créer les villes
             $cityDepartId = $this->findOrCreateCity($villeDepart);
             $cityArrivalId = $this->findOrCreateCity($villeArrivee);
 
-            // Heure d'arrivée estimée (+2h)
             $arrivalDateTime = $dateDepart . ' ' . $heureArrivee . ':00';
 
             if (strtotime($arrivalDateTime) <= strtotime($departureDateTime)) {
@@ -219,9 +203,6 @@ class DriverController extends BaseController
         }
     }
 
-    /**
-     * Afficher les préférences (stockées dans MongoDB)
-     */
     public function preferences()
     {
         $userId = AuthManager::id();
@@ -237,9 +218,6 @@ class DriverController extends BaseController
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     }
 
-    /**
-     * Sauvegarder les préférences dans MongoDB
-     */
     public function savePreferences()
     {
         $userId = AuthManager::id();
@@ -270,9 +248,6 @@ class DriverController extends BaseController
         exit;
     }
 
-    /**
-     * Récupérer les préférences d'un conducteur (statique, pour les vues)
-     */
     public static function getDriverPreferences(int $userId): array
     {
         try {
@@ -282,5 +257,5 @@ class DriverController extends BaseController
             return [];
         }
     }
-    
+
 }
