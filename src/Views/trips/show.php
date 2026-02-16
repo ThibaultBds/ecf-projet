@@ -47,6 +47,56 @@
             </div>
         </div>
 
+        <!-- Préférences du conducteur -->
+        <?php if (!empty($driverPrefs)): ?>
+        <div class="preferences-section" style="margin-bottom:30px;">
+            <h3 style="border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px;">Préférences du conducteur</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                <?php
+                $prefIcons = [
+                    'fumeur' => ['smoking_rooms', 'Fumeur accepté', 'Non-fumeur'],
+                    'animaux' => ['pets', 'Animaux acceptés', 'Pas d\'animaux'],
+                    'musique' => ['music_note', 'Musique', 'Silence préféré'],
+                    'discussion' => ['chat', '', ''],
+                ];
+                $discussionLabels = ['plaisir' => 'Discussion avec plaisir', 'un_peu' => 'Discussion modérée', 'silence' => 'Silence préféré'];
+
+                foreach (['fumeur', 'animaux', 'musique'] as $key):
+                    $val = $driverPrefs[$key] ?? 'non';
+                    $icon = $prefIcons[$key][0];
+                    $label = ($val === 'oui') ? $prefIcons[$key][1] : $prefIcons[$key][2];
+                    $color = ($val === 'oui') ? '#00b894' : '#636e72';
+                ?>
+                    <span style="display:inline-flex;align-items:center;gap:5px;background:#f8f9fa;padding:8px 14px;border-radius:20px;font-size:14px;color:<?= $color ?>;">
+                        <span class="material-icons" style="font-size:18px;"><?= $icon ?></span>
+                        <?= htmlspecialchars($label) ?>
+                    </span>
+                <?php endforeach; ?>
+
+                <?php $disc = $driverPrefs['discussion'] ?? 'un_peu'; ?>
+                <span style="display:inline-flex;align-items:center;gap:5px;background:#f8f9fa;padding:8px 14px;border-radius:20px;font-size:14px;color:#636e72;">
+                    <span class="material-icons" style="font-size:18px;">chat</span>
+                    <?= htmlspecialchars($discussionLabels[$disc] ?? 'Discussion modérée') ?>
+                </span>
+            </div>
+
+            <?php
+            $custom = $driverPrefs['custom_preferences'] ?? [];
+            if (is_array($custom) && !empty($custom)):
+            ?>
+                <div style="margin-top:15px;">
+                    <h4 style="font-size:14px;color:#636e72;margin-bottom:8px;">Autres préférences :</h4>
+                    <?php foreach ($custom as $pref): ?>
+                        <span style="display:inline-flex;align-items:center;gap:5px;background:#fff3e0;padding:6px 12px;border-radius:15px;font-size:13px;color:#e67e22;margin:3px;">
+                            <span class="material-icons" style="font-size:16px;">label</span>
+                            <?= htmlspecialchars((string) $pref) ?>
+                        </span>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+
         <!-- Avis -->
         <div class="reviews-section" style="margin-bottom:30px;">
             <h3 style="border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px;">Avis sur le conducteur</h3>

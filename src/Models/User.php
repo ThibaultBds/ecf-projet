@@ -7,25 +7,16 @@ class User extends BaseModel
     protected static $table = 'users';
     protected static $primaryKey = 'user_id';
 
-    /**
-     * Trouver un utilisateur par email
-     */
     public static function findByEmail($email)
     {
         return static::findBy('email', strtolower(trim($email)));
     }
 
-    /**
-     * Trouver un utilisateur par username
-     */
     public static function findByUsername($username)
     {
         return static::findBy('username', $username);
     }
 
-    /**
-     * Vérifier si un email ou username existe déjà
-     */
     public static function exists($email, $username)
     {
         $stmt = static::query(
@@ -35,34 +26,38 @@ class User extends BaseModel
         return $stmt->fetch() !== false;
     }
 
-    /**
-     * Déduire des crédits
-     */
-    public static function deductCredits($userId, $amount)
+    public static function deductCredits($userId, $amount, $type, $reason = null, $tripId = null)
     {
-        static::query(
-            "UPDATE users SET credits = credits - ? WHERE user_id = ? AND credits >= ?",
+        $stmt = static::query(
+            "UPDATE users 
+             SET credits = credits - ?
+             WHERE user_id = ? AND credits >= ?",
             [$amount, $userId, $amount]
         );
+
+        if ($stmt->rowCount() > 0) {
+            self::logCredit($userId, -$amount, $type, $reason, $tripId);
+        }
+
+        return $stmt->rowCount() > 0;
     }
 
-    /**
-     * Ajouter des crédits
-     */
-    public static function addCredits($userId, $amount)
+    public static function addCredits($userId, $amount, $type, $reason = null, $tripId = null)
     {
         static::query(
-            "UPDATE users SET credits = credits + ? WHERE user_id = ?",
+            "UPDATE users 
+             SET credits = credits + ?
+             WHERE user_id = ?",
             [$amount, $userId]
         );
+
+        self::logCredit($userId, $amount, $type, $reason, $tripId);
     }
 
-    /**
-     * Récupérer les derniers trajets d'un utilisateur
-     */
     public static function recentTrips($userId, $limit = 10)
     {
         $limit = (int) $limit;
+
         return static::query(
             "SELECT t.*,
                     cd.name AS ville_depart,
@@ -71,11 +66,30 @@ class User extends BaseModel
              FROM trips t
              JOIN cities cd ON t.city_depart_id = cd.city_id
              JOIN cities ca ON t.city_arrival_id = ca.city_id
-             LEFT JOIN trip_participants tp ON t.trip_id = tp.trip_id AND tp.user_id = ?
+             LEFT JOIN trip_participants tp 
+                ON t.trip_id = tp.trip_id AND tp.user_id = ?
              WHERE t.chauffeur_id = ? OR tp.user_id = ?
              ORDER BY t.departure_datetime DESC
              LIMIT {$limit}",
             [$userId, $userId, $userId, $userId]
         )->fetchAll();
+    }
+
+    public static function logCredit($userId, $amount, $type, $reason = null, $tripId = null)
+    {
+        static::query(
+            "INSERT INTO credits_logs
+             (user_id, amount, type, trip_id, created_at)
+             VALUES (?, ?, ?, ?, NOW())",
+            [$userId, $amount, $type, $tripId]
+        );
+    }
+
+    public static function updatePhoto($userId, $photoName)
+    {
+        return static::query(
+            "UPDATE users SET photo = ? WHERE user_id = ?",
+            [$photoName, $userId]
+        );
     }
 }

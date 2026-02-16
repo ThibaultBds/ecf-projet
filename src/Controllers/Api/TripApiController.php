@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Models\BaseModel;
 use App\Core\Auth\AuthManager;
 use Exception;
+use App\Core\Mailer;
+
 
 class TripApiController extends BaseController
 {
@@ -46,7 +48,10 @@ class TripApiController extends BaseController
             }
 
             $prix = (int) $trip['price'];
-            if ($user['credits'] < $prix) {
+            $fraisPlateforme = 2;
+            $total = $prix + $fraisPlateforme;
+
+            if ($user['credits'] < $total) {
                 echo json_encode(['success' => false, 'message' => 'Crédits insuffisants.']);
                 return;
             }
@@ -54,32 +59,77 @@ class TripApiController extends BaseController
             // Transaction
             BaseModel::beginTransaction();
 
-            User::deductCredits($userId, $prix);
+            try {
 
-            TripParticipant::create([
-                'trip_id' => $id,
-                'user_id' => $userId
-            ]);
+                // Débit prix
+                if (!User::deductCredits(
+                    $userId,
+                    $prix,
+                    'debit',
+                    'Participation au trajet',
+                    $id
+                )) {
+                    throw new Exception("Erreur débit prix");
+                }
 
-            Trip::query(
-                "UPDATE trips SET available_seats = available_seats - 1 WHERE trip_id = ?",
-                [$id]
-            );
+                // Débit frais plateforme
+                if (!User::deductCredits(
+                    $userId,
+                    $fraisPlateforme,
+                    'platform_fee',
+                    'Frais plateforme',
+                    $id
+                )) {
+                    throw new Exception("Erreur frais plateforme");
+                }
 
-            BaseModel::commit();
+                // Crédit chauffeur
+                if (!User::addCredits(
+                    $trip['chauffeur_id'],
+                    $prix,
+                    'trip_income',
+                    'Revenu trajet',
+                    $id
+                )) {
+                    throw new Exception("Erreur crédit chauffeur");
+                }
 
-            $newCredits = (int) $user['credits'] - $prix;
-            $_SESSION['user']['credits'] = $newCredits;
+                // Ajouter participation
+                TripParticipant::create([
+                    'trip_id' => $id,
+                    'user_id' => $userId
+                ]);
 
-            echo json_encode([
-                'success' => true,
-                'message' => 'Participation confirmée !',
-                'new_credits' => $newCredits
-            ]);
+                // Retirer une place
+                Trip::query(
+                    "UPDATE trips SET available_seats = available_seats - 1 WHERE trip_id = ?",
+                    [$id]
+                );
+
+                BaseModel::commit();
+
+                // Recharger crédits depuis la base (plus fiable)
+                $updatedUser = User::find($userId);
+                $newCredits = (int) $updatedUser['credits'];
+                $_SESSION['user']['credits'] = $newCredits;
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Participation confirmée !',
+                    'new_credits' => $newCredits
+                ]);
+
+            } catch (Exception $e) {
+                BaseModel::rollback();
+                throw $e;
+            }
+
         } catch (Exception $e) {
-            BaseModel::rollback();
             error_log("Erreur participation : " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Erreur technique, réessayez plus tard.']);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erreur technique, réessayez plus tard.'
+            ]);
         }
     }
 
@@ -107,25 +157,60 @@ class TripApiController extends BaseController
 
             BaseModel::beginTransaction();
 
-            Trip::update($id, ['status' => 'cancelled']);
+            try {
 
-            // Rembourser les passagers
-            $participants = TripParticipant::byTrip($id);
-            foreach ($participants as $p) {
-                User::addCredits($p['user_id'], (int) $trip['price']);
+                Trip::update($id, ['status' => 'cancelled']);
+
+                // Rembourser les passagers
+                $participants = TripParticipant::byTrip($id);
+
+                foreach ($participants as $p) {
+
+    // 🔥 Remboursement
+    User::addCredits(
+        $p['user_id'],
+        (int) $trip['price'],
+        'refund',
+        'Remboursement annulation',
+        $id
+    );
+
+    // 🔥 Récupérer passager
+    $passenger = User::find($p['user_id']);
+
+    if ($passenger) {
+        Mailer::send(
+            $passenger['email'],
+            "Trajet annulé - EcoRide",
+            "Bonjour {$passenger['username']},\n\nLe trajet #{$id} a été annulé par le chauffeur.\nVous avez été remboursé de {$trip['price']} crédits.\n\nEcoRide"
+        );
+    }
+}
+
+
+                // Rembourser frais plateforme au chauffeur
+                User::addCredits(
+                    $userId,
+                    2,
+                    'platform_refund',
+                    'Remboursement frais plateforme',
+                    $id
+                );
+
+                BaseModel::commit();
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Trajet annulé. ' . count($participants) . ' passager(s) remboursé(s).'
+                ]);
+
+            } catch (Exception $e) {
+                BaseModel::rollback();
+                throw $e;
             }
 
-            // Rembourser frais plateforme au chauffeur
-            User::addCredits($userId, 2);
-
-            BaseModel::commit();
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Trajet annulé. ' . count($participants) . ' passager(s) remboursé(s).'
-            ]);
         } catch (Exception $e) {
-            BaseModel::rollback();
+            error_log("Erreur annulation : " . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Erreur technique.']);
         }
     }
