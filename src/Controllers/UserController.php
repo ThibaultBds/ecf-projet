@@ -7,16 +7,12 @@ use App\Models\User;
 
 class UserController extends BaseController
 {
-    /**
-     * Afficher le profil de l'utilisateur
-     */
     public function profile()
     {
         $userId = AuthManager::id();
         $userData = User::find($userId);
         $myTrips = User::recentTrips($userId, 10);
 
-        // Messages flash
         $error = $_SESSION['flash_error'] ?? '';
         $success = $_SESSION['flash_success'] ?? '';
         unset($_SESSION['flash_error'], $_SESSION['flash_success']);
@@ -30,22 +26,115 @@ class UserController extends BaseController
         ]);
     }
 
-    /**
-     * Mettre à jour le rôle de l'utilisateur
-     */
     public function update()
     {
         $userId = AuthManager::id();
-        $role = $_POST['role'] ?? '';
+        $type = $_POST['user_type'] ?? '';
 
-        if (in_array($role, ['passager', 'chauffeur'])) {
-            User::update($userId, ['role' => $role]);
-            $_SESSION['user']['role'] = $role;
-            $_SESSION['flash_success'] = 'Profil mis à jour avec succès !';
+        $isDriver = false;
+        $isPassenger = false;
+
+        if ($type === 'chauffeur') {
+            $isDriver = true;
+        } elseif ($type === 'passager') {
+            $isPassenger = true;
+        } elseif ($type === 'les_deux') {
+            $isDriver = true;
+            $isPassenger = true;
         } else {
-            $_SESSION['flash_error'] = 'Rôle invalide.';
+            $_SESSION['flash_error'] = 'Type invalide.';
+            header('Location: /profile');
+            exit;
         }
 
+        User::update($userId, [
+            'is_driver' => $isDriver ? 1 : 0,
+            'is_passenger' => $isPassenger ? 1 : 0
+        ]);
+
+        // Mettre à jour la session
+        $_SESSION['user']['is_driver'] = $isDriver;
+        $_SESSION['user']['is_passenger'] = $isPassenger;
+
+        $_SESSION['flash_success'] = 'Profil mis à jour avec succès !';
+
+        // Si devient chauffeur et n'a pas de véhicule, rediriger
+        if ($isDriver) {
+            $vehicles = \App\Models\Vehicle::byUser($userId);
+            if (empty($vehicles)) {
+                $_SESSION['flash_success'] = 'Profil mis à jour ! Veuillez maintenant ajouter un véhicule.';
+                header('Location: /driver/vehicles');
+                exit;
+            }
+        }
+
+        header('Location: /profile');
+        exit;
+    }
+
+    public function uploadPhoto()
+    {
+        $userId = AuthManager::id();
+
+        if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== 0) {
+            $_SESSION['flash_error'] = "Erreur upload.";
+            header('Location: /profile');
+            exit;
+        }
+
+        $file = $_FILES['photo'];
+
+        // Vérification réelle du type MIME
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $realType = $finfo->file($file['tmp_name']);
+
+        $allowedTypes = [
+            'image/jpeg' => 'jpg',
+            'image/png'  => 'png'
+        ];
+
+        if (!array_key_exists($realType, $allowedTypes)) {
+            $_SESSION['flash_error'] = "Format invalide (jpg ou png uniquement).";
+            header('Location: /profile');
+            exit;
+        }
+
+        $extension = $allowedTypes[$realType];
+
+        $newFileName = 'user_' . $userId . '_' . time() . '.' . $extension;
+
+        $destination = __DIR__ . '/../../public/uploads/' . $newFileName;
+
+        if (!move_uploaded_file($file['tmp_name'], $destination)) {
+            $_SESSION['flash_error'] = "Erreur sauvegarde fichier.";
+            header('Location: /profile');
+            exit;
+        }
+
+        User::updatePhoto($userId, $newFileName);
+
+        $_SESSION['flash_success'] = "Photo mise à jour.";
+        header('Location: /profile');
+        exit;
+    }
+
+    public function deletePhoto()
+    {
+        $userId = AuthManager::id();
+        $user = User::find($userId);
+
+        if (!empty($user['photo'])) {
+
+        $filePath = __DIR__ . '/../..public/uploads./' . $user['photo'];
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        User::updatePhoto($userId, null);
+        }
+
+        $_SESSION['flash_success'] = "Photo supprimée.";
         header('Location: /profile');
         exit;
     }

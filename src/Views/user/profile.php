@@ -10,11 +10,44 @@ $roleLabels = [
     'admin' => 'Administrateur',
     'employe' => 'Employé',
 ];
+$isDriver = !empty($userData['is_driver']);
+$isPassenger = !empty($userData['is_passenger']);
+$currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeur' : 'passager');
 ?>
 <main class="page-wrapper">
     <h2 class="profile-hero">
-        <span class="material-icons profile-icon">account_circle</span> Mon Profil
+        <span class="material-icons profile-icon">account_circle</span>
+        Mon Profil
     </h2>
+
+    <!-- Photo de profil -->
+<div class="profile-box">
+    <h3 class="profil-titre">Photo de profil</h3>
+
+    <div style="margin-bottom:15px;">
+        <?php if (!empty($userData['photo'])): ?>
+            <img src="/uploads/<?= htmlspecialchars($userData['photo']) ?>" 
+                 alt="Photo de profil"
+                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;">
+        <?php else: ?>
+            <img src="/images/default-avatar.png" 
+                 alt="Avatar par défaut"
+                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;">
+        <?php endif; ?>
+    </div>
+
+    <form method="POST" action="/profile/upload-photo" enctype="multipart/form-data">
+        <input type="file" name="photo" accept="image/jpeg,image/png" required>
+        <button type="submit" class="btn-primary">Mettre à jour la photo</button>
+    </form>
+</div>
+
+<?php if (!empty($userData['photo'])): ?>
+    <form method="POST" action="/profile/delete-photo" style="margin-top:10px;">
+        <button type="submit" class="btn-danger">Supprimer la photo</button>
+    </form>
+<?php endif; ?>
+
 
     <?php if (!empty($error)): ?>
         <div class="message-error"><?= htmlspecialchars($error) ?></div>
@@ -43,37 +76,42 @@ $roleLabels = [
                 </div>
             </div>
             <div class="profile-item">
-                <span class="material-icons profile-icon">admin_panel_settings</span>
+                <span class="material-icons profile-icon">badge</span>
                 <div>
-                    <strong class="profile-strong">Rôle</strong>
+                    <strong class="profile-strong">Type</strong>
                     <p class="profile-value">
-                        <span class="admin-badge <?= strtolower($userData['role'] ?? '') ?>">
-                            <?= $roleLabels[$userData['role'] ?? ''] ?? htmlspecialchars($userData['role'] ?? '') ?>
-                        </span>
+                        <?php if ($isDriver && $isPassenger): ?>
+                            <span class="admin-badge" style="background:#00b894;color:white;">Chauffeur &amp; Passager</span>
+                        <?php elseif ($isDriver): ?>
+                            <span class="admin-badge" style="background:#0984e3;color:white;">Chauffeur</span>
+                        <?php else: ?>
+                            <span class="admin-badge" style="background:#636e72;color:white;">Passager</span>
+                        <?php endif; ?>
                     </p>
                 </div>
             </div>
             <div class="profile-item">
                 <span class="material-icons profile-icon">account_balance_wallet</span>
                 <div>
-                    <strong class="profile-strong">Crédits</strong>
+                    <strong class="profile-strong">Cr&eacute;dits</strong>
                     <p class="profile-value profile-credits"><?= (int)($userData['credits'] ?? 0) ?></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modifier le rôle -->
+    <!-- Modifier le type -->
     <div class="profile-box">
-        <h3 class="profil-titre">Modifier mon rôle</h3>
+        <h3 class="profil-titre">Modifier mon type de compte</h3>
         <form method="POST" action="/profile/update" class="form-max">
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-            <label for="role" class="form-label">Je suis :</label>
-            <select name="role" id="role" required class="select-field">
-                <option value="passager" <?= ($userData['role'] ?? 'passager') === 'passager' ? 'selected' : '' ?>>Passager</option>
-                <option value="chauffeur" <?= ($userData['role'] ?? 'passager') === 'chauffeur' ? 'selected' : '' ?>>Chauffeur</option>
+            <label for="user_type" class="form-label">Je suis :</label>
+            <select name="user_type" id="user_type" required class="select-field">
+                <option value="passager" <?= $currentType === 'passager' ? 'selected' : '' ?>>Passager</option>
+                <option value="chauffeur" <?= $currentType === 'chauffeur' ? 'selected' : '' ?>>Chauffeur</option>
+                <option value="les_deux" <?= $currentType === 'les_deux' ? 'selected' : '' ?>>Chauffeur &amp; Passager</option>
             </select>
-            <button type="submit" class="btn-primary">Mettre à jour</button>
+            <button type="submit" class="btn-primary">Mettre &agrave; jour</button>
         </form>
     </div>
 
@@ -81,19 +119,14 @@ $roleLabels = [
     <div class="profil-section compte-section">
         <h3 class="profil-titre">Gestion de mon compte</h3>
         <div class="profil-liens-grid">
-            <?php
-            $role = $userData['role'] ?? 'passager';
-            $is_driver = ($role === 'chauffeur');
-            ?>
-
-            <?php if ($is_driver): ?>
+            <?php if ($isDriver): ?>
                 <a href="/driver/vehicles" class="profil-lien lien-vehicules">
                     <span class="material-icons">directions_car</span>
-                    <span>Gérer mes véhicules</span>
+                    <span>G&eacute;rer mes v&eacute;hicules</span>
                 </a>
                 <a href="/driver/preferences" class="profil-lien lien-preferences">
                     <span class="material-icons">settings</span>
-                    <span>Gérer mes préférences</span>
+                    <span>G&eacute;rer mes pr&eacute;f&eacute;rences</span>
                 </a>
                 <a href="/driver/dashboard" class="profil-lien lien-espace-chauffeur">
                     <span class="material-icons">add_road</span>
@@ -105,6 +138,18 @@ $roleLabels = [
                 <span class="material-icons">list</span>
                 <span>Voir mes trajets</span>
             </a>
+
+            <?php if (($userData['role'] ?? '') === 'admin'): ?>
+                <a href="/admin" class="profil-lien" style="border-color:#e74c3c;">
+                    <span class="material-icons">admin_panel_settings</span>
+                    <span>Administration</span>
+                </a>
+            <?php elseif (($userData['role'] ?? '') === 'employe'): ?>
+                <a href="/moderator" class="profil-lien" style="border-color:#e17055;">
+                    <span class="material-icons">shield</span>
+                    <span>Mod&eacute;ration</span>
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -120,7 +165,7 @@ $roleLabels = [
                         <div class="trajet-infos">
                             <span class="material-icons">location_on</span>
                             <span class="trajet-ville">
-                                <?= htmlspecialchars($t['ville_depart']) ?> → <?= htmlspecialchars($t['ville_arrivee']) ?>
+                                <?= htmlspecialchars($t['ville_depart']) ?> &rarr; <?= htmlspecialchars($t['ville_arrivee']) ?>
                             </span>
                             <span class="trajet-date"><?= date('d/m/Y', strtotime($t['departure_datetime'])) ?></span>
                         </div>
@@ -135,7 +180,7 @@ $roleLabels = [
 
     <div class="retour-section">
         <a href="/" class="btn-retour">
-            <span class="material-icons">arrow_back</span> Retour à l'accueil
+            <span class="material-icons">arrow_back</span> Retour &agrave; l'accueil
         </a>
     </div>
 </main>
