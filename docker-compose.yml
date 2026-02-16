@@ -9,8 +9,10 @@ services:
       - .:/var/www/html                      # 🔹 monte tout le projet (frontend + backend)
     depends_on:
       - db
+      - mongo
     environment:
       - APACHE_DOCUMENT_ROOT=/var/www/html/public
+      - MONGO_URI=mongodb://mongo:27017
     restart: always
 
   db:
@@ -40,5 +42,15 @@ services:
     depends_on:
       - db
 
+  mongo:
+    image: mongo:7.0
+    container_name: ecoride-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
 volumes:
   db_data:
+  mongo_data:

@@ -119,7 +119,7 @@ CREATE TABLE trip_participants (
     id INT AUTO_INCREMENT PRIMARY KEY,
     trip_id INT NOT NULL,
     user_id INT NOT NULL,
-    status ENUM('confirmed', 'cancelled') DEFAULT 'confirmed',
+    status ENUM('confirmed', 'cancelled', 'validated', 'disputed') DEFAULT 'confirmed',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_participant_trip
