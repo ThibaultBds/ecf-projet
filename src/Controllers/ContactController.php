@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Core\Mailer;
+
 class ContactController extends BaseController
 {
     public function show()
@@ -52,6 +54,20 @@ class ContactController extends BaseController
                 'old' => $_POST
             ]);
         }
+
+        $adminEmail = "admin@ecoride.fr";
+
+        $emailContent  = "Nouveau message de contact\n\n";
+        $emailContent .= "Nom: {$nom}\n";
+        $emailContent .= "Email: {$email}\n";
+        $emailContent .= "Sujet: {$sujet}\n\n";
+        $emailContent .= "Message:\n{$message}";
+
+        Mailer::send(
+            $adminEmail,
+            "Nouveau message - EcoRide : {$sujet}",
+            $emailContent
+        );
 
         $_SESSION['flash_success'] = 'Votre message a été envoyé avec succès ! Nous vous recontacterons bientôt.';
         header('Location: /contact');

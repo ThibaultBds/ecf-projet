@@ -71,7 +71,7 @@ class AuthManager
         }
 
         $stmt = $pdo->prepare(
-            "SELECT user_id, username, email, password, role, credits
+            "SELECT user_id, username, email, password, role, credits, is_driver, is_passenger, suspended
              FROM users WHERE email = ? LIMIT 1"
         );
 
@@ -81,6 +81,11 @@ class AuthManager
         if (!$user || !password_verify($password, $user['password'])) {
             self::logAttempt($pdo, $ip, $email, false);
             return ['success' => false, 'message' => 'Identifiants incorrects.'];
+        }
+
+        // Vérifier si le compte est suspendu
+        if (!empty($user['suspended'])) {
+            return ['success' => false, 'message' => 'Votre compte a été suspendu. Contactez l\'administration.'];
         }
 
         // Connexion réussie
@@ -94,7 +99,9 @@ class AuthManager
             'username' => $user['username'],
             'email' => $user['email'],
             'role' => $user['role'],
-            'credits' => (int) $user['credits']
+            'credits' => (int) $user['credits'],
+            'is_driver' => (bool) $user['is_driver'],
+            'is_passenger' => (bool) $user['is_passenger']
         ];
 
         if (!isset($_SESSION['csrf_token'])) {
