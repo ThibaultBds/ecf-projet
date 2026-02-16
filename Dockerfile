@@ -26,4 +26,5 @@ CMD ["apache2-foreground"]
 COPY . /var/www/html
 
 # Permissions uploads
-RUN chown -R www-data:www-data /var/www/html/public/uploads
+RUN mkdir -p /var/www/html/public/uploads \
+    && chown -R www-data:www-data /var/www/html/public/uploads
