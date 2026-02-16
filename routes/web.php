@@ -40,11 +40,13 @@ Router::group(['middleware' => 'auth'], function () {
     // Profil
     Router::get('/profile', 'UserController@profile');
     Router::post('/profile/update', 'UserController@update');
+    Router::post('/profile/upload-photo', 'UserController@uploadPhoto');
+    Router::post('/profile/delete-photo', 'UserController@deletePhoto');
+
 
     // Mes trajets
     Router::get('/my-trips', 'TripController@myTrips');
-    Router::post('/my-trips/cancel-participation', 'TripController@cancelParticipation');
-    Router::post('/my-trips/update-status', 'TripController@updateStatus');
+    Router::post('/my-trips', 'TripController@myTrips');
 
     // API - Participation
     Router::post('/api/trip/{id}/join', 'Api\\TripApiController@join');
@@ -91,4 +93,5 @@ Router::group(['middleware' => 'role:employe'], function () {
     Router::get('/moderator', 'ModeratorController@index');
     Router::post('/moderator/approve-review', 'ModeratorController@approveReview');
     Router::post('/moderator/reject-review', 'ModeratorController@rejectReview');
+    Router::post('/moderator/resolve-incident', 'ModeratorController@resolveIncident');
 });
