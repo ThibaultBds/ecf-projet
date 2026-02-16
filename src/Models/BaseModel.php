@@ -10,17 +10,11 @@ abstract class BaseModel
     protected static $primaryKey = 'id';
     protected $attributes = [];
 
-    /**
-     * Obtenir la connexion PDO
-     */
     protected static function getConnection()
     {
         return Database::getInstance()->getConnection();
     }
 
-    /**
-     * Exécuter une requête préparée
-     */
     public static function query($sql, $params = [])
     {
         $pdo = static::getConnection();
@@ -29,9 +23,6 @@ abstract class BaseModel
         return $stmt;
     }
 
-    /**
-     * Trouver un enregistrement par son ID
-     */
     public static function find($id)
     {
         $table = static::$table;
@@ -40,9 +31,6 @@ abstract class BaseModel
         return $stmt->fetch() ?: null;
     }
 
-    /**
-     * Récupérer tous les enregistrements
-     */
     public static function all($orderBy = null)
     {
         $table = static::$table;
@@ -55,9 +43,6 @@ abstract class BaseModel
         return static::query($sql)->fetchAll();
     }
 
-    /**
-     * Rechercher par colonne
-     */
     public static function where($column, $value)
     {
         $table = static::$table;
@@ -65,9 +50,6 @@ abstract class BaseModel
         return $stmt->fetchAll();
     }
 
-    /**
-     * Rechercher un seul enregistrement par colonne
-     */
     public static function findBy($column, $value)
     {
         $table = static::$table;
@@ -75,9 +57,6 @@ abstract class BaseModel
         return $stmt->fetch() ?: null;
     }
 
-    /**
-     * Compter les enregistrements
-     */
     public static function count($condition = null, $params = [])
     {
         $table = static::$table;
@@ -91,9 +70,6 @@ abstract class BaseModel
         return (int) $result['total'];
     }
 
-    /**
-     * Créer un enregistrement
-     */
     public static function create($data)
     {
         $table = static::$table;
@@ -107,9 +83,6 @@ abstract class BaseModel
         return $pdo->lastInsertId();
     }
 
-    /**
-     * Mettre à jour un enregistrement par ID
-     */
     public static function update($id, $data)
     {
         $table = static::$table;
@@ -129,9 +102,6 @@ abstract class BaseModel
         static::query($sql, $values);
     }
 
-    /**
-     * Supprimer un enregistrement par ID
-     */
     public static function destroy($id)
     {
         $table = static::$table;
@@ -139,25 +109,16 @@ abstract class BaseModel
         static::query("DELETE FROM {$table} WHERE {$pk} = ?", [$id]);
     }
 
-    /**
-     * Démarrer une transaction
-     */
     public static function beginTransaction()
     {
         static::getConnection()->beginTransaction();
     }
 
-    /**
-     * Valider une transaction
-     */
     public static function commit()
     {
         static::getConnection()->commit();
     }
 
-    /**
-     * Annuler une transaction
-     */
     public static function rollback()
     {
         static::getConnection()->rollBack();

@@ -6,9 +6,6 @@ class TripParticipant extends BaseModel
 {
     protected static $table = 'trip_participants';
 
-    /**
-     * Vérifier si un utilisateur participe déjà à un trajet
-     */
     public static function isParticipating($tripId, $userId)
     {
         $result = static::query(
@@ -19,9 +16,6 @@ class TripParticipant extends BaseModel
         return $result !== false;
     }
 
-    /**
-     * Vérifier si un utilisateur a déjà laissé un avis pour un trajet
-     */
     public static function hasReviewed($tripId, $userId)
     {
         $result = static::query(
@@ -32,9 +26,6 @@ class TripParticipant extends BaseModel
         return $result !== false;
     }
 
-    /**
-     * Récupérer tous les participants d'un trajet
-     */
     public static function byTrip($tripId)
     {
         return static::query(

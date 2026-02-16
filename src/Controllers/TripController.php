@@ -13,12 +13,9 @@ use Exception;
 
 class TripController extends BaseController
 {
-    /**
-     * Liste des trajets avec recherche et filtres
-     */
     public function index()
     {
-        // Normaliser la date (le calendrier custom envoie "DD / MM / YYYY")
+        // The custom calendar widget sends dates as "DD / MM / YYYY"
         $rawDate = trim($_GET['date'] ?? '');
         if (preg_match('#^(\d{2})\s*/\s*(\d{2})\s*/\s*(\d{4})$#', $rawDate, $m)) {
             $rawDate = "{$m[3]}-{$m[2]}-{$m[1]}";
@@ -34,11 +31,9 @@ class TripController extends BaseController
             'duree_max' => $_GET['duree_max'] ?? null
         ];
 
-        // Par défaut, aucun covoiturage affiché (l'utilisateur doit chercher)
         $hasSearched = !empty($filters['depart']) || !empty($filters['arrivee']) || !empty($filters['date']);
         $covoiturages = $hasSearched ? Trip::search($filters) : [];
 
-        // Si recherche sans résultat, suggérer la date la plus proche
         $nearestDate = null;
         if ($hasSearched && empty($covoiturages)) {
             $nearestDate = Trip::nearestDate($filters['depart'], $filters['arrivee']);
@@ -53,9 +48,6 @@ class TripController extends BaseController
         ]);
     }
 
-    /**
-     * Détails d'un trajet
-     */
     public function show($id)
     {
         $covoiturage = Trip::findWithDetails($id);
@@ -66,10 +58,8 @@ class TripController extends BaseController
             return;
         }
 
-        // Récupérer les avis du chauffeur
         $reviews = Review::byDriver($covoiturage['chauffeur_id']);
 
-        // Crédits de l'utilisateur connecté
         $user_credit = 0;
         $isParticipating = false;
         if (AuthManager::check()) {
@@ -80,7 +70,6 @@ class TripController extends BaseController
 
         $credit_requis = (int) $covoiturage['price'];
 
-        // Préférences du conducteur (MongoDB)
         try {
             $driverPrefs = DriverController::getDriverPreferences((int) $covoiturage['chauffeur_id']);
         } catch (\Throwable $e) {
@@ -98,15 +87,11 @@ class TripController extends BaseController
         ]);
     }
 
-    /**
-     * Mes trajets (chauffeur + passager)
-     */
     public function myTrips()
     {
         $userId = AuthManager::id();
         $error = '';
 
-        // Traiter les actions POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? '';
             $tripId = (int) ($_POST['trip_id'] ?? 0);
@@ -125,7 +110,8 @@ class TripController extends BaseController
             exit;
         }
 
-        $trajets_conduits = Trip::byDriver($userId);
+        $isDriver = !empty($_SESSION['user']['is_driver']);
+        $trajets_conduits = $isDriver ? Trip::byDriver($userId) : [];
         $participations = Trip::byPassenger($userId);
 
         $this->render('trips/my-trips', [
@@ -136,27 +122,21 @@ class TripController extends BaseController
         ]);
     }
 
-    /**
-     * Annuler la participation d'un passager
-     */
     private function handleCancelParticipation($tripId, $userId)
     {
         try {
             BaseModel::beginTransaction();
 
-            // Supprimer la participation
             TripParticipant::query(
                 "DELETE FROM trip_participants WHERE trip_id = ? AND user_id = ?",
                 [$tripId, $userId]
             );
 
-            // Remettre une place
             Trip::query(
                 "UPDATE trips SET available_seats = available_seats + 1 WHERE trip_id = ?",
                 [$tripId]
             );
 
-            // Rembourser les crédits
             $trip = Trip::find($tripId);
             if ($trip) {
                 User::addCredits($userId, (int) $trip['price']);
@@ -169,9 +149,6 @@ class TripController extends BaseController
         }
     }
 
-    /**
-     * Mettre à jour le statut d'un trajet
-     */
     private function handleUpdateTripStatus($tripId, $userId, $newStatus)
     {
         $validStatuses = ['started', 'completed', 'cancelled'];
@@ -184,7 +161,6 @@ class TripController extends BaseController
             return;
         }
 
-        // Transitions valides
         if ($newStatus === 'started' && $trip['status'] !== 'scheduled') return;
         if ($newStatus === 'completed' && $trip['status'] !== 'started') return;
         if ($newStatus === 'cancelled' && !in_array($trip['status'], ['scheduled', 'started'])) return;
@@ -210,9 +186,6 @@ class TripController extends BaseController
         }
     }
 
-    /**
-     * Passager valide le trajet → crédits au chauffeur
-     */
     private function handleValidateTrip($tripId, $userId)
     {
         $trip = Trip::find($tripId);
@@ -243,9 +216,6 @@ class TripController extends BaseController
         }
     }
 
-    /**
-     * Passager signale un problème → stocké dans MongoDB pour l'employé
-     */
     private function handleReportProblem($tripId, $userId)
     {
         $trip = Trip::find($tripId);

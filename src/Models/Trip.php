@@ -7,9 +7,6 @@ class Trip extends BaseModel
     protected static $table = 'trips';
     protected static $primaryKey = 'trip_id';
 
-    /**
-     * Rechercher des trajets avec filtres
-     */
     public static function search($filters = [])
     {
         $pdo = static::getConnection();
@@ -75,9 +72,6 @@ class Trip extends BaseModel
         return $stmt->fetchAll();
     }
 
-    /**
-     * Trouver la date du prochain trajet disponible pour un itinéraire
-     */
     public static function nearestDate($depart, $arrivee)
     {
         $sql = "SELECT DATE(t.departure_datetime) AS nearest_date
@@ -105,9 +99,6 @@ class Trip extends BaseModel
         return $result ? $result['nearest_date'] : null;
     }
 
-    /**
-     * Récupérer un trajet avec toutes les infos
-     */
     public static function findWithDetails($id)
     {
         return static::query(
@@ -131,9 +122,6 @@ class Trip extends BaseModel
         )->fetch() ?: null;
     }
 
-    /**
-     * Récupérer les trajets d'un chauffeur
-     */
     public static function byDriver($driverId)
     {
         return static::query(
@@ -152,9 +140,6 @@ class Trip extends BaseModel
         )->fetchAll();
     }
 
-    /**
-     * Récupérer les trajets d'un passager
-     */
     public static function byPassenger($passengerId)
     {
         return static::query(

@@ -1,11 +1,3 @@
-/* ========================================
-   COMPONENTS.CSS - Composants réutilisables
-   ======================================== */
-
-/* ===============================
-   BOUTONS
-   =============================== */
-
 button,
 .btn-primary,
 .btn-secondary,
@@ -236,7 +228,6 @@ button:hover {
   color: white;
 }
 
-/* Boutons CTA */
 .cta-btn {
   display: inline-block;
   padding: 15px 30px;
@@ -271,18 +262,6 @@ button:hover {
 .login-cta-btn, .register-cta-btn {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
-
-.register-cta-btn {
-  animation: subtle-pulse 3s infinite ease-in-out;
-}
-
-.register-cta-btn:hover {
-  animation: none;
-}
-
-/* ===============================
-   BADGES
-   =============================== */
 
 .admin-badge {
   display: inline-flex;
@@ -380,10 +359,6 @@ button:hover {
   background: #636e72 !important;
   border-color: rgba(0,0,0,0.06) !important;
 }
-
-/* ===============================
-   CARDS
-   =============================== */
 
 .card-light {
   background: #f8f9fa;
@@ -636,7 +611,6 @@ button:hover {
   color: var(--primary-color);
 }
 
-/* Images dans cards */
 .alt-img,
 .pub-img {
   width: 100%;
@@ -678,10 +652,6 @@ button:hover {
   text-align: right;
   padding-right: 12px;
 }
-
-/* ===============================
-   SEARCH BAR
-   =============================== */
 
 .search-bar {
   background: #fff;
@@ -728,10 +698,6 @@ button:hover {
   background: var(--primary-dark);
   transform: translateY(-2px);
 }
-
-/* ===============================
-   CALENDRIER
-   =============================== */
 
 #calendarPopup {
   background: white;
@@ -811,10 +777,6 @@ button:hover {
   outline: none !important;
 }
 
-/* ===============================
-   CALCULATEUR
-   =============================== */
-
 .calc-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -840,10 +802,6 @@ button:hover {
 .calc-item .material-icons {
   font-size: 20px;
 }
-
-/* ===============================
-   STATS CARDS
-   =============================== */
 
 .stats-cards {
   display: grid;
@@ -880,10 +838,6 @@ button:hover {
   margin: 0;
 }
 
-/* ===============================
-   TOAST NOTIFICATIONS
-   =============================== */
-
 .toast {
   position: fixed;
   top: 20px;
@@ -905,10 +859,6 @@ button:hover {
 .toast.error {
   background: #e74c3c;
 }
-
-/* ===============================
-   DIVERS COMPOSANTS
-   =============================== */
 
 .conducteur-nom {
   font-size: 1.3rem;
@@ -1002,10 +952,6 @@ button:hover {
 .form-loading button {
   background: #636e72 !important;
 }
-
-/* ===============================
-   RESPONSIVE COMPONENTS
-   =============================== */
 
 @media (max-width: 900px) {
   .trip-card {

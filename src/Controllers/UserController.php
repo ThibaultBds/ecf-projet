@@ -52,13 +52,12 @@ class UserController extends BaseController
             'is_passenger' => $isPassenger ? 1 : 0
         ]);
 
-        // Mettre à jour la session
         $_SESSION['user']['is_driver'] = $isDriver;
         $_SESSION['user']['is_passenger'] = $isPassenger;
 
         $_SESSION['flash_success'] = 'Profil mis à jour avec succès !';
 
-        // Si devient chauffeur et n'a pas de véhicule, rediriger
+        // If user just became a driver and has no vehicle, redirect to vehicle page
         if ($isDriver) {
             $vehicles = \App\Models\Vehicle::byUser($userId);
             if (empty($vehicles)) {
@@ -84,7 +83,7 @@ class UserController extends BaseController
 
         $file = $_FILES['photo'];
 
-        // Vérification réelle du type MIME
+        // Check actual MIME type (not just the extension) to prevent spoofing
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $realType = $finfo->file($file['tmp_name']);
 

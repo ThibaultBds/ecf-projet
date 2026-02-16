@@ -1,11 +1,3 @@
-/* ========================================
-   LAYOUT.CSS - Structure et mise en page
-   ======================================== */
-
-/* ===============================
-   HEADER
-   =============================== */
-
 header.container-header {
   background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
   padding: 14px 28px;
@@ -25,7 +17,6 @@ header.container-header h1 {
   font-weight: 700;
 }
 
-/* Brand (logo + nom) */
 .site-brand {
   color: white;
   text-decoration: none;
@@ -39,10 +30,6 @@ header.container-header h1 {
 .site-brand .material-icons {
   font-size: 28px;
 }
-
-/* ===============================
-   NAVBAR
-   =============================== */
 
 .navbar {
   display: flex;
@@ -86,7 +73,6 @@ header.container-header h1 {
   background: rgba(255,255,255,0.12);
 }
 
-/* Navbar dans le header */
 header.container-header > nav.navbar {
   margin-left: auto;
   display: flex;
@@ -134,7 +120,6 @@ header.container-header nav a:hover {
   background: rgba(255,255,255,0.12);
 }
 
-/* Sections user/auth dans navbar */
 nav.navbar #user-profile,
 nav.navbar #auth-links,
 header.container-header > nav#navbar #user-profile,
@@ -206,10 +191,6 @@ header.container-header > nav#navbar #auth-links.visible {
   border-radius: 8px;
 }
 
-/* ===============================
-   HERO
-   =============================== */
-
 .hero {
   background: linear-gradient(
     135deg,
@@ -239,7 +220,6 @@ header.container-header > nav#navbar #auth-links.visible {
   opacity: 0.95;
 }
 
-/* Éléments dans le hero */
 .hero .search-bar,
 .hero .card,
 .hero .search-card,
@@ -264,10 +244,6 @@ header.container-header > nav#navbar #auth-links.visible {
 .hero .search-bar textarea::placeholder {
   color: rgba(255,255,255,0.9) !important;
 }
-
-/* ===============================
-   PAGE HEADER
-   =============================== */
 
 .page-header {
   background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
@@ -301,10 +277,6 @@ header.container-header > nav#navbar #auth-links.visible {
   padding-top: 0 !important;
 }
 
-/* ===============================
-   SECTIONS & CONTAINERS
-   =============================== */
-
 .presentation-entreprise,
 .benefits {
   max-width: 1200px;
@@ -321,7 +293,6 @@ header.container-header > nav#navbar #auth-links.visible {
   margin-bottom: 30px;
 }
 
-/* Story cards */
 .story-cards {
   max-width: 1200px;
   margin: 40px auto;
@@ -349,10 +320,6 @@ header.container-header > nav#navbar #auth-links.visible {
   border: 2px solid #00b894;
 }
 
-/* ===============================
-   GRIDS
-   =============================== */
-
 .benefit-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -379,10 +346,6 @@ header.container-header > nav#navbar #auth-links.visible {
   margin-bottom: 15px;
 }
 
-/* ===============================
-   FOOTER
-   =============================== */
-
 footer {
   background: #2d3436;
   color: white;
@@ -399,10 +362,6 @@ footer a {
 footer a:hover {
   text-decoration: underline;
 }
-
-/* ===============================
-   MODALS
-   =============================== */
 
 .modal-legal-bg {
   display: none;
@@ -468,10 +427,6 @@ footer a:hover {
 .modal-legal-close:hover {
   color: #00ff90;
 }
-
-/* ===============================
-   RESPONSIVE
-   =============================== */
 
 @media (max-width: 768px) {
   .container-header {

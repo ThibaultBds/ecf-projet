@@ -4,23 +4,16 @@ use App\Core\Router;
 
 Router::get('/', 'HomeController@index');
 
-// Trajets (publics)
 Router::get('/trips', 'TripController@index');
 Router::get('/covoiturages', 'TripController@index');
 Router::get('/trip/{id}', 'TripController@show');
 
-// Contact
 Router::get('/contact', 'ContactController@show');
 Router::post('/contact', 'ContactController@send');
 
-// Pages statiques
 Router::get('/terms', 'PageController@terms');
 Router::get('/privacy', 'PageController@privacy');
 Router::get('/legal', 'PageController@legal');
-
-// -------------------------------------------------------
-// Routes invité (redirige si déjà connecté)
-// -------------------------------------------------------
 
 Router::group(['middleware' => 'guest'], function () {
     Router::get('/login', 'AuthController@showLogin');
@@ -29,36 +22,23 @@ Router::group(['middleware' => 'guest'], function () {
     Router::post('/register', 'AuthController@register');
 });
 
-// -------------------------------------------------------
-// Routes authentifiées
-// -------------------------------------------------------
-
 Router::group(['middleware' => 'auth'], function () {
-    // Logout
     Router::get('/logout', 'AuthController@logout');
 
-    // Profil
     Router::get('/profile', 'UserController@profile');
     Router::post('/profile/update', 'UserController@update');
     Router::post('/profile/upload-photo', 'UserController@uploadPhoto');
     Router::post('/profile/delete-photo', 'UserController@deletePhoto');
 
 
-    // Mes trajets
     Router::get('/my-trips', 'TripController@myTrips');
     Router::post('/my-trips', 'TripController@myTrips');
 
-    // API - Participation
     Router::post('/api/trip/{id}/join', 'Api\\TripApiController@join');
     Router::post('/api/trip/{id}/cancel', 'Api\\TripApiController@cancel');
 
-    // API - Avis
     Router::post('/api/review', 'Api\\ReviewApiController@submit');
 });
-
-// -------------------------------------------------------
-// Routes chauffeur (authentifié)
-// -------------------------------------------------------
 
 Router::group(['middleware' => 'auth'], function () {
     Router::get('/driver/dashboard', 'DriverController@dashboard');
@@ -74,20 +54,12 @@ Router::group(['middleware' => 'auth'], function () {
     Router::post('/driver/preferences', 'DriverController@savePreferences');
 });
 
-// -------------------------------------------------------
-// Routes admin
-// -------------------------------------------------------
-
 Router::group(['middleware' => 'role:admin'], function () {
     Router::get('/admin', 'AdminController@index');
     Router::post('/admin/suspend-user', 'AdminController@suspendUser');
     Router::post('/admin/activate-user', 'AdminController@activateUser');
     Router::post('/admin/create-employee', 'AdminController@createEmployee');
 });
-
-// -------------------------------------------------------
-// Routes modérateur
-// -------------------------------------------------------
 
 Router::group(['middleware' => 'role:employe'], function () {
     Router::get('/moderator', 'ModeratorController@index');

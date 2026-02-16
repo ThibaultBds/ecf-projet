@@ -31,9 +31,6 @@ class MongoDB
         return $this->manager;
     }
 
-    /**
-     * Find one document
-     */
     public function findOne(string $collection, array $filter): ?array
     {
         $query = new Query($filter, ['limit' => 1]);
@@ -47,9 +44,6 @@ class MongoDB
         return (array) $results[0];
     }
 
-    /**
-     * Find multiple documents
-     */
     public function find(string $collection, array $filter = [], array $options = []): array
     {
         $query = new Query($filter, $options);
@@ -62,9 +56,6 @@ class MongoDB
         return $results;
     }
 
-    /**
-     * Insert one document
-     */
     public function insertOne(string $collection, array $document): void
     {
         $bulk = new BulkWrite();
@@ -72,9 +63,6 @@ class MongoDB
         $this->manager->executeBulkWrite("{$this->database}.{$collection}", $bulk);
     }
 
-    /**
-     * Update or insert (upsert) a document
-     */
     public function upsert(string $collection, array $filter, array $data): void
     {
         $bulk = new BulkWrite();
@@ -82,9 +70,6 @@ class MongoDB
         $this->manager->executeBulkWrite("{$this->database}.{$collection}", $bulk);
     }
 
-    /**
-     * Delete documents
-     */
     public function delete(string $collection, array $filter): void
     {
         $bulk = new BulkWrite();
