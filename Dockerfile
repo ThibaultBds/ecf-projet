@@ -21,3 +21,9 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
 
 EXPOSE 80
 CMD ["apache2-foreground"]
+
+# Copier le projet dans le container
+COPY . /var/www/html
+
+# Permissions uploads
+RUN chown -R www-data:www-data /var/www/html/public/uploads
