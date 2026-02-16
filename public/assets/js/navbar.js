@@ -14,7 +14,7 @@ function renderMenu(user) {
         </ul>
 
         <div id="user-profile" class="nav-user">
-            <a href="/profil" class="nav-profile-link">
+            <a href="/profile" class="nav-profile-link">
                 <span class="material-icons nav-avatar">account_circle</span>
                 <span class="nav-username">
                     ${user && user.pseudo ? user.pseudo : 'Profil'}
