@@ -30,6 +30,7 @@ class VehicleController extends BaseController
         $licensePlate = strtoupper(trim($_POST['license_plate'] ?? ''));
         $energyType = $_POST['energy_type'] ?? 'essence';
         $seatsAvailable = (int) ($_POST['seats_available'] ?? 4);
+        $registrationDate = $_POST['registration_date'] ?? date('Y-m-d');
 
         if (empty($brand) || empty($model) || empty($color) || empty($licensePlate)) {
             $_SESSION['flash_error'] = 'Veuillez remplir tous les champs.';
@@ -57,7 +58,7 @@ class VehicleController extends BaseController
             'license_plate' => $licensePlate,
             'energy_type' => $energyType,
             'seats_available' => $seatsAvailable,
-            'registration_date' => date('Y-m-d')
+            'registration_date' => $registrationDate
         ]);
 
         $_SESSION['flash_success'] = 'Véhicule ajouté avec succès !';

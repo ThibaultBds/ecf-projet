@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Auth\AuthManager;
 use App\Core\Database;
+use App\Core\MongoDB;
 use App\Models\User;
 use App\Models\Trip;
 use App\Models\Vehicle;
@@ -35,10 +36,12 @@ class DriverController extends BaseController
     {
         $userId = AuthManager::id();
         $user = User::find($userId);
+        $vehicles = Vehicle::byUser($userId);
 
         $this->render('driver/create-trip', [
             'title' => 'Créer un trajet - EcoRide',
             'user' => $user,
+            'vehicles' => $vehicles,
             'error' => '',
             'success' => ''
         ]);
@@ -78,11 +81,18 @@ class DriverController extends BaseController
         $villeArrivee = trim($_POST['ville_arrivee'] ?? '');
         $dateDepart = $_POST['date_depart'] ?? '';
         $heureDepart = $_POST['heure_depart'] ?? '';
+        $heureArrivee = $_POST['heure_arrivee'] ?? '';
         $places = (int) ($_POST['places'] ?? 0);
         $prix = (float) ($_POST['prix'] ?? 0);
 
         // Validation
-        if (empty($villeDepart) || empty($villeArrivee) || empty($dateDepart) || empty($heureDepart)) {
+        if (
+            empty($villeDepart) ||
+            empty($villeArrivee) ||
+            empty($dateDepart) ||
+            empty($heureDepart) ||
+            empty($heureArrivee)) 
+            {
             return $this->render('driver/create-trip', [
                 'title' => 'Créer un trajet - EcoRide',
                 'user' => $user,
@@ -130,20 +140,29 @@ class DriverController extends BaseController
             ]);
         }
 
-        // Récupérer ou créer un véhicule
-        $vehicle = Vehicle::firstByUser($userId);
-        if (!$vehicle) {
-            $vehicleId = Vehicle::create([
-                'user_id' => $userId,
-                'brand' => 'Non renseigné',
-                'model' => 'Non renseigné',
-                'color' => 'Non renseigné',
-                'license_plate' => 'AA-000-AA',
-                'energy_type' => 'essence',
-                'seats_available' => $places,
-                'registration_date' => date('Y-m-d')
-            ]);
+        // Véhicule sélectionné
+        $vehicleId = (int) ($_POST['vehicle_id'] ?? 0);
+        if ($vehicleId > 0) {
+            if (!Vehicle::belongsToUser($vehicleId, $userId)) {
+                return $this->render('driver/create-trip', [
+                    'title' => 'Créer un trajet - EcoRide',
+                    'user' => $user,
+                    'vehicles' => Vehicle::byUser($userId),
+                    'error' => 'Véhicule invalide.',
+                    'success' => ''
+                ]);
+            }
         } else {
+            $vehicle = Vehicle::firstByUser($userId);
+            if (!$vehicle) {
+                return $this->render('driver/create-trip', [
+                    'title' => 'Créer un trajet - EcoRide',
+                    'user' => $user,
+                    'vehicles' => [],
+                    'error' => 'Vous devez d\'abord ajouter un véhicule.',
+                    'success' => ''
+                ]);
+            }
             $vehicleId = $vehicle['vehicle_id'];
         }
 
@@ -154,8 +173,19 @@ class DriverController extends BaseController
             $cityDepartId = $this->findOrCreateCity($villeDepart);
             $cityArrivalId = $this->findOrCreateCity($villeArrivee);
 
-            // Estimer l'heure d'arrivée (+2h par défaut)
-            $arrivalDateTime = date('Y-m-d H:i:s', strtotime($departureDateTime) + 7200);
+            // Heure d'arrivée estimée (+2h)
+            $arrivalDateTime = $dateDepart . ' ' . $heureArrivee . ':00';
+
+            if (strtotime($arrivalDateTime) <= strtotime($departureDateTime)) {
+            return $this->render('driver/create-trip', [
+                'title' => 'Créer un trajet - EcoRide',
+                'user' => $user,
+                'vehicles' => Vehicle::byUser($userId),
+                'error' => "L'heure d'arrivée doit être après l'heure de départ.",
+                'success' => ''
+    ]);
+}
+
 
             Trip::create([
                 'chauffeur_id' => $userId,
@@ -169,7 +199,8 @@ class DriverController extends BaseController
                 'status' => 'scheduled'
             ]);
 
-            User::deductCredits($userId, $totalCost);
+            User::deductCredits($userId, $prix, 'debit', 'Création trajet', null);
+            User::deductCredits($userId, 2, 'platform_fee', 'Frais plateforme création', null);
             $_SESSION['user']['credits'] -= $totalCost;
 
             BaseModel::commit();
@@ -189,26 +220,67 @@ class DriverController extends BaseController
     }
 
     /**
-     * Afficher les préférences (table non disponible)
+     * Afficher les préférences (stockées dans MongoDB)
      */
     public function preferences()
     {
+        $userId = AuthManager::id();
+        $mongo = MongoDB::getInstance();
+        $prefs = $mongo->findOne('driver_preferences', ['user_id' => $userId]);
+
         $this->render('driver/preferences', [
             'title' => 'Mes Préférences - EcoRide',
-            'prefs' => [],
+            'prefs' => $prefs ?? [],
             'success' => $_SESSION['flash_success'] ?? '',
-            'error' => 'Les préférences ne sont pas encore disponibles.'
+            'error' => $_SESSION['flash_error'] ?? ''
         ]);
-        unset($_SESSION['flash_success']);
+        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     }
 
     /**
-     * Sauvegarder les préférences (table non disponible)
+     * Sauvegarder les préférences dans MongoDB
      */
     public function savePreferences()
     {
-        $_SESSION['flash_error'] = 'Les préférences ne sont pas encore disponibles.';
+        $userId = AuthManager::id();
+
+        $prefs = [
+            'user_id' => $userId,
+            'fumeur' => $_POST['fumeur'] ?? 'non',
+            'animaux' => $_POST['animaux'] ?? 'non',
+            'musique' => $_POST['musique'] ?? 'non',
+            'discussion' => $_POST['discussion'] ?? 'un_peu',
+            'custom_preferences' => array_filter(
+                array_map('trim', explode("\n", $_POST['custom_preferences'] ?? '')),
+                fn($line) => $line !== ''
+            ),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        try {
+            $mongo = MongoDB::getInstance();
+            $mongo->upsert('driver_preferences', ['user_id' => $userId], $prefs);
+            $_SESSION['flash_success'] = 'Préférences sauvegardées avec succès.';
+        } catch (Exception $e) {
+            error_log("Erreur MongoDB préférences : " . $e->getMessage());
+            $_SESSION['flash_error'] = 'Erreur lors de la sauvegarde des préférences.';
+        }
+
         header('Location: /driver/preferences');
         exit;
     }
+
+    /**
+     * Récupérer les préférences d'un conducteur (statique, pour les vues)
+     */
+    public static function getDriverPreferences(int $userId): array
+    {
+        try {
+            $mongo = MongoDB::getInstance();
+            return $mongo->findOne('driver_preferences', ['user_id' => $userId]) ?? [];
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+    
 }
