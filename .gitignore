@@ -44,3 +44,6 @@ nul
 dist/
 package.json
 package-lock.json
+
+# Uploads utilisateurs
+public/uploads/
