@@ -10,25 +10,24 @@ class Database {
     private $pdo;
 
     private function __construct() {
-    try {
-        $host = getenv('MYSQLHOST') ?: 'db';
-        $port = getenv('MYSQLPORT') ?: '3306';
-        $db   = getenv('MYSQLDATABASE') ?: 'ecoride';
-        $user = getenv('MYSQLUSER') ?: 'ecoride_user';
-        $pass = getenv('MYSQLPASSWORD') ?: 'ecoride_pass';
+        try {
+            $host = getenv('DB_HOST') ?: 'db';
+            $port = getenv('DB_PORT') ?: '3306';
+            $db   = getenv('DB_DATABASE') ?: 'ecoride';
+            $user = getenv('DB_USERNAME') ?: 'ecoride_user';
+            $pass = getenv('DB_PASSWORD') ?: 'ecoride_pass';
 
-        $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+            $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
 
-        $this->pdo = new PDO($dsn, $user, $pass);
+            $this->pdo = new PDO($dsn, $user, $pass);
 
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-    } catch (PDOException $e) {
-        die("Erreur de connexion à la base de données : " . $e->getMessage());
+        } catch (PDOException $e) {
+            die("Erreur de connexion à la base de données : " . $e->getMessage());
+        }
     }
-}
-
 
     public static function getInstance() {
         if (self::$instance === null) {
