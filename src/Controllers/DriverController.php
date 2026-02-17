@@ -80,18 +80,23 @@ class DriverController extends BaseController
             empty($heureDepart) ||
             empty($heureArrivee))
             {
+            $vehicles = Vehicle::byUser($userId);
             return $this->render('driver/create-trip', [
                 'title' => 'Créer un trajet - EcoRide',
                 'user' => $user,
+                'vehicles' => $vehicles,
                 'error' => 'Veuillez remplir tous les champs obligatoires.',
                 'success' => ''
             ]);
         }
 
+        $vehicles = Vehicle::byUser($userId);
+
         if ($prix < 1 || $prix > 100) {
             return $this->render('driver/create-trip', [
                 'title' => 'Créer un trajet - EcoRide',
                 'user' => $user,
+                'vehicles' => $vehicles,
                 'error' => 'Le prix doit être entre 1€ et 100€.',
                 'success' => ''
             ]);
@@ -101,6 +106,7 @@ class DriverController extends BaseController
             return $this->render('driver/create-trip', [
                 'title' => 'Créer un trajet - EcoRide',
                 'user' => $user,
+                'vehicles' => $vehicles,
                 'error' => 'Le nombre de places doit être entre 1 et 4.',
                 'success' => ''
             ]);
@@ -111,6 +117,7 @@ class DriverController extends BaseController
             return $this->render('driver/create-trip', [
                 'title' => 'Créer un trajet - EcoRide',
                 'user' => $user,
+                'vehicles' => $vehicles,
                 'error' => 'La date de départ doit être dans le futur.',
                 'success' => ''
             ]);
@@ -122,6 +129,7 @@ class DriverController extends BaseController
             return $this->render('driver/create-trip', [
                 'title' => 'Créer un trajet - EcoRide',
                 'user' => $user,
+                'vehicles' => $vehicles,
                 'error' => "Crédits insuffisants. Vous avez {$user['credits']} crédits, il en faut {$totalCost} (prix + 2€ frais).",
                 'success' => ''
             ]);
@@ -161,14 +169,15 @@ class DriverController extends BaseController
             $arrivalDateTime = $dateDepart . ' ' . $heureArrivee . ':00';
 
             if (strtotime($arrivalDateTime) <= strtotime($departureDateTime)) {
-            return $this->render('driver/create-trip', [
-                'title' => 'Créer un trajet - EcoRide',
-                'user' => $user,
-                'vehicles' => Vehicle::byUser($userId),
-                'error' => "L'heure d'arrivée doit être après l'heure de départ.",
-                'success' => ''
-    ]);
-}
+                BaseModel::rollback();
+                return $this->render('driver/create-trip', [
+                    'title' => 'Créer un trajet - EcoRide',
+                    'user' => $user,
+                    'vehicles' => Vehicle::byUser($userId),
+                    'error' => "L'heure d'arrivée doit être après l'heure de départ.",
+                    'success' => ''
+                ]);
+            }
 
 
             Trip::create([
@@ -197,6 +206,7 @@ class DriverController extends BaseController
             return $this->render('driver/create-trip', [
                 'title' => 'Créer un trajet - EcoRide',
                 'user' => $user,
+                'vehicles' => Vehicle::byUser($userId),
                 'error' => 'Une erreur est survenue lors de la création du trajet.',
                 'success' => ''
             ]);

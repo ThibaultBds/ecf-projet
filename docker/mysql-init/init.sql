@@ -25,6 +25,7 @@ CREATE TABLE users (
     role ENUM('user', 'admin', 'employe') DEFAULT 'user',
     is_driver BOOLEAN DEFAULT FALSE,
     is_passenger BOOLEAN DEFAULT TRUE,
+    photo VARCHAR(255) DEFAULT NULL,
     suspended BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

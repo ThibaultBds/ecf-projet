@@ -124,7 +124,7 @@ class UserController extends BaseController
 
         if (!empty($user['photo'])) {
 
-        $filePath = __DIR__ . '/../..public/uploads./' . $user['photo'];
+        $filePath = __DIR__ . '/../../public/uploads/' . $user['photo'];
 
         if (file_exists($filePath)) {
             unlink($filePath);

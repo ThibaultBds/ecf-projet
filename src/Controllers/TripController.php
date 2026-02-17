@@ -139,7 +139,7 @@ class TripController extends BaseController
 
             $trip = Trip::find($tripId);
             if ($trip) {
-                User::addCredits($userId, (int) $trip['price']);
+                User::addCredits($userId, (int) $trip['price'], 'refund', 'Annulation participation', $tripId);
             }
 
             BaseModel::commit();
@@ -174,9 +174,9 @@ class TripController extends BaseController
 
             if ($newStatus === 'cancelled') {
                 foreach ($participants as $p) {
-                    User::addCredits($p['user_id'], (int) $trip['price']);
+                    User::addCredits($p['user_id'], (int) $trip['price'], 'refund', 'Remboursement annulation trajet', $tripId);
                 }
-                User::addCredits($userId, 2);
+                User::addCredits($userId, 2, 'refund', 'Remboursement frais plateforme', $tripId);
             }
 
             BaseModel::commit();
@@ -207,7 +207,7 @@ class TripController extends BaseController
                 [$tripId, $userId]
             );
 
-            User::addCredits($trip['chauffeur_id'], (int) $trip['price']);
+            User::addCredits($trip['chauffeur_id'], (int) $trip['price'], 'credit', 'Validation trajet passager', $tripId);
 
             BaseModel::commit();
         } catch (Exception $e) {
