@@ -14,7 +14,7 @@ class MongoDB
 
     private function __construct()
     {
-        $uri = getenv('MONGO_URI') ?: 'mongodb://mongo:27017';
+        $uri = getenv('MONGO_URL') ?: 'mongodb://mongo:27017';
         $this->manager = new Manager($uri);
     }
 
