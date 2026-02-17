@@ -1,11 +1,5 @@
 FROM php:8.2-apache
 
-RUN a2dismod mpm_event || true
-RUN a2dismod mpm_worker || true
-RUN a2dismod mpm_prefork || true
-
-RUN a2enmod mpm_prefork
-
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
 RUN apt-get update && apt-get install -y libssl-dev pkg-config \
@@ -30,4 +24,5 @@ RUN mkdir -p /var/www/html/public/uploads \
     && chown -R www-data:www-data /var/www/html/public/uploads
 
 EXPOSE 80
+
 CMD ["apache2-foreground"]
