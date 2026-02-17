@@ -1,5 +1,11 @@
 FROM php:8.2-apache
 
+RUN a2dismod mpm_event || true
+RUN a2dismod mpm_worker || true
+RUN a2dismod mpm_prefork || true
+
+RUN a2enmod mpm_prefork
+
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
 RUN apt-get update && apt-get install -y libssl-dev pkg-config \
@@ -8,10 +14,6 @@ RUN apt-get update && apt-get install -y libssl-dev pkg-config \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite
-
-RUN a2dismod mpm_event 
-RUN a2dismod mpm_worker 
-RUN a2enmod mpm_prefork
 
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 
