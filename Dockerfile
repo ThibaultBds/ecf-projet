@@ -9,6 +9,13 @@ RUN apt-get update && apt-get install -y libssl-dev pkg-config \
 
 RUN a2enmod rewrite
 
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.* \
+    && rm -f /etc/apache2/mods-enabled/mpm_worker.* \
+    && rm -f /etc/apache2/mods-enabled/mpm_prefork.*
+
+RUN a2enmod mpm_prefork
+
+
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
