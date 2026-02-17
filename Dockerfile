@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y libssl-dev pkg-config \
 
 RUN a2enmod rewrite
 
-RUN a2dismod mpm_event || true
-RUN a2dismod mpm_worker || true
+RUN a2dismod mpm_event 
+RUN a2dismod mpm_worker 
 RUN a2enmod mpm_prefork
 
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
