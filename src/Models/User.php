@@ -78,10 +78,10 @@ class User extends BaseModel
     public static function logCredit($userId, $amount, $type, $reason = null, $tripId = null)
     {
         static::query(
-            "INSERT INTO credits_logs
-             (user_id, amount, type, trip_id, created_at)
-             VALUES (?, ?, ?, ?, NOW())",
-            [$userId, $amount, $type, $tripId]
+            "INSERT INTO credit_logs
+             (user_id, amount, type, reason, trip_id, created_at)
+             VALUES (?, ?, ?, ?, ?, NOW())",
+            [$userId, $amount, $type, $reason, $tripId]
         );
     }
 

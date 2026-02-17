@@ -77,15 +77,13 @@ class TripApiController extends BaseController
                     throw new Exception("Erreur frais plateforme");
                 }
 
-                if (!User::addCredits(
+                User::addCredits(
                     $trip['chauffeur_id'],
                     $prix,
-                    'trip_income',
+                    'credit',
                     'Revenu trajet',
                     $id
-                )) {
-                    throw new Exception("Erreur crédit chauffeur");
-                }
+                );
 
                 TripParticipant::create([
                     'trip_id' => $id,
@@ -176,7 +174,7 @@ class TripApiController extends BaseController
                 User::addCredits(
                     $userId,
                     2,
-                    'platform_refund',
+                    'refund',
                     'Remboursement frais plateforme',
                     $id
                 );

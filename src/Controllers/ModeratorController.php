@@ -132,7 +132,7 @@ class ModeratorController extends BaseController
                 User::addCredits(
                     $trip['chauffeur_id'],
                     (int)$trip['price'],
-                    'incident_refund',
+                    'credit',
                     'Résolution incident validée',
                     $tripId
                 );
