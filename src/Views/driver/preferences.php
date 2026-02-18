@@ -18,57 +18,38 @@
             <!-- Fumeur -->
             <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
                 <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">smoking_rooms</span> Cigarette</h4>
-                <label style="margin-right:20px;">
-                    <input type="radio" name="fumeur" value="oui" <?= ($prefs['fumeur'] ?? '') === 'oui' ? 'checked' : '' ?>>
-                    Fumeur accepté
-                </label>
-                <label>
-                    <input type="radio" name="fumeur" value="non" <?= ($prefs['fumeur'] ?? 'non') === 'non' ? 'checked' : '' ?>>
-                    Non-fumeur
-                </label>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+                    <label><input type="radio" name="fumeur" value="oui" <?= ($prefs['fumeur'] ?? '') === 'oui' ? 'checked' : '' ?>> Fumeur accept&eacute;</label>
+                    <label><input type="radio" name="fumeur" value="non" <?= ($prefs['fumeur'] ?? 'non') === 'non' ? 'checked' : '' ?>> Non-fumeur</label>
+                </div>
             </div>
 
             <!-- Animaux -->
             <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
                 <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">pets</span> Animaux</h4>
-                <label style="margin-right:20px;">
-                    <input type="radio" name="animaux" value="oui" <?= ($prefs['animaux'] ?? '') === 'oui' ? 'checked' : '' ?>>
-                    Acceptés
-                </label>
-                <label>
-                    <input type="radio" name="animaux" value="non" <?= ($prefs['animaux'] ?? 'non') === 'non' ? 'checked' : '' ?>>
-                    Non acceptés
-                </label>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+                    <label><input type="radio" name="animaux" value="oui" <?= ($prefs['animaux'] ?? '') === 'oui' ? 'checked' : '' ?>> Accept&eacute;s</label>
+                    <label><input type="radio" name="animaux" value="non" <?= ($prefs['animaux'] ?? 'non') === 'non' ? 'checked' : '' ?>> Non accept&eacute;s</label>
+                </div>
             </div>
 
             <!-- Musique -->
             <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
                 <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">music_note</span> Musique</h4>
-                <label style="margin-right:20px;">
-                    <input type="radio" name="musique" value="oui" <?= ($prefs['musique'] ?? '') === 'oui' ? 'checked' : '' ?>>
-                    Avec plaisir
-                </label>
-                <label>
-                    <input type="radio" name="musique" value="non" <?= ($prefs['musique'] ?? 'non') === 'non' ? 'checked' : '' ?>>
-                    Silence préféré
-                </label>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+                    <label><input type="radio" name="musique" value="oui" <?= ($prefs['musique'] ?? '') === 'oui' ? 'checked' : '' ?>> Avec plaisir</label>
+                    <label><input type="radio" name="musique" value="non" <?= ($prefs['musique'] ?? 'non') === 'non' ? 'checked' : '' ?>> Silence pr&eacute;f&eacute;r&eacute;</label>
+                </div>
             </div>
 
             <!-- Discussion -->
             <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
                 <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">chat</span> Discussion</h4>
-                <label style="margin-right:15px;">
-                    <input type="radio" name="discussion" value="plaisir" <?= ($prefs['discussion'] ?? '') === 'plaisir' ? 'checked' : '' ?>>
-                    Avec plaisir
-                </label>
-                <label style="margin-right:15px;">
-                    <input type="radio" name="discussion" value="un_peu" <?= ($prefs['discussion'] ?? 'un_peu') === 'un_peu' ? 'checked' : '' ?>>
-                    Un peu
-                </label>
-                <label>
-                    <input type="radio" name="discussion" value="silence" <?= ($prefs['discussion'] ?? '') === 'silence' ? 'checked' : '' ?>>
-                    Silence préféré
-                </label>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+                    <label><input type="radio" name="discussion" value="plaisir" <?= ($prefs['discussion'] ?? '') === 'plaisir' ? 'checked' : '' ?>> Avec plaisir</label>
+                    <label><input type="radio" name="discussion" value="un_peu" <?= ($prefs['discussion'] ?? 'un_peu') === 'un_peu' ? 'checked' : '' ?>> Un peu</label>
+                    <label><input type="radio" name="discussion" value="silence" <?= ($prefs['discussion'] ?? '') === 'silence' ? 'checked' : '' ?>> Silence pr&eacute;f&eacute;r&eacute;</label>
+                </div>
             </div>
 
             <!-- Préférences personnalisées -->

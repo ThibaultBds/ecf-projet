@@ -102,7 +102,12 @@ class UserController extends BaseController
 
         $newFileName = 'user_' . $userId . '_' . time() . '.' . $extension;
 
-        $destination = __DIR__ . '/../../public/uploads/' . $newFileName;
+        $uploadDir = __DIR__ . '/../../public/uploads';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $destination = $uploadDir . '/' . $newFileName;
 
         if (!move_uploaded_file($file['tmp_name'], $destination)) {
             $_SESSION['flash_error'] = "Erreur sauvegarde fichier.";
