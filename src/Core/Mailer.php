@@ -2,55 +2,63 @@
 
 namespace App\Core;
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
 class Mailer
 {
     public static function send(string $to, string $subject, string $message): bool
     {
-        $host = getenv('MAIL_HOST') ?: null;
+        $apiKey = getenv('BREVO_API_KEY');
 
-        // Si MAIL_HOST est défini et différent de mailhog → Brevo SMTP
-        if ($host && $host !== 'mailhog') {
-            return self::sendSmtp($to, $subject, $message);
+        if ($apiKey) {
+            return self::sendBrevoApi($to, $subject, $message, $apiKey);
         }
 
-        // Sinon fallback sur mail() (local Docker + Mailhog)
+        // Fallback local : mail() via Mailhog
         $from = "noreply@ecoride.fr";
-        $headers = "From: {$from}\r\n";
+        $headers  = "From: {$from}\r\n";
         $headers .= "Reply-To: {$from}\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
         return mail($to, $subject, $message, $headers);
     }
 
-    private static function sendSmtp(string $to, string $subject, string $message): bool
+    private static function sendBrevoApi(string $to, string $subject, string $message, string $apiKey): bool
     {
-        $mail = new PHPMailer(true);
-        try {
-            $mail->isSMTP();
-            $mail->Host       = getenv('MAIL_HOST');
-            $mail->SMTPAuth   = true;
-            $mail->Timeout    = 10;
-            $mail->Username   = getenv('MAIL_USERNAME');
-            $mail->Password   = getenv('MAIL_PASSWORD');
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = (int) (getenv('MAIL_PORT') ?: 587);
-            $mail->CharSet    = 'UTF-8';
+        $payload = json_encode([
+            'sender'      => ['name' => 'EcoRide', 'email' => 'noreply@ecoride.fr'],
+            'to'          => [['email' => $to]],
+            'subject'     => $subject,
+            'textContent' => $message,
+            'htmlContent' => '<html><body>' . nl2br(htmlspecialchars($message)) . '</body></html>',
+        ]);
 
-            $mail->setFrom('noreply@ecoride.fr', 'EcoRide');
-            $mail->addAddress($to);
-            $mail->Subject = $subject;
-            $mail->isHTML(true);
-            $mail->Body    = nl2br(htmlspecialchars($message));
-            $mail->AltBody = $message;
+        $ch = curl_init('https://api.brevo.com/v3/smtp/email');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_HTTPHEADER     => [
+                'accept: application/json',
+                'api-key: ' . $apiKey,
+                'content-type: application/json',
+            ],
+            CURLOPT_TIMEOUT        => 15,
+        ]);
 
-            $mail->send();
-            return true;
-        } catch (Exception $e) {
-            error_log("Erreur envoi mail : " . $e->getMessage());
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error    = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            error_log("Brevo curl error: $error");
             return false;
         }
+
+        if ($httpCode < 200 || $httpCode >= 300) {
+            error_log("Brevo API error ($httpCode): $response");
+            return false;
+        }
+
+        return true;
     }
 }

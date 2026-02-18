@@ -25,7 +25,11 @@ $statusLabels = ['scheduled' => 'Planifié', 'started' => 'En cours', 'completed
                 <?php foreach ($trips as $i => $trip): ?>
                     <tr style="border-bottom:1px solid #f0f0f0;<?= $i % 2 === 1 ? 'background:#f9f9f9;' : '' ?>">
                         <td style="padding:12px 16px;"><?= $trip['trip_id'] ?></td>
-                        <td style="padding:12px 16px;"><?= htmlspecialchars($trip['departure_city']) ?> → <?= htmlspecialchars($trip['arrival_city']) ?></td>
+                        <td style="padding:12px 16px;">
+                            <a href="/covoiturages/<?= $trip['trip_id'] ?>" style="color:#00b894;text-decoration:none;font-weight:500;">
+                                <?= htmlspecialchars($trip['ville_depart']) ?> → <?= htmlspecialchars($trip['ville_arrivee']) ?>
+                            </a>
+                        </td>
                         <td style="padding:12px 16px;"><?= htmlspecialchars($trip['chauffeur']) ?></td>
                         <td style="padding:12px 16px;"><?= date('d/m/Y H:i', strtotime($trip['departure_datetime'])) ?></td>
                         <td style="padding:12px 16px;"><?= $trip['available_seats'] ?></td>

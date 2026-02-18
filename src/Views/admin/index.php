@@ -162,7 +162,7 @@ $roleLabels = [
                                 <span class="admin-badge <?= strtolower($u['role'] ?? '') ?>"><?= $roleLabels[$u['role'] ?? ''] ?? ($u['role'] ?? '') ?></span>
                             </td>
                             <td style="padding:12px;"><?= (int)($u['credits'] ?? 0) ?></td>
-                            <td style="padding:12px;">
+                            <td style="padding:12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                                 <?php if (empty($u['suspended'])): ?>
                                     <form method="POST" action="/admin/suspend-user" style="display:inline;">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
@@ -176,6 +176,12 @@ $roleLabels = [
                                         <button type="submit" class="btn-primary" style="padding:6px 12px;font-size:13px;">Réactiver</button>
                                     </form>
                                 <?php endif; ?>
+                                <form method="POST" action="/admin/add-credits" style="display:inline;display:flex;gap:4px;align-items:center;">
+                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                                    <input type="hidden" name="user_id" value="<?= (int)$u['user_id'] ?>">
+                                    <input type="number" name="credits" min="1" max="9999" placeholder="Crédits" style="width:70px;padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                                    <button type="submit" style="background:#fdcb6e;color:#2d3436;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:13px;font-weight:600;">+</button>
+                                </form>
                             </td>
                         </tr>
                     <?php endforeach; ?>

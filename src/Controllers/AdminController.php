@@ -107,6 +107,23 @@ class AdminController extends BaseController
         exit;
     }
 
+    public function addCredits()
+    {
+        $userId  = (int) ($_POST['user_id'] ?? 0);
+        $credits = (int) ($_POST['credits'] ?? 0);
+
+        if ($userId > 0 && $credits > 0) {
+            BaseModel::query(
+                "UPDATE users SET credits = credits + ? WHERE user_id = ?",
+                [$credits, $userId]
+            );
+            $_SESSION['flash_success'] = "$credits crédit(s) ajouté(s).";
+        }
+
+        header('Location: /admin');
+        exit;
+    }
+
     public function createEmployee()
     {
         $email = strtolower(trim($_POST['email'] ?? ''));

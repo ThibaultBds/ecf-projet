@@ -62,6 +62,7 @@ Router::group(['middleware' => 'csrf'], function () {
         Router::post('/admin/activate-user', 'AdminController@activateUser');
         Router::post('/admin/create-employee', 'AdminController@createEmployee');
         Router::post('/admin/mark-message-read', 'AdminController@markMessageRead');
+        Router::post('/admin/add-credits', 'AdminController@addCredits');
     });
 
     Router::group(['middleware' => 'role:employe'], function () {
