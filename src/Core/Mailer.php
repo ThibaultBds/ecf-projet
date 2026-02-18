@@ -41,7 +41,9 @@ class Mailer
             $mail->setFrom('noreply@ecoride.fr', 'EcoRide');
             $mail->addAddress($to);
             $mail->Subject = $subject;
-            $mail->Body    = $message;
+            $mail->isHTML(true);
+            $mail->Body    = nl2br(htmlspecialchars($message));
+            $mail->AltBody = $message;
 
             $mail->send();
             return true;
