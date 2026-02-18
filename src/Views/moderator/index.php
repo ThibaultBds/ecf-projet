@@ -66,11 +66,14 @@
         <?php endif; ?>
     </div>
 
-    <!-- Incidents de trajets -->
+    <!-- Incidents en attente -->
     <div class="profile-box" style="margin-top:30px;">
         <h3 class="profil-titre">
             <span class="material-icons" style="vertical-align:middle;color:#e74c3c;">report_problem</span>
-            Trajets signal&eacute;s
+            Signalements en cours
+            <?php if (!empty($incidents)): ?>
+                <span style="background:#e74c3c;color:white;border-radius:12px;padding:2px 8px;font-size:13px;margin-left:8px;"><?= count($incidents) ?></span>
+            <?php endif; ?>
         </h3>
 
         <?php if (empty($incidents)): ?>
@@ -138,6 +141,42 @@
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
+
+    <!-- Incidents résolus -->
+    <?php if (!empty($resolvedIncidents)): ?>
+    <div class="profile-box" style="margin-top:30px;opacity:0.85;">
+        <h3 class="profil-titre">
+            <span class="material-icons" style="vertical-align:middle;color:#00b894;">check_circle</span>
+            Signalements r&eacute;gl&eacute;s
+            <span style="background:#00b894;color:white;border-radius:12px;padding:2px 8px;font-size:13px;margin-left:8px;"><?= count($resolvedIncidents) ?></span>
+        </h3>
+        <?php foreach ($resolvedIncidents as $inc): ?>
+            <?php $decisionLabel = ($inc['decision'] ?? '') === 'favor_driver' ? 'En faveur du chauffeur' : 'En faveur du passager'; ?>
+            <?php $decisionColor = ($inc['decision'] ?? '') === 'favor_driver' ? '#0984e3' : '#e17055'; ?>
+            <div style="border:1px solid #e0f5ef;border-radius:8px;padding:15px;margin-bottom:15px;background:#f0faf7;">
+                <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center;">
+                    <div>
+                        <strong>Trajet #<?= (int)($inc['trip_id'] ?? 0) ?></strong>
+                        &mdash;
+                        <?= htmlspecialchars($inc['ville_depart'] ?? '?') ?> &rarr; <?= htmlspecialchars($inc['ville_arrivee'] ?? '?') ?>
+                    </div>
+                    <span style="background:<?= $decisionColor ?>;color:white;border-radius:12px;padding:3px 10px;font-size:13px;font-weight:500;">
+                        <?= htmlspecialchars($decisionLabel) ?>
+                    </span>
+                </div>
+                <div style="margin-top:8px;font-size:13px;color:#636e72;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div><strong>Passager :</strong> <?= htmlspecialchars($inc['reporter_name'] ?? '?') ?></div>
+                    <div><strong>Chauffeur :</strong> <?= htmlspecialchars($inc['driver_name'] ?? '?') ?></div>
+                </div>
+                <?php if (!empty($inc['resolved_at'])): ?>
+                    <div style="margin-top:6px;font-size:12px;color:#b2bec3;">
+                        R&eacute;solu le <?= date('d/m/Y à H:i', strtotime($inc['resolved_at'])) ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
 
     <div class="retour-section">
         <a href="/profile" class="btn-retour">

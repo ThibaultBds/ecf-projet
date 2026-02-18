@@ -29,11 +29,15 @@ class ModeratorController extends BaseController
         }
 
         $incidents = [];
+        $resolvedIncidents = [];
         try {
             $mongo = MongoDB::getInstance();
-            $incidents = $mongo->find('trip_incidents', ['status' => 'pending']);
+            $allIncidents = array_merge(
+                $mongo->find('trip_incidents', ['status' => 'pending']),
+                $mongo->find('trip_incidents', ['status' => 'resolved'])
+            );
 
-            foreach ($incidents as &$inc) {
+            foreach ($allIncidents as &$inc) {
                 $tripInfo = BaseModel::query(
                     "SELECT t.trip_id, t.departure_datetime, t.arrival_datetime,
                             cd.name AS ville_depart, ca.name AS ville_arrivee,
@@ -53,15 +57,19 @@ class ModeratorController extends BaseController
                 }
             }
             unset($inc);
+
+            $incidents = array_values(array_filter($allIncidents, fn($i) => ($i['status'] ?? '') === 'pending'));
+            $resolvedIncidents = array_values(array_filter($allIncidents, fn($i) => ($i['status'] ?? '') === 'resolved'));
         } catch (\Throwable $e) {
             // MongoDB might not be available
         }
 
         $this->render('moderator/index', [
-            'pendingReviews' => $pendingReviews,
-            'incidents' => $incidents,
+            'pendingReviews'   => $pendingReviews,
+            'incidents'        => $incidents,
+            'resolvedIncidents'=> $resolvedIncidents,
             'success' => $_SESSION['flash_success'] ?? '',
-            'error' => $_SESSION['flash_error'] ?? ''
+            'error'   => $_SESSION['flash_error'] ?? ''
         ]);
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     }
