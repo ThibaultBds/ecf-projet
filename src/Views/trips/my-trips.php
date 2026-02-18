@@ -172,7 +172,7 @@ $statusLabels = [
                     $pStatus     = $trajet['participant_status'] ?? '';
                     $hasReviewed = !empty($trajet['has_reviewed']);
                     ?>
-                    <div class="ride-card-history card-light" style="opacity:<?= $trajet['status'] === 'cancelled' ? '0.7' : '1' ?>;">
+                    <div class="ride-card-history card-light" style="flex-direction:column;opacity:<?= $trajet['status'] === 'cancelled' ? '0.7' : '1' ?>;">
                         <div class="ride-content">
                             <p class="ride-title">
                                 <a href="/trip/<?= (int)$trajet['trip_id'] ?>" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:5px;">
@@ -183,7 +183,7 @@ $statusLabels = [
                             <p class="small-muted">
                                 D&eacute;part : <?= date('d/m/Y H:i', strtotime($trajet['departure_datetime'])) ?>
                                 | Conducteur : <?= htmlspecialchars($trajet['conducteur'] ?? '') ?>
-                                <span class="muted-status">Statut : <strong><?= $statusLabels[$trajet['status']] ?? ucfirst($trajet['status']) ?></strong></span>
+                                &mdash; Statut : <strong><?= $statusLabels[$trajet['status']] ?? ucfirst($trajet['status']) ?></strong>
                             </p>
                         </div>
 
@@ -193,7 +193,7 @@ $statusLabels = [
                             </span>
 
                         <?php elseif ($trajet['status'] === 'completed'): ?>
-                            <div class="ride-actions" style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;width:100%;">
+                            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;width:100%;">
 
                                 <?php if ($pStatus === 'confirmed'): ?>
                                     <!-- Pas encore validé ni signalé -->
