@@ -102,6 +102,7 @@ class ModeratorController extends BaseController
 {
     $tripId = (int) ($_POST['trip_id'] ?? 0);
     $reporterId = (int) ($_POST['reporter_id'] ?? 0);
+    $creditDriver = ($_POST['credit_driver'] ?? '1') === '1';
 
     if ($tripId > 0 && $reporterId > 0) {
         try {
@@ -109,14 +110,19 @@ class ModeratorController extends BaseController
             $mongo->upsert(
                 'trip_incidents',
                 ['trip_id' => $tripId, 'reporter_id' => $reporterId],
-                ['status' => 'resolved', 'resolved_at' => date('Y-m-d H:i:s')]
+                [
+                    'status' => 'resolved',
+                    'resolved_at' => date('Y-m-d H:i:s'),
+                    'decision' => $creditDriver ? 'favor_driver' : 'favor_passenger',
+                ]
             );
 
+            $participantStatus = $creditDriver ? 'validated' : 'disputed_closed';
             BaseModel::query(
                 "UPDATE trip_participants
-                 SET status = 'validated'
+                 SET status = ?
                  WHERE trip_id = ? AND user_id = ?",
-                [$tripId, $reporterId]
+                [$participantStatus, $tripId, $reporterId]
             );
 
             $trip = BaseModel::query(
@@ -128,27 +134,46 @@ class ModeratorController extends BaseController
             )->fetch();
 
             if ($trip) {
-
-                User::addCredits(
-                    $trip['chauffeur_id'],
-                    (int)$trip['price'],
-                    'credit',
-                    'Résolution incident validée',
-                    $tripId
-                );
-
                 $driver = User::find($trip['chauffeur_id']);
 
-                if ($driver) {
-                    Mailer::send(
-                        $driver['email'],
-                        "Incident résolu - EcoRide",
-                        "Bonjour {$driver['username']},\n\nVotre incident pour le trajet #{$tripId} a été résolu. Vous avez été crédité.\n\nEcoRide"
+                if ($creditDriver) {
+                    User::addCredits(
+                        $trip['chauffeur_id'],
+                        (int)$trip['price'],
+                        'credit',
+                        'Résolution incident — décision en faveur du chauffeur',
+                        $tripId
                     );
+
+                    if ($driver) {
+                        try {
+                            Mailer::send(
+                                $driver['email'],
+                                "Incident résolu - EcoRide",
+                                "Bonjour {$driver['username']},\n\nL'incident signalé sur le trajet #{$tripId} a été examiné. La décision est en votre faveur : vous avez été crédité du montant du trajet.\n\nEcoRide"
+                            );
+                        } catch (\Throwable $mailErr) {
+                            error_log("Mailer error resolveIncident (favor driver): " . $mailErr->getMessage());
+                        }
+                    }
+
+                    $_SESSION['flash_success'] = 'Incident résolu — décision en faveur du chauffeur (crédité).';
+                } else {
+                    if ($driver) {
+                        try {
+                            Mailer::send(
+                                $driver['email'],
+                                "Incident résolu - EcoRide",
+                                "Bonjour {$driver['username']},\n\nL'incident signalé sur le trajet #{$tripId} a été examiné. La décision est en faveur du passager : aucun crédit ne vous a été attribué pour ce trajet.\n\nEcoRide"
+                            );
+                        } catch (\Throwable $mailErr) {
+                            error_log("Mailer error resolveIncident (favor passenger): " . $mailErr->getMessage());
+                        }
+                    }
+
+                    $_SESSION['flash_success'] = 'Incident résolu — décision en faveur du passager (chauffeur non crédité).';
                 }
             }
-
-            $_SESSION['flash_success'] = 'Incident résolu.';
         } catch (\Throwable $e) {
             $_SESSION['flash_error'] = 'Erreur lors de la résolution.';
         }

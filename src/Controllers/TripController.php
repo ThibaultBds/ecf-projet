@@ -44,7 +44,9 @@ class TripController extends BaseController
             'covoiturages' => $covoiturages,
             'filters' => $filters,
             'hasSearched' => $hasSearched,
-            'nearestDate' => $nearestDate
+            'nearestDate' => $nearestDate,
+            'isDriver' => !empty($_SESSION['user']['is_driver']),
+            'isLoggedIn' => AuthManager::check(),
         ]);
     }
 

@@ -80,6 +80,29 @@
     </div>
     <?php endif; ?>
 
+    <?php if (!empty($isDriver)): ?>
+        <div style="margin-bottom:24px;background:#e8f8f5;border:1px solid #00b894;border-radius:10px;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span class="material-icons" style="color:#00b894;font-size:32px;">add_road</span>
+                <div>
+                    <strong style="color:#2d3436;">Vous &ecirc;tes chauffeur</strong>
+                    <p style="margin:0;color:#636e72;font-size:14px;">Proposez un trajet et gagnez des cr&eacute;dits.</p>
+                </div>
+            </div>
+            <a href="/driver/create-trip" class="btn-primary" style="white-space:nowrap;">
+                <span class="material-icons" style="vertical-align:middle;font-size:18px;margin-right:4px;">add</span>
+                Cr&eacute;er un trajet
+            </a>
+        </div>
+    <?php elseif (!empty($isLoggedIn)): ?>
+        <div style="margin-bottom:24px;background:#f8f9fa;border:1px solid #ddd;border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <span class="material-icons" style="color:#636e72;">info</span>
+            <p style="margin:0;color:#636e72;font-size:14px;">Vous souhaitez proposer des trajets ?
+                <a href="/profile" style="color:#00b894;font-weight:600;">Activez le mode chauffeur</a> depuis votre profil.
+            </p>
+        </div>
+    <?php endif; ?>
+
     <?php if (empty($hasSearched)): ?>
         <!-- État initial : pas de recherche -->
         <div style="text-align:center;padding:60px 20px;background:white;border-radius:12px;">

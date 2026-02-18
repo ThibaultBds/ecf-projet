@@ -109,15 +109,30 @@
                             &laquo; <?= htmlspecialchars((string)$inc['comment']) ?> &raquo;
                         </div>
                     <?php endif; ?>
-                    <div style="margin-top:12px;text-align:right;">
-                        <form method="POST" action="/moderator/resolve-incident" style="display:inline;">
-                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                            <input type="hidden" name="trip_id" value="<?= (int)($inc['trip_id'] ?? 0) ?>">
-                            <input type="hidden" name="reporter_id" value="<?= (int)($inc['reporter_id'] ?? 0) ?>">
-                            <button type="submit" class="btn-primary" style="padding:6px 16px;font-size:13px;">
-                                <span class="material-icons" style="vertical-align:middle;font-size:16px;">check</span> Marquer comme r&eacute;solu
-                            </button>
-                        </form>
+                    <div style="margin-top:12px;border-top:1px solid #f1f2f6;padding-top:12px;">
+                        <p style="font-size:13px;color:#636e72;margin:0 0 10px 0;font-weight:500;">D&eacute;cision de mod&eacute;ration :</p>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+                            <form method="POST" action="/moderator/resolve-incident" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                                <input type="hidden" name="trip_id" value="<?= (int)($inc['trip_id'] ?? 0) ?>">
+                                <input type="hidden" name="reporter_id" value="<?= (int)($inc['reporter_id'] ?? 0) ?>">
+                                <input type="hidden" name="credit_driver" value="0">
+                                <button type="submit" class="btn-danger" style="padding:6px 14px;font-size:13px;" title="Le signalement est fond&eacute; : le chauffeur n'est pas pay&eacute;">
+                                    <span class="material-icons" style="vertical-align:middle;font-size:16px;">person_off</span>
+                                    En faveur du passager
+                                </button>
+                            </form>
+                            <form method="POST" action="/moderator/resolve-incident" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                                <input type="hidden" name="trip_id" value="<?= (int)($inc['trip_id'] ?? 0) ?>">
+                                <input type="hidden" name="reporter_id" value="<?= (int)($inc['reporter_id'] ?? 0) ?>">
+                                <input type="hidden" name="credit_driver" value="1">
+                                <button type="submit" class="btn-primary" style="padding:6px 14px;font-size:13px;" title="Le signalement est non fond&eacute; : le chauffeur est cr&eacute;dit&eacute;">
+                                    <span class="material-icons" style="vertical-align:middle;font-size:16px;">check_circle</span>
+                                    En faveur du chauffeur
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>
