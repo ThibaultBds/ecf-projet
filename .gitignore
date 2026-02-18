@@ -31,11 +31,6 @@ tools/
 Thumbs.db
 nul
 
-# IDE / éditeurs
-.idea/
-.vscode/
-.claude/
-
 # Cache
 *.cache
 *.tmp

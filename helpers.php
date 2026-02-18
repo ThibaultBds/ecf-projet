@@ -12,7 +12,7 @@ function dd($var) {
 }
 
 function redirect($url) {
-    header("Location: $ûrl");
+    header("Location: $url");
     exit;
 }
 
