@@ -121,12 +121,9 @@ class AuthController extends BaseController
 ]);
 
 
-            return $this->render('auth/register', [
-                'title' => 'Inscription - EcoRide',
-                'error' => '',
-                'success' => 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.',
-                'old' => []
-            ]);
+            $_SESSION['flash_success'] = 'Compte créé avec succès ! Connectez-vous.';
+            header('Location: /login');
+            exit;
         } catch (Exception $e) {
             error_log("Erreur inscription : " . $e->getMessage());
             return $this->render('auth/register', [

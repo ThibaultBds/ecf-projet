@@ -105,6 +105,7 @@ class Trip extends BaseModel
             "SELECT t.*,
                     u.username AS conducteur,
                     u.user_id AS chauffeur_user_id,
+                    u.photo AS conducteur_photo,
                     v.brand,
                     v.model,
                     v.color,
