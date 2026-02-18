@@ -34,12 +34,17 @@ class AdminController extends BaseController
             "SELECT * FROM users ORDER BY user_id DESC LIMIT 20"
         )->fetchAll();
 
+        $contactMessages = BaseModel::query(
+            "SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT 50"
+        )->fetchAll();
+
         $this->render('admin/index', [
             'title' => 'Administration - EcoRide',
             'stats' => $stats,
             'users' => $users,
             'tripsPerDay' => $tripsPerDay,
             'creditsPerDay' => $creditsPerDay,
+            'contactMessages' => $contactMessages,
             'success' => $_SESSION['flash_success'] ?? '',
             'error' => $_SESSION['flash_error'] ?? ''
         ]);
@@ -69,6 +74,16 @@ class AdminController extends BaseController
         }
 
         header('Location: /admin');
+        exit;
+    }
+
+    public function markMessageRead()
+    {
+        $id = (int) ($_POST['message_id'] ?? 0);
+        if ($id > 0) {
+            BaseModel::query("UPDATE contact_messages SET is_read = 1 WHERE id = ?", [$id]);
+        }
+        header('Location: /admin#messages');
         exit;
     }
 

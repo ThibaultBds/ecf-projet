@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Core\Mailer;
+use App\Models\BaseModel;
 
 class ContactController extends BaseController
 {
@@ -54,18 +54,9 @@ class ContactController extends BaseController
             ]);
         }
 
-        $adminEmail = "admin@ecoride.fr";
-
-        $emailContent  = "Nouveau message de contact\n\n";
-        $emailContent .= "Nom: {$nom}\n";
-        $emailContent .= "Email: {$email}\n";
-        $emailContent .= "Sujet: {$sujet}\n\n";
-        $emailContent .= "Message:\n{$message}";
-
-        Mailer::send(
-            $adminEmail,
-            "Nouveau message - EcoRide : {$sujet}",
-            $emailContent
+        BaseModel::query(
+            "INSERT INTO contact_messages (nom, email, sujet, message) VALUES (?, ?, ?, ?)",
+            [$nom, $email, $sujet, $message]
         );
 
         $_SESSION['flash_success'] = 'Votre message a été envoyé avec succès ! Nous vous recontacterons bientôt.';
