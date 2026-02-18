@@ -24,10 +24,13 @@ if (session_status() === PHP_SESSION_NONE) {
     try {
         $sessionHandler = new DatabaseSessionHandler(Database::getInstance()->getConnection());
         session_set_save_handler($sessionHandler, true);
+        session_start();
     } catch (\Throwable $e) {
         // Fallback to default file sessions if DB not available
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     }
-    session_start();
 }
 
 if (!isset($_SESSION['csrf_token'])) {
