@@ -37,6 +37,7 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
     </div>
 
     <form method="POST" action="/profile/upload-photo" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
         <input type="file" name="photo" accept="image/jpeg,image/png" required>
         <button type="submit" class="btn-primary">Mettre à jour la photo</button>
     </form>
@@ -44,6 +45,7 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
 
 <?php if (!empty($userData['photo'])): ?>
     <form method="POST" action="/profile/delete-photo" style="margin-top:10px;">
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
         <button type="submit" class="btn-danger">Supprimer la photo</button>
     </form>
 <?php endif; ?>
