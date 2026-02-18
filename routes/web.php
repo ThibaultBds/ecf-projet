@@ -57,6 +57,7 @@ Router::group(['middleware' => 'csrf'], function () {
 
     Router::group(['middleware' => 'role:admin'], function () {
         Router::get('/admin', 'AdminController@index');
+        Router::get('/admin/trips', 'AdminController@trips');
         Router::post('/admin/suspend-user', 'AdminController@suspendUser');
         Router::post('/admin/activate-user', 'AdminController@activateUser');
         Router::post('/admin/create-employee', 'AdminController@createEmployee');

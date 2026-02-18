@@ -55,6 +55,22 @@ class AdminController extends BaseController
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     }
 
+    public function trips()
+    {
+        $trips = BaseModel::query(
+            "SELECT t.*, u.username AS chauffeur
+             FROM trips t
+             JOIN users u ON t.chauffeur_id = u.user_id
+             WHERE t.status = 'scheduled'
+             ORDER BY t.departure_datetime ASC"
+        )->fetchAll(\PDO::FETCH_ASSOC);
+
+        $this->render('admin/trips', [
+            'title' => 'Trajets planifiés - Admin',
+            'trips' => $trips,
+        ]);
+    }
+
     public function suspendUser()
     {
         $userId = (int) ($_POST['user_id'] ?? 0);
