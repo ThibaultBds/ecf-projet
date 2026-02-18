@@ -137,11 +137,15 @@ class AuthController extends BaseController
 
     public function logout()
     {
-        AuthManager::logout();
-
-        // Restart a clean session for CSRF token persistence
+        $csrfToken = $_SESSION['csrf_token'] ?? null;
+        
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_unset();
+            session_destroy();
+        }
+        
         session_start();
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        $_SESSION['csrf_token'] = $csrfToken ?? bin2hex(random_bytes(32));
 
         header('Location: /');
         exit;

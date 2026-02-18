@@ -2,6 +2,7 @@
 -- RESET BASE
 -- ==========================================
 
+DROP TABLE IF EXISTS php_sessions;
 DROP TABLE IF EXISTS login_attempts;
 DROP TABLE IF EXISTS credit_logs;
 DROP TABLE IF EXISTS reviews;
@@ -195,6 +196,17 @@ CREATE TABLE credit_logs (
         REFERENCES trips(trip_id)
         ON DELETE SET NULL
 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================
+-- TABLE PHP_SESSIONS
+-- ==========================================
+
+CREATE TABLE php_sessions (
+    session_id VARCHAR(128) NOT NULL PRIMARY KEY,
+    data MEDIUMTEXT NOT NULL,
+    expires_at DATETIME NOT NULL,
+    INDEX idx_expires (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ==========================================

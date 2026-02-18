@@ -106,6 +106,13 @@ class ModeratorController extends BaseController
 
     if ($tripId > 0 && $reporterId > 0) {
         try {
+            $validStatuses = ['validated', 'disputed'];
+            $participantStatus = $creditDriver ? 'validated' : 'disputed';
+            
+            if (!in_array($participantStatus, $validStatuses, true)) {
+                throw new \Exception("Invalid participant status: " . $participantStatus);
+            }
+
             $mongo = MongoDB::getInstance();
             $mongo->upsert(
                 'trip_incidents',
@@ -117,13 +124,16 @@ class ModeratorController extends BaseController
                 ]
             );
 
-            $participantStatus = $creditDriver ? 'validated' : 'disputed';
-            BaseModel::query(
+            $stmt = BaseModel::query(
                 "UPDATE trip_participants
                  SET status = ?
                  WHERE trip_id = ? AND user_id = ?",
                 [$participantStatus, $tripId, $reporterId]
             );
+            
+            if ($stmt && $stmt->rowCount() === 0) {
+                error_log("Warning: No participant found for trip_id=$tripId, user_id=$reporterId when resolving incident");
+            }
 
             $trip = BaseModel::query(
                 "SELECT chauffeur_id, price
