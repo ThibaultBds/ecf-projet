@@ -141,9 +141,12 @@ class ModeratorController extends BaseController
             }
 
             $mongo = MongoDB::getInstance();
-            $mongo->upsert(
+            $mongo->updateWhere(
                 'trip_incidents',
-                ['trip_id' => $tripId, 'reporter_id' => $reporterId],
+                ['$or' => [
+                    ['trip_id' => $tripId,         'reporter_id' => $reporterId],
+                    ['trip_id' => (string)$tripId, 'reporter_id' => (string)$reporterId],
+                ]],
                 [
                     'status' => 'resolved',
                     'resolved_at' => date('Y-m-d H:i:s'),

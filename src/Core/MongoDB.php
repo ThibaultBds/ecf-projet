@@ -74,6 +74,13 @@ class MongoDB
         $this->manager->executeBulkWrite("{$this->database}.{$collection}", $bulk);
     }
 
+    public function updateWhere(string $collection, array $filter, array $data): void
+    {
+        $bulk = new BulkWrite();
+        $bulk->update($filter, ['$set' => $data], ['multi' => true]);
+        $this->manager->executeBulkWrite("{$this->database}.{$collection}", $bulk);
+    }
+
     public function delete(string $collection, array $filter): void
     {
         $bulk = new BulkWrite();
