@@ -1,7 +1,8 @@
 services:
   web:
     build:
-      context: ./docker
+      context: .
+      dockerfile: Dockerfile
     container_name: ecoride-web
     ports:
       - "8081:80"
@@ -10,9 +11,12 @@ services:
     depends_on:
       - db
       - mongo
+      - mailhog
     environment:
       - APACHE_DOCUMENT_ROOT=/var/www/html/public
       - MONGO_URI=mongodb://mongo:27017
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
     restart: always
 
   db:
@@ -50,6 +54,14 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: ecoride-mailhog
+    restart: always
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
 volumes:
   db_data:
