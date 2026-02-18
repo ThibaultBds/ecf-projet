@@ -34,9 +34,13 @@ class AdminController extends BaseController
             "SELECT * FROM users ORDER BY user_id DESC LIMIT 20"
         )->fetchAll();
 
-        $contactMessages = BaseModel::query(
-            "SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT 50"
-        )->fetchAll();
+        try {
+            $contactMessages = BaseModel::query(
+                "SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT 50"
+            )->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Throwable $e) {
+            $contactMessages = [];
+        }
 
         $this->render('admin/index', [
             'title' => 'Administration - EcoRide',
