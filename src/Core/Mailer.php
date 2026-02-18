@@ -24,7 +24,7 @@ class Mailer
     private static function sendBrevoApi(string $to, string $subject, string $message, string $apiKey): bool
     {
         $payload = json_encode([
-            'sender'      => ['name' => 'EcoRide', 'email' => 'noreply@ecoride.fr'],
+            'sender'      => ['name' => 'EcoRide', 'email' => getenv('MAIL_FROM') ?: 'noreply@ecoride.fr'],
             'to'          => [['email' => $to]],
             'subject'     => $subject,
             'textContent' => $message,

@@ -17,6 +17,12 @@ services:
       - MONGO_URI=mongodb://mongo:27017
       - MAIL_HOST=mailhog
       - MAIL_PORT=1025
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=ecoride
+      - DB_USERNAME=ecoride_user
+      - DB_PASSWORD=ecoride_pass
+      - DB_CONNECTION=mysql
     restart: always
 
   db:
