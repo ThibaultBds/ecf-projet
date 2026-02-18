@@ -127,7 +127,7 @@
                 <div class="ride-details">
                     <p>
                         <span class="material-icons">schedule</span>
-                        <?= date('d/m/Y &\agrave; H:i', strtotime($c['departure_datetime'])) ?>
+                        <?= date('d/m/Y', strtotime($c['departure_datetime'])) ?> &agrave; <?= date('H:i', strtotime($c['departure_datetime'])) ?>
                         <?php if (!empty($c['arrival_datetime'])): ?>
                             &rarr; <?= date('H:i', strtotime($c['arrival_datetime'])) ?>
                         <?php endif; ?>
