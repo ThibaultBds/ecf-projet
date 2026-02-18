@@ -148,7 +148,9 @@ class Trip extends BaseModel
                     u.username AS conducteur,
                     cd.name AS ville_depart,
                     ca.name AS ville_arrivee,
-                    tp.status AS participant_status
+                    tp.status AS participant_status,
+                    (SELECT COUNT(*) FROM reviews r2
+                     WHERE r2.trip_id = t.trip_id AND r2.reviewer_id = tp.user_id) AS has_reviewed
              FROM trips t
              JOIN trip_participants tp ON t.trip_id = tp.trip_id
              JOIN users u ON t.chauffeur_id = u.user_id

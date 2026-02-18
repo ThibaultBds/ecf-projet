@@ -117,7 +117,7 @@ class ModeratorController extends BaseController
                 ]
             );
 
-            $participantStatus = $creditDriver ? 'validated' : 'disputed_closed';
+            $participantStatus = $creditDriver ? 'validated' : 'disputed';
             BaseModel::query(
                 "UPDATE trip_participants
                  SET status = ?

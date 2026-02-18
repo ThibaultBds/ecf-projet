@@ -61,6 +61,7 @@
   width: 100%;
   margin-top: 10px;
   padding: 12px 0;
+  justify-content: center;
   background: linear-gradient(90deg, var(--primary-color) 70%, #00aaff 100%);
   color: #fff;
   border: none;

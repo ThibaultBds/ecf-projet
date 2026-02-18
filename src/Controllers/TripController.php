@@ -116,10 +116,18 @@ class TripController extends BaseController
         $trajets_conduits = $isDriver ? Trip::byDriver($userId) : [];
         $participations = Trip::byPassenger($userId);
 
+        $upcomingStatuses = ['scheduled', 'started'];
+        $upcoming_conduits      = array_values(array_filter($trajets_conduits, fn($t) => in_array($t['status'], $upcomingStatuses)));
+        $past_conduits          = array_values(array_filter($trajets_conduits, fn($t) => !in_array($t['status'], $upcomingStatuses)));
+        $upcoming_participations = array_values(array_filter($participations, fn($t) => in_array($t['status'], $upcomingStatuses)));
+        $past_participations    = array_values(array_filter($participations, fn($t) => !in_array($t['status'], $upcomingStatuses)));
+
         $this->render('trips/my-trips', [
             'title' => 'Mes Trajets - EcoRide',
-            'trajets_conduits' => $trajets_conduits,
-            'participations' => $participations,
+            'upcoming_conduits'       => $upcoming_conduits,
+            'past_conduits'           => $past_conduits,
+            'upcoming_participations' => $upcoming_participations,
+            'past_participations'     => $past_participations,
             'error' => $error
         ]);
     }
