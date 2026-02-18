@@ -32,6 +32,7 @@ class Mailer
             $mail->isSMTP();
             $mail->Host       = getenv('MAIL_HOST');
             $mail->SMTPAuth   = true;
+            $mail->Timeout    = 10;
             $mail->Username   = getenv('MAIL_USERNAME');
             $mail->Password   = getenv('MAIL_PASSWORD');
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
