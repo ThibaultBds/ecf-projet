@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\TripParticipant;
 use App\Models\BaseModel;
 use App\Core\Auth\AuthManager;
+use App\Core\Mailer;
 use App\Controllers\DriverController;
 use Exception;
 
@@ -185,8 +186,29 @@ class TripController extends BaseController
             if ($newStatus === 'cancelled') {
                 foreach ($participants as $p) {
                     User::addCredits($p['user_id'], (int) $trip['price'], 'refund', 'Remboursement annulation trajet', $tripId);
+                    $passenger = User::find($p['user_id']);
+                    if ($passenger) {
+                        Mailer::send(
+                            $passenger['email'],
+                            "Trajet annulé - EcoRide",
+                            "Bonjour {$passenger['username']},\n\nLe trajet #{$tripId} a été annulé par le chauffeur.\nVous avez été remboursé de {$trip['price']} crédits.\n\nEcoRide"
+                        );
+                    }
                 }
                 User::addCredits($userId, 2, 'refund', 'Remboursement frais plateforme', $tripId);
+            }
+
+            if ($newStatus === 'completed') {
+                foreach ($participants as $p) {
+                    $passenger = User::find($p['user_id']);
+                    if ($passenger) {
+                        Mailer::send(
+                            $passenger['email'],
+                            "Votre trajet est terminé - EcoRide",
+                            "Bonjour {$passenger['username']},\n\nVotre trajet #{$tripId} est terminé.\nRendez-vous dans votre espace pour valider le trajet et laisser un avis.\n\nEcoRide"
+                        );
+                    }
+                }
             }
 
             BaseModel::commit();
