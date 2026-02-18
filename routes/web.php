@@ -68,6 +68,7 @@ Router::group(['middleware' => 'csrf'], function () {
         Router::post('/moderator/approve-review', 'ModeratorController@approveReview');
         Router::post('/moderator/reject-review', 'ModeratorController@rejectReview');
         Router::post('/moderator/resolve-incident', 'ModeratorController@resolveIncident');
+        Router::post('/moderator/mark-message-read', 'ModeratorController@markMessageRead');
     });
 
 });

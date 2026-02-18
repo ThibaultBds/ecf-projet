@@ -178,6 +178,46 @@
     </div>
     <?php endif; ?>
 
+    <!-- Messages de contact -->
+    <div class="profile-box" id="messages" style="margin-top:30px;">
+        <h3 class="profil-titre">
+            <span class="material-icons" style="vertical-align:middle;color:#0984e3;">mail</span>
+            Messages de contact
+            <?php $unread = count(array_filter($contactMessages ?? [], fn($m) => !$m['is_read'])); ?>
+            <?php if ($unread > 0): ?>
+                <span style="background:#e74c3c;color:white;border-radius:12px;padding:2px 8px;font-size:13px;margin-left:8px;"><?= $unread ?> non lu<?= $unread > 1 ? 's' : '' ?></span>
+            <?php endif; ?>
+        </h3>
+        <?php if (empty($contactMessages)): ?>
+            <p style="text-align:center;color:#636e72;padding:30px 0;">Aucun message reçu.</p>
+        <?php else: ?>
+            <?php foreach ($contactMessages as $msg): ?>
+                <div style="border:1px solid <?= $msg['is_read'] ? '#f1f2f6' : '#fdcb6e' ?>;border-radius:8px;padding:15px;margin-bottom:12px;background:<?= $msg['is_read'] ? '#fafafa' : '#fffdf0' ?>;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <div>
+                            <strong><?= htmlspecialchars($msg['nom']) ?></strong>
+                            &lt;<a href="mailto:<?= htmlspecialchars($msg['email']) ?>" style="color:#0984e3;"><?= htmlspecialchars($msg['email']) ?></a>&gt;
+                            &mdash; <em><?= htmlspecialchars($msg['sujet']) ?></em>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span style="font-size:12px;color:#b2bec3;"><?= date('d/m/Y H:i', strtotime($msg['created_at'])) ?></span>
+                            <?php if (!$msg['is_read']): ?>
+                                <form method="POST" action="/moderator/mark-message-read" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                                    <input type="hidden" name="message_id" value="<?= (int)$msg['id'] ?>">
+                                    <button type="submit" class="btn-primary" style="padding:4px 10px;font-size:12px;">Marquer lu</button>
+                                </form>
+                            <?php else: ?>
+                                <span style="color:#00b894;font-size:12px;">&#10003; Lu</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px;padding:10px;background:white;border-radius:6px;color:#2d3436;font-size:14px;white-space:pre-wrap;"><?= htmlspecialchars($msg['message']) ?></div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+
     <div class="retour-section">
         <a href="/profile" class="btn-retour">
             <span class="material-icons">arrow_back</span> Retour au profil

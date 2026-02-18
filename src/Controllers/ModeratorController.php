@@ -64,14 +64,33 @@ class ModeratorController extends BaseController
             // MongoDB might not be available
         }
 
+        try {
+            $contactMessages = BaseModel::query(
+                "SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT 50"
+            )->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Throwable $e) {
+            $contactMessages = [];
+        }
+
         $this->render('moderator/index', [
-            'pendingReviews'   => $pendingReviews,
-            'incidents'        => $incidents,
-            'resolvedIncidents'=> $resolvedIncidents,
+            'pendingReviews'    => $pendingReviews,
+            'incidents'         => $incidents,
+            'resolvedIncidents' => $resolvedIncidents,
+            'contactMessages'   => $contactMessages,
             'success' => $_SESSION['flash_success'] ?? '',
             'error'   => $_SESSION['flash_error'] ?? ''
         ]);
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+    }
+
+    public function markMessageRead()
+    {
+        $id = (int) ($_POST['message_id'] ?? 0);
+        if ($id > 0) {
+            BaseModel::query("UPDATE contact_messages SET is_read = 1 WHERE id = ?", [$id]);
+        }
+        header('Location: /moderator#messages');
+        exit;
     }
 
     public function approveReview()
