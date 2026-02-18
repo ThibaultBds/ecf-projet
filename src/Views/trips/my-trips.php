@@ -31,8 +31,10 @@ $statusLabels = [
                     <div class="ride-card-history card-light">
                         <div class="ride-content">
                             <p class="ride-title">
-                                <span class="material-icons ride-icon">directions_car</span>
-                                <?= htmlspecialchars($trajet['ville_depart']) ?> &rarr; <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                                <a href="/trip/<?= (int)$trajet['trip_id'] ?>" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:5px;">
+                                    <span class="material-icons ride-icon">directions_car</span>
+                                    <?= htmlspecialchars($trajet['ville_depart']) ?> &rarr; <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                                </a>
                             </p>
                             <p class="small-muted">
                                 D&eacute;part : <?= date('d/m/Y H:i', strtotime($trajet['departure_datetime'])) ?>
@@ -87,8 +89,10 @@ $statusLabels = [
                     <div class="ride-card-history card-light">
                         <div class="ride-content">
                             <p class="ride-title">
-                                <span class="material-icons ride-icon">person</span>
-                                <?= htmlspecialchars($trajet['ville_depart']) ?> &rarr; <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                                <a href="/trip/<?= (int)$trajet['trip_id'] ?>" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:5px;">
+                                    <span class="material-icons ride-icon">person</span>
+                                    <?= htmlspecialchars($trajet['ville_depart']) ?> &rarr; <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                                </a>
                             </p>
                             <p class="small-muted">
                                 D&eacute;part : <?= date('d/m/Y H:i', strtotime($trajet['departure_datetime'])) ?>

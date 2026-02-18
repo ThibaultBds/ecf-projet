@@ -1,6 +1,11 @@
 <div class="login-container">
     <h2 class="title-login">Connexion</h2>
 
+    <?php if (!empty($_SESSION['flash_success'])): ?>
+        <div class="message-success"><?= htmlspecialchars($_SESSION['flash_success']) ?></div>
+        <?php unset($_SESSION['flash_success']); ?>
+    <?php endif; ?>
+
     <?php if (!empty($error)): ?>
         <div class="message-error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>

@@ -7,7 +7,11 @@
                 <?= htmlspecialchars($covoiturage['ville_depart']) ?> → <?= htmlspecialchars($covoiturage['ville_arrivee']) ?>
             </h2>
             <p style="margin:5px 0;color:#636e72;font-size:18px;display:flex;align-items:center;gap:10px;">
-                <span class="material-icons" style="font-size:48px;color:#00b894;">account_circle</span>
+                <?php if (!empty($covoiturage['conducteur_photo'])): ?>
+                    <img src="/uploads/<?= htmlspecialchars($covoiturage['conducteur_photo']) ?>" alt="Photo" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
+                <?php else: ?>
+                    <span class="material-icons" style="font-size:48px;color:#00b894;">account_circle</span>
+                <?php endif; ?>
                 <span>Conducteur : <?= htmlspecialchars($covoiturage['conducteur']) ?></span>
             </p>
             <?php if ($covoiturage['energy_type'] === 'electrique'): ?>
