@@ -29,11 +29,12 @@ $roleLabels = [
             <h3><?= $stats['trips'] ?></h3>
             <p style="color:#636e72;">Trajets planifiés</p>
         </div>
-        <div style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+        <a href="/moderator" style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);text-decoration:none;display:block;">
             <span class="material-icons" style="font-size:36px;color:#e17055;">flag</span>
-            <h3><?= $stats['pending_reviews'] ?></h3>
+            <h3 style="color:#2d3436;"><?= $stats['pending_reviews'] ?></h3>
             <p style="color:#636e72;">Avis en attente</p>
-        </div>
+            <small style="color:#e17055;">Accéder à la modération →</small>
+        </a>
         <div style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
             <span class="material-icons" style="font-size:36px;color:#fdcb6e;">account_balance_wallet</span>
             <h3><?= $stats['platform_credits'] ?></h3>

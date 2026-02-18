@@ -19,10 +19,16 @@ class DriverController extends BaseController
         $user = User::find($userId);
         $trips = Trip::byDriver($userId);
 
+        $upcomingStatuses = ['scheduled', 'started'];
+        $upcoming_trips = array_values(array_filter($trips, fn($t) => in_array($t['status'], $upcomingStatuses)));
+        $past_trips     = array_values(array_filter($trips, fn($t) => !in_array($t['status'], $upcomingStatuses)));
+
         $this->render('driver/dashboard', [
-            'title' => 'Espace Chauffeur - EcoRide',
-            'user' => $user,
-            'trips' => $trips
+            'title'         => 'Espace Chauffeur - EcoRide',
+            'user'          => $user,
+            'trips'         => $trips,
+            'upcoming_trips'=> $upcoming_trips,
+            'past_trips'    => $past_trips,
         ]);
     }
 

@@ -41,7 +41,9 @@ class MongoDB
             return null;
         }
 
-        return (array) $results[0];
+        $arr = (array) $results[0];
+        unset($arr['_id']);
+        return $arr;
     }
 
     public function find(string $collection, array $filter = [], array $options = []): array
@@ -51,7 +53,9 @@ class MongoDB
 
         $results = [];
         foreach ($cursor as $doc) {
-            $results[] = (array) $doc;
+            $arr = (array) $doc;
+            unset($arr['_id']);
+            $results[] = $arr;
         }
         return $results;
     }

@@ -175,7 +175,8 @@ class ModeratorController extends BaseController
                 }
             }
         } catch (\Throwable $e) {
-            $_SESSION['flash_error'] = 'Erreur lors de la résolution.';
+            error_log("resolveIncident error: " . $e->getMessage());
+            $_SESSION['flash_error'] = 'Erreur : ' . $e->getMessage();
         }
     }
 
