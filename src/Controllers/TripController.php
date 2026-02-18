@@ -237,9 +237,9 @@ class TripController extends BaseController
         try {
             $mongo = \App\Core\MongoDB::getInstance();
             $mongo->insertOne('trip_incidents', [
-                'trip_id' => $tripId,
-                'reporter_id' => $userId,
-                'chauffeur_id' => $trip['chauffeur_id'],
+                'trip_id' => (int) $tripId,
+                'reporter_id' => (int) $userId,
+                'chauffeur_id' => (int) $trip['chauffeur_id'],
                 'comment' => $comment,
                 'status' => 'pending',
                 'created_at' => date('Y-m-d H:i:s')
