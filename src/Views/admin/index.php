@@ -24,11 +24,11 @@ $roleLabels = [
             <h3><?= $stats['users'] ?></h3>
             <p style="color:#636e72;">Utilisateurs actifs</p>
         </div>
-        <div style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+        <a href="/trips" style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);text-decoration:none;display:block;">
             <span class="material-icons" style="font-size:36px;color:#0984e3;">map</span>
-            <h3><?= $stats['trips'] ?></h3>
+            <h3 style="color:#2d3436;"><?= $stats['trips'] ?></h3>
             <p style="color:#636e72;">Trajets planifiés</p>
-        </div>
+        </a>
         <a href="/moderator" style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);text-decoration:none;display:block;">
             <span class="material-icons" style="font-size:36px;color:#e17055;">flag</span>
             <h3 style="color:#2d3436;"><?= $stats['pending_reviews'] ?></h3>
