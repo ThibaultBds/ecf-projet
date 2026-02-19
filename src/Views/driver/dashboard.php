@@ -68,17 +68,20 @@ $statusLabels = [
                             <span class="admin-badge <?= $trip['status'] ?>"><?= $statusLabels[$trip['status']] ?? ucfirst($trip['status']) ?></span>
                             <?php if ($trip['status'] === 'scheduled'): ?>
                                 <form method="POST" action="/my-trips" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                     <input type="hidden" name="action" value="start_trip">
                                     <input type="hidden" name="trip_id" value="<?= $trip['trip_id'] ?>">
                                     <button type="submit" style="background:#0984e3;color:white;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px;">▶ Démarrer</button>
                                 </form>
                                 <form method="POST" action="/my-trips" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                     <input type="hidden" name="action" value="cancel_trip">
                                     <input type="hidden" name="trip_id" value="<?= $trip['trip_id'] ?>">
                                     <button type="submit" style="background:#d63031;color:white;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px;">Annuler</button>
                                 </form>
                             <?php elseif ($trip['status'] === 'started'): ?>
                                 <form method="POST" action="/my-trips" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                     <input type="hidden" name="action" value="complete_trip">
                                     <input type="hidden" name="trip_id" value="<?= $trip['trip_id'] ?>">
                                     <button type="submit" style="background:#00b894;color:white;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px;">✓ Terminer</button>
