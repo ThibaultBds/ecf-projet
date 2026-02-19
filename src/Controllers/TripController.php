@@ -123,12 +123,28 @@ class TripController extends BaseController
         $upcoming_participations = array_values(array_filter($participations, fn($t) => in_array($t['status'], $upcomingStatuses)));
         $past_participations    = array_values(array_filter($participations, fn($t) => !in_array($t['status'], $upcomingStatuses)));
 
+        // Récupère les incidents résolus pour ce passager (map trip_id => decision)
+        $resolvedIncidents = [];
+        try {
+            $mongo = \App\Core\MongoDB::getInstance();
+            $incidents = $mongo->find('trip_incidents', [
+                'reporter_id' => $userId,
+                'status'      => 'resolved',
+            ]);
+            foreach ($incidents as $inc) {
+                $resolvedIncidents[(int)$inc['trip_id']] = $inc['decision'] ?? '';
+            }
+        } catch (\Throwable $e) {
+            // MongoDB indisponible : on affiche juste "Litige" sans détail
+        }
+
         $this->render('trips/my-trips', [
             'title' => 'Mes Trajets - EcoRide',
             'upcoming_conduits'       => $upcoming_conduits,
             'past_conduits'           => $past_conduits,
             'upcoming_participations' => $upcoming_participations,
             'past_participations'     => $past_participations,
+            'resolvedIncidents'       => $resolvedIncidents,
             'error' => $error
         ]);
     }

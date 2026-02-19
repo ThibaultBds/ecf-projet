@@ -223,10 +223,23 @@ $statusLabels = [
                                     </span>
 
                                 <?php elseif ($pStatus === 'disputed'): ?>
-                                    <span style="color:#e74c3c;font-weight:500;font-size:14px;">
-                                        <span class="material-icons" style="vertical-align:middle;font-size:16px;">report</span>
-                                        Litige en cours
-                                    </span>
+                                    <?php $decision = $resolvedIncidents[(int)$trajet['trip_id']] ?? null; ?>
+                                    <?php if ($decision === 'favor_passenger'): ?>
+                                        <span style="color:#00b894;font-weight:500;font-size:14px;">
+                                            <span class="material-icons" style="vertical-align:middle;font-size:16px;">verified</span>
+                                            Litige résolu en votre faveur — crédits remboursés
+                                        </span>
+                                    <?php elseif ($decision === 'favor_driver'): ?>
+                                        <span style="color:#636e72;font-weight:500;font-size:14px;">
+                                            <span class="material-icons" style="vertical-align:middle;font-size:16px;">gavel</span>
+                                            Litige résolu en faveur du chauffeur
+                                        </span>
+                                    <?php else: ?>
+                                        <span style="color:#e74c3c;font-weight:500;font-size:14px;">
+                                            <span class="material-icons" style="vertical-align:middle;font-size:16px;">report</span>
+                                            Litige en cours — en attente de décision
+                                        </span>
+                                    <?php endif; ?>
                                 <?php endif; ?>
 
                                 <!-- Formulaire de notation : visible si pas encore noté -->

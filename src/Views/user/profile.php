@@ -26,9 +26,11 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
 
     <div style="margin-bottom:15px;">
         <?php if (!empty($userData['photo'])): ?>
-            <img src="/uploads/<?= htmlspecialchars($userData['photo']) ?>" 
+            <img src="/uploads/<?= htmlspecialchars($userData['photo']) ?>"
                  alt="Photo de profil"
-                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;">
+                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='inline';">
+            <span class="material-icons" style="font-size:100px;color:#00b894;display:none;">account_circle</span>
         <?php else: ?>
             <span class="material-icons" style="font-size:100px;color:#00b894;">account_circle</span>
         <?php endif; ?>
