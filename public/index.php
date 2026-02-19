@@ -18,26 +18,9 @@ ini_set('session.gc_maxlifetime', 7200);
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\Router;
-use App\Core\Database;
-use App\Core\DatabaseSessionHandler;
 
 if (session_status() === PHP_SESSION_NONE) {
-    $sessionStarted = false;
-    for ($attempt = 0; $attempt < 3; $attempt++) {
-        try {
-            $sessionHandler = new DatabaseSessionHandler(Database::getInstance()->getConnection());
-            session_set_save_handler($sessionHandler, true);
-            session_start();
-            $sessionStarted = true;
-            break;
-        } catch (\Throwable $e) {
-            error_log("Session DB handler attempt $attempt failed: " . $e->getMessage());
-            if ($attempt < 2) usleep(200000); // 200ms entre chaque tentative
-        }
-    }
-    if (!$sessionStarted) {
-        session_start(); // dernier recours : sessions fichier
-    }
+    session_start();
 }
 
 if (!isset($_SESSION['csrf_token'])) {
