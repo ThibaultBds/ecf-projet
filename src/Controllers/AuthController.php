@@ -10,6 +10,9 @@ class AuthController extends BaseController
 {
     public function showLogin()
     {
+        if (!empty($_GET['redirect'])) {
+            $_SESSION['intended_url'] = $_GET['redirect'];
+        }
         $this->render('auth/login', [
             'title' => 'Connexion - EcoRide',
             'error' => '',
@@ -47,6 +50,9 @@ class AuthController extends BaseController
 
     public function showRegister()
     {
+        if (!empty($_GET['redirect'])) {
+            $_SESSION['intended_url'] = $_GET['redirect'];
+        }
         $this->render('auth/register', [
             'title' => 'Inscription - EcoRide',
             'error' => '',

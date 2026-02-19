@@ -150,7 +150,7 @@ class TripController extends BaseController
 
             $trip = Trip::find($tripId);
             if ($trip) {
-                User::addCredits($userId, (int) $trip['price'], 'refund', 'Annulation participation', $tripId);
+                User::addCredits($userId, (int) $trip['price'] + 2, 'refund', 'Annulation participation', $tripId);
             }
 
             BaseModel::commit();

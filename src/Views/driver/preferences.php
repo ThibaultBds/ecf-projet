@@ -1,3 +1,7 @@
+<style>
+.pref-card label { display:flex; align-items:center; gap:10px; cursor:pointer; }
+.pref-card label input[type="radio"] { width:18px; height:18px; flex-shrink:0; }
+</style>
 <main class="member-container">
     <h2 class="page-title-hero">
         <span class="material-icons page-icon-large">settings</span> Mes Préférences

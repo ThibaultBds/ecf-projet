@@ -199,6 +199,26 @@ class ModeratorController extends BaseController
 
                     $_SESSION['flash_success'] = 'Incident résolu — décision en faveur du chauffeur (crédité).';
                 } else {
+                    $passenger = User::find($reporterId);
+                    if ($passenger) {
+                        User::addCredits(
+                            $reporterId,
+                            (int)$trip['price'] + 2,
+                            'refund',
+                            'Remboursement incident — décision en faveur du passager',
+                            $tripId
+                        );
+                        try {
+                            Mailer::send(
+                                $passenger['email'],
+                                "Incident résolu - EcoRide",
+                                "Bonjour {$passenger['username']},\n\nL'incident sur le trajet #{$tripId} a été examiné. La décision est en votre faveur : vous avez été remboursé de " . ((int)$trip['price'] + 2) . " crédits.\n\nEcoRide"
+                            );
+                        } catch (\Throwable $mailErr) {
+                            error_log("Mailer error resolveIncident (favor passenger mail): " . $mailErr->getMessage());
+                        }
+                    }
+
                     if ($driver) {
                         try {
                             Mailer::send(
@@ -211,7 +231,7 @@ class ModeratorController extends BaseController
                         }
                     }
 
-                    $_SESSION['flash_success'] = 'Incident résolu — décision en faveur du passager (chauffeur non crédité).';
+                    $_SESSION['flash_success'] = 'Incident résolu — décision en faveur du passager (remboursé).';
                 }
             }
         } catch (\Throwable $e) {
