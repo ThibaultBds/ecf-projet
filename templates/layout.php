@@ -34,9 +34,10 @@
         <a href="mailto:contact@ecoride.fr" style="color:#00b894;text-decoration:none;">contact@ecoride.fr</a>
     </p>
     <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:8px;">
-        <a href="#" id="openModalLegal" style="color:#dfe6e9;text-decoration:none;">Mentions légales</a>
         <a href="/contact" style="color:#dfe6e9;text-decoration:none;">Contact</a>
-        <a href="/legal" style="color:#dfe6e9;text-decoration:none;">CGU</a>
+        <a href="#" id="openModalLegal" style="color:#dfe6e9;text-decoration:none;">Mentions légales</a>
+        <a href="/privacy" style="color:#dfe6e9;text-decoration:none;">Politique de confidentialité</a>
+        <a href="/terms" style="color:#dfe6e9;text-decoration:none;">Conditions d'utilisation</a>
     </div>
 </footer>
 

@@ -1,0 +1,54 @@
+DOCUMENTATION GESTION DE PROJET - ECORIDE
+
+1. Méthodologie adoptée
+Pour le développement du projet EcoRide, une méthodologie Agile simplifiée basée sur un système Kanban a été mise en place.
+
+L'objectif était de :
+- Structurer le développement
+- Prioriser les fonctionnalités
+- Suivre l'avancement
+- Organiser les livraisons
+
+2. Organisation du Kanban
+Un tableau Kanban a été utilisé (Trello / Notion).
+
+Le tableau comprend les colonnes suivantes :
+- Backlog → Liste complète des fonctionnalités prévues
+- À faire → Fonctionnalités priorisées pour développement
+- En cours → Fonctionnalités en cours d'implémentation
+- Terminé (branche develop) → Fonctionnalités développées et testées
+- Déployé (branche main) → Fonctionnalités validées et mises en production
+
+Cela a permis d'avoir une vision claire de l'avancement du projet.
+
+3. Organisation Git
+Une organisation inspirée de Git Flow simplifié a été adoptée.
+
+Branches principales :
+- main → version stable en production
+- develop → branche d'intégration et de tests
+
+Branches secondaires :
+- refactor-mvc → réorganisation complète vers une architecture MVC personnalisée
+- hotfix/mongo-env → correction liée à la configuration de MongoDB en environnement
+- css/cleanup → amélioration structurelle
+
+4. Cycle de développement d'une fonctionnalité
+Chaque fonctionnalité suit le cycle suivant :
+- Création d'une branche feature à partir de develop
+- Développement de la fonctionnalité
+- Tests manuels
+- Merge vers develop
+- Validation globale
+- Merge vers main une fois stable
+
+Cela garantit :
+- Une stabilité de la branche principale
+- Une séparation claire entre développement et production
+- Une traçabilité des évolutions
+
+5. Avantages de cette organisation
+- Meilleure lisibilité du projet
+- Travail structuré
+- Possibilité de revenir en arrière
+- Préparation à un environnement professionnel
