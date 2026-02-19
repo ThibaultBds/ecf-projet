@@ -50,16 +50,22 @@ class VehicleController extends BaseController
             exit;
         }
 
-        Vehicle::create([
-            'user_id' => $userId,
-            'brand' => $brand,
-            'model' => $model,
-            'color' => $color,
-            'license_plate' => $licensePlate,
-            'energy_type' => $energyType,
-            'seats_available' => $seatsAvailable,
-            'registration_date' => $registrationDate
-        ]);
+        try {
+            Vehicle::create([
+                'user_id' => $userId,
+                'brand' => $brand,
+                'model' => $model,
+                'color' => $color,
+                'license_plate' => $licensePlate,
+                'energy_type' => $energyType,
+                'seats_available' => $seatsAvailable,
+                'registration_date' => $registrationDate
+            ]);
+        } catch (\Exception $e) {
+            $_SESSION['flash_error'] = 'Cette plaque d\'immatriculation est déjà enregistrée.';
+            header('Location: /driver/vehicles');
+            exit;
+        }
 
         $_SESSION['flash_success'] = 'Véhicule ajouté avec succès !';
         header('Location: /driver/vehicles');
