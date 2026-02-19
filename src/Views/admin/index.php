@@ -111,7 +111,7 @@ $roleLabels = [
 
     <!-- Créer un employé -->
     <div class="profile-box">
-        <h3 class="profil-titre">Créer un compte Employé</h3>
+        <h3 class="profil-titre">Créer un compte</h3>
         <form method="POST" action="/admin/create-employee" class="form-container">
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
             <div class="input-group">
@@ -129,8 +129,8 @@ $roleLabels = [
             <div class="input-group">
                 <label for="role">Rôle</label>
                 <select id="role" name="role" class="select-field">
+                    <option value="user">Utilisateur</option>
                     <option value="employe">Employé (Modérateur)</option>
-                    <option value="admin">Administrateur</option>
                 </select>
             </div>
             <button type="submit" class="btn-primary">Créer</button>

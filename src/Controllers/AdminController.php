@@ -137,7 +137,7 @@ class AdminController extends BaseController
             exit;
         }
 
-        if (!in_array($role, ['employe', 'admin'])) {
+        if (!in_array($role, ['employe', 'user'])) {
             $_SESSION['flash_error'] = 'Rôle invalide.';
             header('Location: /admin');
             exit;
