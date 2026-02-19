@@ -44,6 +44,7 @@ class AuthController extends BaseController
         }
 
         $redirectUrl = AuthManager::intendedUrl(AuthManager::redirectUrlByRole());
+        session_write_close();
         header('Location: ' . $redirectUrl);
         exit;
     }
