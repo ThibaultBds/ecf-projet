@@ -13,7 +13,7 @@ class AdminController extends BaseController
             'users' => User::count(),
             'trips' => (int) BaseModel::query("SELECT COUNT(*) as total FROM trips WHERE status = 'scheduled'")->fetch()['total'],
             'pending_reviews' => (int) BaseModel::query("SELECT COUNT(*) as total FROM reviews WHERE status = 'pending'")->fetch()['total'],
-            'platform_credits' => (int) BaseModel::query("SELECT COALESCE(SUM(amount), 0) as total FROM credit_logs WHERE type = 'platform_fee'")->fetch()['total']
+            'platform_credits' => (int) BaseModel::query("SELECT COALESCE(-SUM(amount), 0) as total FROM credit_logs WHERE type = 'platform_fee'")->fetch()['total']
         ];
 
         $tripsPerDay = BaseModel::query(
@@ -24,7 +24,7 @@ class AdminController extends BaseController
         )->fetchAll();
 
         $creditsPerDay = BaseModel::query(
-            "SELECT DATE(created_at) AS jour, SUM(amount) AS total
+            "SELECT DATE(created_at) AS jour, -SUM(amount) AS total
              FROM credit_logs
              WHERE type = 'platform_fee' AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
              GROUP BY jour ORDER BY jour"
