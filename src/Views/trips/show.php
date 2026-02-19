@@ -162,10 +162,10 @@
                     <h3 style="margin:0 0 10px 0;font-size:24px;font-weight:600;">Rejoignez l'aventure EcoRide !</h3>
                     <p style="margin:0 0 20px 0;opacity:0.9;">Connectez-vous pour participer à ce covoiturage</p>
                     <div style="display:flex;justify-content:center;gap:15px;flex-wrap:wrap;">
-                        <a href="/login?redirect=/trips/<?= $covoiturage['trip_id'] ?>" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.2);color:white;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:500;">
+                        <a href="/login?redirect=/trip/<?= $covoiturage['trip_id'] ?>" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.2);color:white;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:500;">
                             <span class="material-icons">login</span> Se connecter
                         </a>
-                        <a href="/register?redirect=/trips/<?= $covoiturage['trip_id'] ?>" style="display:inline-flex;align-items:center;gap:8px;background:white;color:#00b894;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:500;">
+                        <a href="/register?redirect=/trip/<?= $covoiturage['trip_id'] ?>" style="display:inline-flex;align-items:center;gap:8px;background:white;color:#00b894;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:500;">
                             <span class="material-icons">person_add</span> Créer un compte
                         </a>
                     </div>

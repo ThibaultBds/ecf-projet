@@ -18,8 +18,9 @@ class CsrfMiddleware
         $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
 
         if (!$token || !hash_equals($_SESSION['csrf_token'], $token)) {
-            http_response_code(419);
-            die('Token CSRF invalide ou expiré');
+            $_SESSION['flash_error'] = 'Session expirée, veuillez réessayer.';
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/'));
+            exit;
         }
 
         return true;

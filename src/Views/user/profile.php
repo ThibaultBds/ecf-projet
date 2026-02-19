@@ -30,9 +30,7 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
                  alt="Photo de profil"
                  style="width:100px;height:100px;border-radius:50%;object-fit:cover;">
         <?php else: ?>
-            <img src="/images/default-avatar.png" 
-                 alt="Avatar par défaut"
-                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;">
+            <span class="material-icons" style="font-size:100px;color:#00b894;">account_circle</span>
         <?php endif; ?>
     </div>
 

@@ -155,11 +155,15 @@
                             &rarr; <?= date('H:i', strtotime($c['arrival_datetime'])) ?>
                         <?php endif; ?>
                     </p>
-                    <p>
-                        <span class="material-icons" style="vertical-align:middle;">person</span>
+                    <p style="display:flex;align-items:center;gap:8px;">
+                        <?php if (!empty($c['conducteur_photo'])): ?>
+                            <img src="/uploads/<?= htmlspecialchars($c['conducteur_photo']) ?>" alt="Photo" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+                        <?php else: ?>
+                            <span class="material-icons" style="font-size:32px;color:#00b894;">account_circle</span>
+                        <?php endif; ?>
                         <?= htmlspecialchars($c['conducteur']) ?>
                         <?php if (round($c['note_conducteur'], 1) > 0): ?>
-                            <span style="color:#ffd700;margin-left:8px;">&#9733; <?= round($c['note_conducteur'], 1) ?>/5</span>
+                            <span style="color:#ffd700;">&#9733; <?= round($c['note_conducteur'], 1) ?>/5</span>
                         <?php endif; ?>
                     </p>
                     <p><span class="material-icons">directions_car</span> <?= htmlspecialchars($c['brand']) ?> <?= htmlspecialchars($c['model']) ?></p>
@@ -168,6 +172,8 @@
 
                 <?php if ($c['energy_type'] === 'electrique'): ?>
                     <div class="eco-badge">⚡ &Eacute;cologique</div>
+                <?php else: ?>
+                    <div class="eco-badge" style="background:#f0f0f0;color:#636e72;">🚗 Non &eacute;cologique</div>
                 <?php endif; ?>
 
                 <div class="ride-actions">

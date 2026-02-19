@@ -13,6 +13,7 @@ class Trip extends BaseModel
 
         $sql = "SELECT t.*,
                        u.username AS conducteur,
+                       u.photo AS conducteur_photo,
                        v.brand,
                        v.model,
                        v.energy_type,

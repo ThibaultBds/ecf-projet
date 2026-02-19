@@ -129,7 +129,9 @@ class AuthController extends BaseController
 
 
             $_SESSION['flash_success'] = 'Compte créé avec succès ! Connectez-vous.';
-            header('Location: /login');
+            $redirectAfter = $_SESSION['intended_url'] ?? null;
+            session_write_close();
+            header('Location: /login' . ($redirectAfter ? '?redirect=' . urlencode($redirectAfter) : ''));
             exit;
         } catch (Exception $e) {
             error_log("Erreur inscription : " . $e->getMessage());
