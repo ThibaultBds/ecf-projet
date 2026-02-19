@@ -208,8 +208,6 @@ Import local :
 | `Charte_Graphique.pdf` | Charte graphique |
 | `Documentation_Technique.pdf` | Documentation technique |
 | `Manuel_d_Utilisation.pdf` | Manuel utilisateur |
-| `Documentation de Gestion de Projet.docx` | Gestion de projet (Kanban, Agile) |
-| `Annexe.docx` | Annexes complémentaires |
 
 ## Initialisation MongoDB
 
