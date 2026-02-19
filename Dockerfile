@@ -2,7 +2,7 @@ FROM php:8.2-apache
 
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-RUN apt-get update && apt-get install -y libssl-dev pkg-config msmtp \
+RUN apt-get update && apt-get install -y libssl-dev pkg-config msmtp unzip \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
