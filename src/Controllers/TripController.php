@@ -51,6 +51,30 @@ class TripController extends BaseController
         ]);
     }
 
+    public function search() 
+    {
+        $rawDate = trim($_GET['date'] ?? '');
+        if (preg_match('#^\d{2}\s*/\s*(\d{2})\s*/\s*(\d{4})$#', $rawDate, $m)) {
+            $rawDate = "{m3[3])-{$m[2]}-{$m[1]}";
+        }
+
+        $filters = [
+            'depart' => $_GET['depart'] ?? '',
+            'arrivee' => $_GET['arrivee'] ?? '',
+            'date' => $rawDate,
+            'prix_max' => $_GET['prix_max'] ?? null,
+            'note_min' => $_GET['note_min'] ?? null,
+            'ecologique' => $_GET['ecologique'] ?? '',
+            'duree_max' => $_GET['duree_max'] ?? null,
+        ];
+
+        $covoiturages = Trip::search($filters);
+
+        header('Content-Type: application/json');
+        echo json_encode($covoiturages);
+        exit;
+    }
+
     public function show($id)
     {
         $covoiturage = Trip::findWithDetails($id);

@@ -7,6 +7,7 @@ Router::group(['middleware' => 'csrf'], function () {
     Router::get('/', 'HomeController@index');
 
     Router::get('/trips', 'TripController@index');
+    Router::get('/trips/search', 'TripController@search');
     Router::get('/covoiturages', 'TripController@index');
     Router::get('/trip/{id}', 'TripController@show');
 

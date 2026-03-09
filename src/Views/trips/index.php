@@ -184,6 +184,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Toggle filtres avancés
     const toggleBtn = document.getElementById('toggle-filters');
     const filtersBlock = document.getElementById('advanced-filters');
     if (toggleBtn && filtersBlock) {
@@ -191,5 +192,53 @@ document.addEventListener('DOMContentLoaded', function() {
             filtersBlock.classList.toggle('is-open');
         });
     }
+
+    // Fetch search
+    const form = document.querySelector('form.search-bar');
+    const resultsContainer = document.querySelector('.covoiturages-list');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const params = new URLSearchParams({
+            depart: form.querySelector('[name="depart"]').value,
+            arrivee: form.querySelector('[name="arrivee"]').value,
+            date: form.querySelector('[name="date"]').value,
+        });
+
+        resultsContainer.innerHTML = '<p>Chargement...</p>';
+
+        fetch('/trips/search?' + params)
+            .then(res => res.json())
+            .then(function(trajets) {
+                if (trajets.length === 0) {
+                    resultsContainer.innerHTML = '<p>Aucun trajet trouvé.</p>';
+                    return;
+                }
+
+                let html = '<p>' + trajets.length + ' trajet(s) trouvé(s)</p>';
+                trajets.forEach(function(c) {
+                    html += `
+                        <div class="ride-card">
+                            <div class="ride-header">
+                                <h3>${c.ville_depart} &rarr; ${c.ville_arrivee}</h3>
+                                <div class="ride-price">${parseFloat(c.price).toFixed(2)}€</div>
+                            </div>
+                            <div class="ride-details">
+                                <p>${c.conducteur} &bull; ${c.brand} ${c.model}</p>
+                                <p>${c.available_seats} place(s) &bull; ${c.departure_datetime}</p>
+                            </div>
+                            <div class="ride-actions">
+                                <a href="/trip/${c.trip_id}" class="btn-primary">Voir détails</a>
+                            </div>
+                        </div>`;
+                });
+                resultsContainer.innerHTML = html;
+            })
+            .catch(function() {
+                resultsContainer.innerHTML = '<p>Erreur lors de la recherche.</p>';
+            });
+    });
 });
 </script>
+
