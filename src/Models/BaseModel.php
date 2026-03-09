@@ -15,6 +15,13 @@ abstract class BaseModel
         return Database::getInstance()->getConnection();
     }
 
+    private static function validateIdentifier($name)
+    {
+        if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $name)) {
+            throw new \InvalidArgumentException("Invalid SQL identifier: {$name}");
+        }
+    }
+
     public static function query($sql, $params = [])
     {
         $pdo = static::getConnection();
@@ -37,6 +44,7 @@ abstract class BaseModel
         $sql = "SELECT * FROM {$table}";
 
         if ($orderBy) {
+            static::validateIdentifier($orderBy);
             $sql .= " ORDER BY {$orderBy}";
         }
 
@@ -45,6 +53,7 @@ abstract class BaseModel
 
     public static function where($column, $value)
     {
+        static::validateIdentifier($column);
         $table = static::$table;
         $stmt = static::query("SELECT * FROM {$table} WHERE {$column} = ?", [$value]);
         return $stmt->fetchAll();
@@ -52,6 +61,7 @@ abstract class BaseModel
 
     public static function findBy($column, $value)
     {
+        static::validateIdentifier($column);
         $table = static::$table;
         $stmt = static::query("SELECT * FROM {$table} WHERE {$column} = ? LIMIT 1", [$value]);
         return $stmt->fetch() ?: null;
@@ -91,6 +101,7 @@ abstract class BaseModel
         $sets = [];
         $values = [];
         foreach ($data as $column => $value) {
+            static::validateIdentifier($column);
             $sets[] = "{$column} = ?";
             $values[] = $value;
         }
