@@ -1,8 +1,4 @@
-<style>
-.pref-card label { display:flex; align-items:center; gap:10px; cursor:pointer; }
-.pref-card label input[type="radio"] { width:18px; height:18px; flex-shrink:0; }
-</style>
-<main class="member-container">
+﻿<main class="member-container">
     <h2 class="page-title-hero">
         <span class="material-icons page-icon-large">settings</span> Mes Préférences
     </h2>
@@ -19,48 +15,43 @@
         <form method="POST" action="/driver/preferences" class="form-container">
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
 
-            <!-- Fumeur -->
-            <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
-                <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">smoking_rooms</span> Cigarette</h4>
-                <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
-                    <label><input type="radio" name="fumeur" value="oui" <?= ($prefs['fumeur'] ?? '') === 'oui' ? 'checked' : '' ?>> Fumeur accept&eacute;</label>
+            <div class="pref-card pref-card-box">
+                <h4><span class="material-icons pref-card-icon">smoking_rooms</span> Cigarette</h4>
+                <div class="pref-options-col">
+                    <label><input type="radio" name="fumeur" value="oui" <?= ($prefs['fumeur'] ?? '') === 'oui' ? 'checked' : '' ?>> Fumeur accepté</label>
                     <label><input type="radio" name="fumeur" value="non" <?= ($prefs['fumeur'] ?? 'non') === 'non' ? 'checked' : '' ?>> Non-fumeur</label>
                 </div>
             </div>
 
-            <!-- Animaux -->
-            <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
-                <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">pets</span> Animaux</h4>
-                <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
-                    <label><input type="radio" name="animaux" value="oui" <?= ($prefs['animaux'] ?? '') === 'oui' ? 'checked' : '' ?>> Accept&eacute;s</label>
-                    <label><input type="radio" name="animaux" value="non" <?= ($prefs['animaux'] ?? 'non') === 'non' ? 'checked' : '' ?>> Non accept&eacute;s</label>
+            <div class="pref-card pref-card-box">
+                <h4><span class="material-icons pref-card-icon">pets</span> Animaux</h4>
+                <div class="pref-options-col">
+                    <label><input type="radio" name="animaux" value="oui" <?= ($prefs['animaux'] ?? '') === 'oui' ? 'checked' : '' ?>> Acceptés</label>
+                    <label><input type="radio" name="animaux" value="non" <?= ($prefs['animaux'] ?? 'non') === 'non' ? 'checked' : '' ?>> Non acceptés</label>
                 </div>
             </div>
 
-            <!-- Musique -->
-            <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
-                <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">music_note</span> Musique</h4>
-                <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+            <div class="pref-card pref-card-box">
+                <h4><span class="material-icons pref-card-icon">music_note</span> Musique</h4>
+                <div class="pref-options-col">
                     <label><input type="radio" name="musique" value="oui" <?= ($prefs['musique'] ?? '') === 'oui' ? 'checked' : '' ?>> Avec plaisir</label>
-                    <label><input type="radio" name="musique" value="non" <?= ($prefs['musique'] ?? 'non') === 'non' ? 'checked' : '' ?>> Silence pr&eacute;f&eacute;r&eacute;</label>
+                    <label><input type="radio" name="musique" value="non" <?= ($prefs['musique'] ?? 'non') === 'non' ? 'checked' : '' ?>> Silence préféré</label>
                 </div>
             </div>
 
-            <!-- Discussion -->
-            <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
-                <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">chat</span> Discussion</h4>
-                <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+            <div class="pref-card pref-card-box">
+                <h4><span class="material-icons pref-card-icon">chat</span> Discussion</h4>
+                <div class="pref-options-col">
                     <label><input type="radio" name="discussion" value="plaisir" <?= ($prefs['discussion'] ?? '') === 'plaisir' ? 'checked' : '' ?>> Avec plaisir</label>
                     <label><input type="radio" name="discussion" value="un_peu" <?= ($prefs['discussion'] ?? 'un_peu') === 'un_peu' ? 'checked' : '' ?>> Un peu</label>
-                    <label><input type="radio" name="discussion" value="silence" <?= ($prefs['discussion'] ?? '') === 'silence' ? 'checked' : '' ?>> Silence pr&eacute;f&eacute;r&eacute;</label>
+                    <label><input type="radio" name="discussion" value="silence" <?= ($prefs['discussion'] ?? '') === 'silence' ? 'checked' : '' ?>> Silence préféré</label>
                 </div>
             </div>
 
-            <!-- Préférences personnalisées -->
-            <div class="pref-card" style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:15px;">
-                <h4><span class="material-icons" style="vertical-align:middle;color:#00b894;">edit_note</span> Préférences personnalisées</h4>
-                <p style="font-size:14px;color:#636e72;margin-bottom:10px;">Ajoutez vos propres préférences (une par ligne)</p>
-                <textarea name="custom_preferences" rows="4" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:12px;font-size:14px;resize:vertical;" placeholder="Ex: Pas de nourriture dans le véhicule&#10;Bagages légers uniquement&#10;Ponctualité exigée"><?php
+            <div class="pref-card pref-card-box">
+                <h4><span class="material-icons pref-card-icon">edit_note</span> Préférences personnalisées</h4>
+                <p class="pref-help-text">Ajoutez vos propres préférences (une par ligne)</p>
+                <textarea name="custom_preferences" rows="4" class="pref-custom-textarea" placeholder="Ex: Pas de nourriture dans le véhicule&#10;Bagages légers uniquement&#10;Ponctualité exigée"><?php
                     $custom = $prefs['custom_preferences'] ?? [];
                     if (is_array($custom)) {
                         echo htmlspecialchars(implode("\n", $custom));
@@ -70,7 +61,7 @@
                 ?></textarea>
             </div>
 
-            <button type="submit" class="btn-primary" style="width:100%;padding:15px;">Sauvegarder mes préférences</button>
+            <button type="submit" class="btn-primary pref-submit-btn">Sauvegarder mes préférences</button>
         </form>
     </div>
 

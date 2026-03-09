@@ -1,4 +1,4 @@
-<section class="hero">
+﻿<section class="hero">
   <h2>Voyagez vert, partagez vos trajets !</h2>
 
   <p>
@@ -10,9 +10,8 @@
   <a id="cta-dynamic" href="/login" class="cta-btn secondary">Connexion</a>
 </section>
 
-<div style="display:flex;justify-content:center;margin:30px 0;">
-  <form class="search-bar"
-        style="margin:0;max-width:900px;width:100%;box-sizing:border-box;"
+<div class="home-search-wrap">
+  <form class="search-bar home-search-bar"
         action="/covoiturages"
         method="get">
 
@@ -33,7 +32,7 @@
     </datalist>
 
     <input type="text" id="dateInput" name="date" placeholder="JJ / MM / AAAA" autocomplete="off" readonly>
-    <div id="calendarPopup" style="display:none;position:absolute;z-index:1000;background:white;border:1px solid #ddd;border-radius:8px;padding:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15);"></div>
+    <div id="calendarPopup" class="home-calendar-popup"></div>
 
     <select name="places">
       <option value="">Places</option>
@@ -47,32 +46,31 @@
   </form>
 </div>
 
-<!-- Résultats du calculateur -->
-<div id="calculation-results" style="display:none;max-width:900px;margin:0 auto 30px auto;padding:20px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
-  <h3 style="text-align:center;color:#2d3436;margin-bottom:20px;">
-    <span class="material-icons" style="vertical-align:middle;color:#00b894;">calculate</span>
+<div id="calculation-results" class="home-calc-results">
+  <h3 class="home-calc-title">
+    <span class="material-icons home-calc-title-icon">calculate</span>
     Estimation du trajet
   </h3>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px;text-align:center;">
+  <div class="home-calc-grid">
     <div>
-      <span class="material-icons" style="font-size:32px;color:#00b894;">straighten</span>
-      <p style="font-size:24px;font-weight:bold;color:#2d3436;" id="calc-distance">-</p>
-      <p style="color:#636e72;font-size:14px;">Distance</p>
+      <span class="material-icons home-calc-icon">straighten</span>
+      <p class="home-calc-value home-calc-dark" id="calc-distance">-</p>
+      <p class="home-calc-label">Distance</p>
     </div>
     <div>
-      <span class="material-icons" style="font-size:32px;color:#00b894;">schedule</span>
-      <p style="font-size:24px;font-weight:bold;color:#2d3436;" id="calc-time">-</p>
-      <p style="color:#636e72;font-size:14px;">Durée estimée</p>
+      <span class="material-icons home-calc-icon">schedule</span>
+      <p class="home-calc-value home-calc-dark" id="calc-time">-</p>
+      <p class="home-calc-label">Durée estimée</p>
     </div>
     <div>
-      <span class="material-icons" style="font-size:32px;color:#00b894;">euro</span>
-      <p style="font-size:24px;font-weight:bold;color:#00b894;" id="calc-price">-</p>
-      <p style="color:#636e72;font-size:14px;">Prix / personne</p>
+      <span class="material-icons home-calc-icon">euro</span>
+      <p class="home-calc-value home-calc-green" id="calc-price">-</p>
+      <p class="home-calc-label">Prix / personne</p>
     </div>
     <div>
-      <span class="material-icons" style="font-size:32px;color:#00b894;">eco</span>
-      <p style="font-size:24px;font-weight:bold;color:#00b894;" id="calc-co2">-</p>
-      <p style="color:#636e72;font-size:14px;">CO2 économisé</p>
+      <span class="material-icons home-calc-icon">eco</span>
+      <p class="home-calc-value home-calc-green" id="calc-co2">-</p>
+      <p class="home-calc-label">CO2 économisé</p>
     </div>
   </div>
 </div>

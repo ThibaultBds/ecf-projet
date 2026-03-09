@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $roleLabels = [
     'user' => 'Utilisateur',
     'admin' => 'Administrateur',
@@ -17,44 +17,42 @@ $roleLabels = [
         <div class="message-error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <!-- Stats -->
-    <div class="stats-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:30px;">
-        <div style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <span class="material-icons" style="font-size:36px;color:#00b894;">people</span>
+    <div class="stats-cards admin-stats-grid">
+        <div class="admin-stat-card">
+            <span class="material-icons admin-stat-icon admin-stat-green">people</span>
             <h3><?= $stats['users'] ?></h3>
-            <p style="color:#636e72;">Utilisateurs actifs</p>
+            <p class="admin-stat-text">Utilisateurs actifs</p>
         </div>
-        <a href="/admin/trips" style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);text-decoration:none;display:block;">
-            <span class="material-icons" style="font-size:36px;color:#0984e3;">map</span>
-            <h3 style="color:#2d3436;"><?= $stats['trips'] ?></h3>
-            <p style="color:#636e72;">Trajets planifiés</p>
+        <a href="/admin/trips" class="admin-stat-card admin-stat-link">
+            <span class="material-icons admin-stat-icon admin-stat-blue">map</span>
+            <h3 class="admin-stat-title"><?= $stats['trips'] ?></h3>
+            <p class="admin-stat-text">Trajets planifiés</p>
         </a>
-        <a href="/moderator" style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);text-decoration:none;display:block;">
-            <span class="material-icons" style="font-size:36px;color:#e17055;">flag</span>
-            <h3 style="color:#2d3436;"><?= $stats['pending_reviews'] ?></h3>
-            <p style="color:#636e72;">Avis en attente</p>
-            <small style="color:#e17055;">Accéder à la modération →</small>
+        <a href="/moderator" class="admin-stat-card admin-stat-link">
+            <span class="material-icons admin-stat-icon admin-stat-orange">flag</span>
+            <h3 class="admin-stat-title"><?= $stats['pending_reviews'] ?></h3>
+            <p class="admin-stat-text">Avis en attente</p>
+            <small class="admin-stat-note">Accéder à la modération →</small>
         </a>
-        <div style="background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <span class="material-icons" style="font-size:36px;color:#fdcb6e;">account_balance_wallet</span>
+        <div class="admin-stat-card">
+            <span class="material-icons admin-stat-icon admin-stat-yellow">account_balance_wallet</span>
             <h3><?= $stats['platform_credits'] ?></h3>
-            <p style="color:#636e72;">Crédits plateforme</p>
+            <p class="admin-stat-text">Crédits plateforme</p>
         </div>
     </div>
 
-    <!-- Graphiques -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px;margin-bottom:30px;">
-        <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h3 style="margin:0 0 15px 0;color:#2d3436;font-size:16px;">
-                <span class="material-icons" style="vertical-align:middle;color:#0984e3;">bar_chart</span>
+    <div class="admin-chart-grid">
+        <div class="admin-chart-card">
+            <h3 class="admin-chart-title">
+                <span class="material-icons admin-chart-title-icon admin-stat-blue">bar_chart</span>
                 Covoiturages par jour
             </h3>
             <canvas id="chart-trips" height="200"></canvas>
         </div>
-        <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h3 style="margin:0 0 15px 0;color:#2d3436;font-size:16px;">
-                <span class="material-icons" style="vertical-align:middle;color:#fdcb6e;">monetization_on</span>
-                Cr&eacute;dits plateforme par jour
+        <div class="admin-chart-card">
+            <h3 class="admin-chart-title">
+                <span class="material-icons admin-chart-title-icon admin-stat-yellow">monetization_on</span>
+                Crédits plateforme par jour
             </h3>
             <canvas id="chart-credits" height="200"></canvas>
         </div>
@@ -91,7 +89,7 @@ $roleLabels = [
             data: {
                 labels: creditsData.map(function(r) { return r.jour; }),
                 datasets: [{
-                    label: 'Cr\u00e9dits',
+                    label: 'Crédits',
                     data: creditsData.map(function(r) { return parseInt(r.total); }),
                     borderColor: '#00b894',
                     backgroundColor: 'rgba(0, 184, 148, 0.1)',
@@ -109,7 +107,6 @@ $roleLabels = [
     });
     </script>
 
-    <!-- Créer un employé -->
     <div class="profile-box">
         <h3 class="profil-titre">Créer un compte</h3>
         <form method="POST" action="/admin/create-employee" class="form-container">
@@ -137,50 +134,49 @@ $roleLabels = [
         </form>
     </div>
 
-    <!-- Gestion des utilisateurs -->
     <div class="profile-box">
         <h3 class="profil-titre">Gestion des utilisateurs</h3>
-        <div style="overflow-x:auto;">
-            <table class="admin-table" style="width:100%;border-collapse:collapse;">
+        <div class="table-wrap-x">
+            <table class="admin-table admin-users-table">
                 <thead>
-                    <tr style="background:#f8f9fa;">
-                        <th style="padding:12px;text-align:left;">ID</th>
-                        <th style="padding:12px;text-align:left;">Pseudo</th>
-                        <th style="padding:12px;text-align:left;">Email</th>
-                        <th style="padding:12px;text-align:left;">Rôle</th>
-                        <th style="padding:12px;text-align:left;">Crédits</th>
-                        <th style="padding:12px;text-align:left;">Actions</th>
+                    <tr class="admin-row-head">
+                        <th>ID</th>
+                        <th>Pseudo</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Crédits</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($users as $u): ?>
-                        <tr style="border-bottom:1px solid #f1f2f6;">
-                            <td style="padding:12px;"><?= $u['user_id'] ?></td>
-                            <td style="padding:12px;"><?= htmlspecialchars($u['username'] ?? '') ?></td>
-                            <td style="padding:12px;"><?= htmlspecialchars($u['email']) ?></td>
-                            <td style="padding:12px;">
+                        <tr class="admin-row">
+                            <td><?= $u['user_id'] ?></td>
+                            <td><?= htmlspecialchars($u['username'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($u['email']) ?></td>
+                            <td>
                                 <span class="admin-badge <?= strtolower($u['role'] ?? '') ?>"><?= $roleLabels[$u['role'] ?? ''] ?? ($u['role'] ?? '') ?></span>
                             </td>
-                            <td style="padding:12px;"><?= (int)($u['credits'] ?? 0) ?></td>
-                            <td style="padding:12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                            <td><?= (int)($u['credits'] ?? 0) ?></td>
+                            <td class="admin-user-actions-cell">
                                 <?php if (empty($u['suspended'])): ?>
-                                    <form method="POST" action="/admin/suspend-user" style="display:inline;">
+                                    <form method="POST" action="/admin/suspend-user" class="inline-form">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                         <input type="hidden" name="user_id" value="<?= (int)$u['user_id'] ?>">
-                                        <button type="submit" class="btn-danger" style="padding:6px 12px;font-size:13px;">Suspendre</button>
+                                        <button type="submit" class="btn-danger admin-btn-sm">Suspendre</button>
                                     </form>
                                 <?php else: ?>
-                                    <form method="POST" action="/admin/activate-user" style="display:inline;">
+                                    <form method="POST" action="/admin/activate-user" class="inline-form">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                         <input type="hidden" name="user_id" value="<?= (int)$u['user_id'] ?>">
-                                        <button type="submit" class="btn-primary" style="padding:6px 12px;font-size:13px;">Réactiver</button>
+                                        <button type="submit" class="btn-primary admin-btn-sm">Réactiver</button>
                                     </form>
                                 <?php endif; ?>
-                                <form method="POST" action="/admin/add-credits" style="display:inline;display:flex;gap:4px;align-items:center;">
+                                <form method="POST" action="/admin/add-credits" class="admin-credit-form">
                                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                     <input type="hidden" name="user_id" value="<?= (int)$u['user_id'] ?>">
-                                    <input type="number" name="credits" min="1" max="9999" placeholder="Crédits" style="width:70px;padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
-                                    <button type="submit" style="background:#fdcb6e;color:#2d3436;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:13px;font-weight:600;">+</button>
+                                    <input type="number" name="credits" min="1" max="9999" placeholder="Crédits" class="admin-credit-input">
+                                    <button type="submit" class="admin-credit-plus-btn">+</button>
                                 </form>
                             </td>
                         </tr>
@@ -190,40 +186,39 @@ $roleLabels = [
         </div>
     </div>
 
-    <!-- Messages de contact -->
-    <div class="profile-box" id="messages" style="margin-top:30px;">
+    <div class="profile-box admin-messages-box" id="messages">
         <h3 class="profil-titre">
             Messages de contact
             <?php $unread = count(array_filter($contactMessages ?? [], fn($m) => !$m['is_read'])); ?>
             <?php if ($unread > 0): ?>
-                <span style="background:#e74c3c;color:white;border-radius:12px;padding:2px 8px;font-size:13px;margin-left:8px;"><?= $unread ?> non lu<?= $unread > 1 ? 's' : '' ?></span>
+                <span class="admin-unread-badge"><?= $unread ?> non lu<?= $unread > 1 ? 's' : '' ?></span>
             <?php endif; ?>
         </h3>
         <?php if (empty($contactMessages)): ?>
-            <p style="text-align:center;color:#636e72;padding:30px 0;">Aucun message reçu.</p>
+            <p class="admin-empty-text">Aucun message reçu.</p>
         <?php else: ?>
             <?php foreach ($contactMessages as $msg): ?>
-                <div style="border:1px solid <?= $msg['is_read'] ? '#f1f2f6' : '#fdcb6e' ?>;border-radius:8px;padding:15px;margin-bottom:12px;background:<?= $msg['is_read'] ? '#fafafa' : '#fffdf0' ?>;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                <div class="admin-message-card <?= $msg['is_read'] ? 'is-read' : 'is-unread' ?>">
+                    <div class="admin-message-head">
                         <div>
                             <strong><?= htmlspecialchars($msg['nom']) ?></strong>
-                            &lt;<a href="mailto:<?= htmlspecialchars($msg['email']) ?>" style="color:#0984e3;"><?= htmlspecialchars($msg['email']) ?></a>&gt;
+                            &lt;<a href="mailto:<?= htmlspecialchars($msg['email']) ?>" class="admin-message-mail-link"><?= htmlspecialchars($msg['email']) ?></a>&gt;
                             &mdash; <em><?= htmlspecialchars($msg['sujet']) ?></em>
                         </div>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <span style="font-size:12px;color:#b2bec3;"><?= date('d/m/Y H:i', strtotime($msg['created_at'])) ?></span>
+                        <div class="admin-message-meta">
+                            <span class="admin-message-date"><?= date('d/m/Y H:i', strtotime($msg['created_at'])) ?></span>
                             <?php if (!$msg['is_read']): ?>
-                                <form method="POST" action="/admin/mark-message-read" style="display:inline;">
+                                <form method="POST" action="/admin/mark-message-read" class="inline-form">
                                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                     <input type="hidden" name="message_id" value="<?= (int)$msg['id'] ?>">
-                                    <button type="submit" class="btn-primary" style="padding:4px 10px;font-size:12px;">Marquer lu</button>
+                                    <button type="submit" class="btn-primary admin-btn-xs">Marquer lu</button>
                                 </form>
                             <?php else: ?>
-                                <span style="color:#00b894;font-size:12px;">&#10003; Lu</span>
+                                <span class="admin-read-check">&#10003; Lu</span>
                             <?php endif; ?>
                         </div>
                     </div>
-                    <div style="margin-top:10px;padding:10px;background:white;border-radius:6px;color:#2d3436;font-size:14px;white-space:pre-wrap;"><?= htmlspecialchars($msg['message']) ?></div>
+                    <div class="admin-message-body"><?= htmlspecialchars($msg['message']) ?></div>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>

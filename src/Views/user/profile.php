@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $statusLabels = [
     'scheduled' => 'Planifié',
     'started' => 'En cours',
@@ -20,19 +20,18 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
         Mon Profil
     </h2>
 
-    <!-- Photo de profil -->
 <div class="profile-box">
     <h3 class="profil-titre">Photo de profil</h3>
 
-    <div style="margin-bottom:15px;">
+    <div class="profile-photo-wrap">
         <?php if (!empty($userData['photo'])): ?>
             <img src="/uploads/<?= htmlspecialchars($userData['photo']) ?>"
                  alt="Photo de profil"
-                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;"
-                 onerror="this.style.display='none';this.nextElementSibling.style.display='inline';">
-            <span class="material-icons" style="font-size:100px;color:#00b894;display:none;">account_circle</span>
+                 class="profile-photo"
+                 onerror="this.classList.add('is-hidden');this.nextElementSibling.classList.remove('is-hidden');">
+            <span class="material-icons profile-photo-fallback is-hidden">account_circle</span>
         <?php else: ?>
-            <span class="material-icons" style="font-size:100px;color:#00b894;">account_circle</span>
+            <span class="material-icons profile-photo-fallback">account_circle</span>
         <?php endif; ?>
     </div>
 
@@ -44,7 +43,7 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
 </div>
 
 <?php if (!empty($userData['photo'])): ?>
-    <form method="POST" action="/profile/delete-photo" style="margin-top:10px;">
+    <form method="POST" action="/profile/delete-photo" class="profile-photo-delete-form">
         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
         <button type="submit" class="btn-danger">Supprimer la photo</button>
     </form>
@@ -59,7 +58,6 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
         <div class="message-success"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
 
-    <!-- Informations personnelles -->
     <div class="profile-box">
         <h3 class="profil-titre">Informations personnelles</h3>
         <div class="profile-grid">
@@ -83,11 +81,11 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
                     <strong class="profile-strong">Type</strong>
                     <p class="profile-value">
                         <?php if ($isDriver && $isPassenger): ?>
-                            <span class="admin-badge" style="background:#00b894;color:white;">Chauffeur &amp; Passager</span>
+                            <span class="admin-badge badge-dual">Chauffeur &amp; Passager</span>
                         <?php elseif ($isDriver): ?>
-                            <span class="admin-badge" style="background:#0984e3;color:white;">Chauffeur</span>
+                            <span class="admin-badge badge-driver">Chauffeur</span>
                         <?php else: ?>
-                            <span class="admin-badge" style="background:#636e72;color:white;">Passager</span>
+                            <span class="admin-badge badge-passenger">Passager</span>
                         <?php endif; ?>
                     </p>
                 </div>
@@ -95,14 +93,13 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
             <div class="profile-item">
                 <span class="material-icons profile-icon">account_balance_wallet</span>
                 <div>
-                    <strong class="profile-strong">Cr&eacute;dits</strong>
+                    <strong class="profile-strong">Crédits</strong>
                     <p class="profile-value profile-credits"><?= (int)($userData['credits'] ?? 0) ?></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modifier le type -->
     <div class="profile-box">
         <h3 class="profil-titre">Modifier mon type de compte</h3>
         <form method="POST" action="/profile/update" class="form-max">
@@ -113,22 +110,21 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
                 <option value="chauffeur" <?= $currentType === 'chauffeur' ? 'selected' : '' ?>>Chauffeur</option>
                 <option value="les_deux" <?= $currentType === 'les_deux' ? 'selected' : '' ?>>Chauffeur &amp; Passager</option>
             </select>
-            <button type="submit" class="btn-primary">Mettre &agrave; jour</button>
+            <button type="submit" class="btn-primary">Mettre à jour</button>
         </form>
     </div>
 
-    <!-- Gestion du compte -->
     <div class="profil-section compte-section">
         <h3 class="profil-titre">Gestion de mon compte</h3>
         <div class="profil-liens-grid">
             <?php if ($isDriver): ?>
                 <a href="/driver/vehicles" class="profil-lien lien-vehicules">
                     <span class="material-icons">directions_car</span>
-                    <span>G&eacute;rer mes v&eacute;hicules</span>
+                    <span>Gérer mes véhicules</span>
                 </a>
                 <a href="/driver/preferences" class="profil-lien lien-preferences">
                     <span class="material-icons">settings</span>
-                    <span>G&eacute;rer mes pr&eacute;f&eacute;rences</span>
+                    <span>Gérer mes préférences</span>
                 </a>
                 <a href="/driver/dashboard" class="profil-lien lien-espace-chauffeur">
                     <span class="material-icons">add_road</span>
@@ -142,20 +138,19 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
             </a>
 
             <?php if (($userData['role'] ?? '') === 'admin'): ?>
-                <a href="/admin" class="profil-lien" style="border-color:#e74c3c;">
+                <a href="/admin" class="profil-lien profil-link-admin">
                     <span class="material-icons">admin_panel_settings</span>
                     <span>Administration</span>
                 </a>
             <?php elseif (($userData['role'] ?? '') === 'employe'): ?>
-                <a href="/moderator" class="profil-lien" style="border-color:#e17055;">
+                <a href="/moderator" class="profil-lien profil-link-moderator">
                     <span class="material-icons">shield</span>
-                    <span>Mod&eacute;ration</span>
+                    <span>Modération</span>
                 </a>
             <?php endif; ?>
         </div>
     </div>
 
-    <!-- Derniers trajets -->
     <div class="profil-section trajets-section">
         <h3 class="profil-titre">Vos derniers trajets</h3>
         <?php if (empty($myTrips)): ?>
@@ -182,7 +177,7 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
 
     <div class="retour-section">
         <a href="/" class="btn-retour">
-            <span class="material-icons">arrow_back</span> Retour &agrave; l'accueil
+            <span class="material-icons">arrow_back</span> Retour à l'accueil
         </a>
     </div>
 </main>

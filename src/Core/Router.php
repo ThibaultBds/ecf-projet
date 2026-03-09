@@ -61,6 +61,11 @@ class Router
         return new Route($route);
     }
 
+    public static function setNamedRoute($name, array &$route)
+    {
+        self::$namedRoutes[$name] = &$route;
+    }
+
     private static function compilePattern($uri)
     {
         $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<$1>[^/]+)', $uri);
@@ -206,7 +211,7 @@ class Route
 
     public function name($name)
     {
-        Router::$namedRoutes[$name] = $this->route;
+        Router::setNamedRoute($name, $this->route);
         return $this;
     }
 }

@@ -764,6 +764,23 @@ button:hover {
   background: var(--primary-dark);
 }
 
+#calendarPopup .calendar-controls {
+  text-align: center;
+  margin-top: 6px;
+}
+
+#calendarPopup .calendar-nav-btn.prev {
+  margin-right: 10px;
+}
+
+#calendarPopup .calendar-nav-btn.next {
+  margin-left: 10px;
+}
+
+#calendarPopup .calendar-current {
+  font-weight: bold;
+}
+
 #dateInput {
   background: white !important;
   color: #c8e6c9 !important;
@@ -858,6 +875,11 @@ button:hover {
 
 .toast.error {
   background: #e74c3c;
+}
+
+.toast-icon {
+  vertical-align: middle;
+  margin-right: 8px;
 }
 
 .conducteur-nom {

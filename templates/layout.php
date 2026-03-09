@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -14,13 +14,12 @@
 
 <header class="container-header">
     <h1>
-        <a href="/" class="site-brand" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;">
+        <a href="/" class="site-brand site-brand-header">
             <span class="material-icons">eco</span>
             EcoRide
         </a>
     </h1>
 
-    <!-- Placeholder que ton JS va remplir -->
     <nav id="navbar"></nav>
 </header>
 
@@ -28,16 +27,16 @@
     <?= $content ?>
 </main>
 
-<footer style="text-align:center;padding:20px;background:#2d3436;color:#b2bec3;font-size:14px;">
+<footer class="site-footer">
     <p>&copy; <?= date('Y') ?> EcoRide - Tous droits réservés</p>
-    <p style="margin:8px 0;">
-        <a href="mailto:contact@ecoride.fr" style="color:#00b894;text-decoration:none;">contact@ecoride.fr</a>
+    <p class="site-footer-email-wrap">
+        <a href="mailto:contact@ecoride.fr" class="site-footer-email">contact@ecoride.fr</a>
     </p>
-    <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:8px;">
-        <a href="/contact" style="color:#dfe6e9;text-decoration:none;">Contact</a>
-        <a href="#" id="openModalLegal" style="color:#dfe6e9;text-decoration:none;">Mentions légales</a>
-        <a href="/privacy" style="color:#dfe6e9;text-decoration:none;">Politique de confidentialité</a>
-        <a href="/terms" style="color:#dfe6e9;text-decoration:none;">Conditions d'utilisation</a>
+    <div class="site-footer-links">
+        <a href="/contact" class="site-footer-link">Contact</a>
+        <a href="#" id="openModalLegal" class="site-footer-link">Mentions légales</a>
+        <a href="/privacy" class="site-footer-link">Politique de confidentialité</a>
+        <a href="/terms" class="site-footer-link">Conditions d'utilisation</a>
     </div>
 </footer>
 
@@ -63,7 +62,6 @@
     </form>
 </dialog>
 
-<!-- Injection session utilisateur pour le JS -->
 <script>
 <?php if (!empty($_SESSION['user'])): ?>
 window.ecorideUser = {

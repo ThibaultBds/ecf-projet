@@ -1,4 +1,4 @@
-<main class="member-container">
+﻿<main class="member-container">
     <h2 class="page-title-hero">
         <span class="material-icons page-icon-large">add_road</span> Créer un trajet
     </h2>
@@ -8,8 +8,8 @@
     <?php endif; ?>
 
     <div class="profile-box">
-        <p style="text-align:center;color:#636e72;margin-bottom:20px;">
-            <span class="material-icons" style="vertical-align:middle;">account_balance_wallet</span>
+        <p class="trip-create-credit-info">
+            <span class="material-icons icon-middle">account_balance_wallet</span>
             Vos crédits : <strong><?= (int)($user['credits'] ?? 0) ?></strong>
             | Frais plateforme : <strong>2 crédits</strong>
         </p>
@@ -54,9 +54,8 @@
                        value="<?= htmlspecialchars($_POST['heure_arrivee'] ?? '') ?>">
             </div>
 
-
             <div class="input-group">
-                <label for="vehicle_id">V&eacute;hicule *</label>
+                <label for="vehicle_id">Véhicule *</label>
                 <?php if (!empty($vehicles)): ?>
                     <select id="vehicle_id" name="vehicle_id" required class="select-field">
                         <?php foreach ($vehicles as $v): ?>
@@ -67,9 +66,9 @@
                         <?php endforeach; ?>
                     </select>
                 <?php else: ?>
-                    <p style="color:#e74c3c;">
-                        Aucun v&eacute;hicule enregistr&eacute;.
-                        <a href="/driver/vehicles" style="color:#00b894;font-weight:600;">Ajouter un v&eacute;hicule</a>
+                    <p class="trip-create-error-text">
+                        Aucun véhicule enregistré.
+                        <a href="/driver/vehicles" class="trip-create-inline-link">Ajouter un véhicule</a>
                     </p>
                 <?php endif; ?>
             </div>
@@ -86,8 +85,8 @@
                        value="<?= htmlspecialchars($_POST['prix'] ?? '') ?>">
             </div>
 
-            <button type="submit" class="btn-primary" style="width:100%;padding:15px;">
-                <span class="material-icons" style="vertical-align:middle;">add_circle</span> Créer le trajet
+            <button type="submit" class="btn-primary trip-create-submit">
+                <span class="material-icons icon-middle">add_circle</span> Créer le trajet
             </button>
         </form>
     </div>

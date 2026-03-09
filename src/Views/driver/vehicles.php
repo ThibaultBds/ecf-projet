@@ -1,4 +1,4 @@
-<main class="member-container">
+﻿<main class="member-container">
     <h2 class="page-title-hero">
         <span class="material-icons page-icon-large">directions_car</span> Mes Véhicules
     </h2>
@@ -10,7 +10,6 @@
         <div class="message-success"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
 
-    <!-- Formulaire d'ajout -->
     <div class="profile-box">
         <h3 class="profil-titre">Ajouter un véhicule</h3>
         <form method="POST" action="/driver/vehicles" class="form-container">
@@ -31,7 +30,7 @@
             <div class="input-group">
                 <label for="license_plate">Plaque d'immatriculation * (format: AB-123-CD)</label>
                 <input type="text" id="license_plate" name="license_plate" required placeholder="AB-123-CD"
-                       pattern="[A-Z]{2}-[0-9]{3}-[A-Z]{2}" style="text-transform:uppercase;">
+                       pattern="[A-Z]{2}-[0-9]{3}-[A-Z]{2}" class="vehicle-plate-input">
             </div>
             <div class="input-group">
                 <label for="energy_type">Type d'énergie</label>
@@ -46,20 +45,19 @@
                 <input type="number" id="seats_available" name="seats_available" min="1" max="8" value="4">
             </div>
             <div class="input-group">
-                <label for="registration_date">Date de premi&egrave;re immatriculation *</label>
+                <label for="registration_date">Date de première immatriculation *</label>
                 <input type="date" id="registration_date" name="registration_date" required>
             </div>
 
-            <button type="submit" class="btn-primary">Ajouter le v&eacute;hicule</button>
+            <button type="submit" class="btn-primary">Ajouter le véhicule</button>
         </form>
     </div>
 
-    <!-- Liste des véhicules -->
     <?php if (!empty($vehicles)): ?>
         <h3 class="section-title">Mes véhicules</h3>
         <div class="trips-grid">
             <?php foreach ($vehicles as $v): ?>
-                <div class="ride-card-history card-light" style="position:relative;">
+                <div class="ride-card-history card-light vehicle-card-wrap">
                     <div class="ride-content">
                         <p class="ride-title">
                             <span class="material-icons ride-icon">directions_car</span>
@@ -72,10 +70,10 @@
                             | <?= $v['seats_available'] ?> places
                         </p>
                         <?php if ($v['energy_type'] === 'electrique'): ?>
-                            <span class="eco-badge" style="display:inline-block;margin-top:5px;">⚡ Écologique</span>
+                            <span class="eco-badge eco-badge-inline">⚡ Écologique</span>
                         <?php endif; ?>
                     </div>
-                    <form method="POST" action="/driver/vehicles/delete" style="display:inline;">
+                    <form method="POST" action="/driver/vehicles/delete" class="inline-form">
                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                         <input type="hidden" name="vehicle_id" value="<?= $v['vehicle_id'] ?>">
                         <button type="submit" class="btn-danger" onclick="return confirm('Supprimer ce véhicule ?');">Supprimer</button>

@@ -1,13 +1,13 @@
-<main>
-    <div style="max-width:800px;margin:40px auto;padding:0 20px;">
-        <div style="background:white;padding:40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
-            <h2 style="text-align:center;color:#2d3436;margin-bottom:30px;">
-                <span class="material-icons" style="vertical-align:middle;color:#00b894;margin-right:10px;">contact_mail</span>
+﻿<main>
+    <div class="contact-page-wrap">
+        <div class="contact-page-card">
+            <h2 class="contact-page-title">
+                <span class="material-icons contact-title-icon">contact_mail</span>
                 Contactez-nous
             </h2>
 
-            <div style="text-align:center;margin-bottom:40px;color:#636e72;">
-                <p>Une question ? Une suggestion ? N'hesitez pas a nous ecrire !</p>
+            <div class="contact-page-intro">
+                <p>Une question ? Une suggestion ? N'hésitez pas à nous écrire !</p>
             </div>
 
             <?php if (!empty($success)): ?>
@@ -18,28 +18,27 @@
                 <div class="message-error"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="/contact" style="display:grid;gap:20px;">
+            <form method="POST" action="/contact" class="contact-form">
                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="contact-form-grid-two">
                     <div>
-                        <label for="nom" style="display:block;margin-bottom:5px;font-weight:600;color:#2d3436;">Nom complet *</label>
+                        <label for="nom" class="contact-label">Nom complet *</label>
                         <input type="text" id="nom" name="nom" required
                                value="<?= htmlspecialchars($old['nom'] ?? '') ?>"
-                               style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;box-sizing:border-box;">
+                               class="contact-input">
                     </div>
                     <div>
-                        <label for="email" style="display:block;margin-bottom:5px;font-weight:600;color:#2d3436;">Email *</label>
+                        <label for="email" class="contact-label">Email *</label>
                         <input type="email" id="email" name="email" required
                                value="<?= htmlspecialchars($old['email'] ?? '') ?>"
-                               style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;box-sizing:border-box;">
+                               class="contact-input">
                     </div>
                 </div>
 
                 <div>
-                    <label for="sujet" style="display:block;margin-bottom:5px;font-weight:600;color:#2d3436;">Sujet *</label>
-                    <select id="sujet" name="sujet" required
-                            style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;box-sizing:border-box;">
+                    <label for="sujet" class="contact-label">Sujet *</label>
+                    <select id="sujet" name="sujet" required class="contact-input">
                         <option value="">Choisissez un sujet</option>
                         <?php
                         $options = ['Question generale', 'Probleme technique', 'Signalement', 'Suggestion', 'Autre'];
@@ -52,39 +51,39 @@
                 </div>
 
                 <div>
-                    <label for="message" style="display:block;margin-bottom:5px;font-weight:600;color:#2d3436;">Message *</label>
+                    <label for="message" class="contact-label">Message *</label>
                     <textarea id="message" name="message" rows="8" required
-                              placeholder="Decrivez votre demande en detail..."
-                              style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;box-sizing:border-box;resize:vertical;"><?= htmlspecialchars($old['message'] ?? '') ?></textarea>
+                              placeholder="Décrivez votre demande en détail..."
+                              class="contact-textarea"><?= htmlspecialchars($old['message'] ?? '') ?></textarea>
                 </div>
 
-                <div style="text-align:center;">
-                    <button type="submit" class="btn-primary" style="padding:15px 40px;font-size:18px;">
-                        <span class="material-icons" style="vertical-align:middle;">send</span>
+                <div class="contact-submit-wrap">
+                    <button type="submit" class="btn-primary contact-submit-btn">
+                        <span class="material-icons contact-submit-icon">send</span>
                         Envoyer le message
                     </button>
                 </div>
             </form>
 
-            <div style="margin-top:40px;padding-top:30px;border-top:1px solid #ddd;">
-                <h3 style="color:#2d3436;text-align:center;margin-bottom:20px;">Autres moyens de contact</h3>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;text-align:center;">
-                    <div style="background:#f8f9fa;padding:20px;border-radius:8px;">
-                        <span class="material-icons" style="font-size:32px;color:#00b894;">email</span>
-                        <h4 style="margin:0 0 5px 0;color:#2d3436;">Email direct</h4>
-                        <p style="margin:0;color:#636e72;">contact@ecoride.fr</p>
+            <div class="contact-alt-wrap">
+                <h3 class="contact-alt-title">Autres moyens de contact</h3>
+                <div class="contact-alt-grid">
+                    <div class="contact-alt-card">
+                        <span class="material-icons contact-alt-card-icon">email</span>
+                        <h4 class="contact-alt-card-title">Email direct</h4>
+                        <p class="contact-alt-card-text">contact@ecoride.fr</p>
                     </div>
-                    <div style="background:#f8f9fa;padding:20px;border-radius:8px;">
-                        <span class="material-icons" style="font-size:32px;color:#00b894;">schedule</span>
-                        <h4 style="margin:0 0 5px 0;color:#2d3436;">Delai de reponse</h4>
-                        <p style="margin:0;color:#636e72;">Sous 24 h ouvrees</p>
+                    <div class="contact-alt-card">
+                        <span class="material-icons contact-alt-card-icon">schedule</span>
+                        <h4 class="contact-alt-card-title">Délai de réponse</h4>
+                        <p class="contact-alt-card-text">Sous 24 h ouvrées</p>
                     </div>
                 </div>
             </div>
 
-            <div style="text-align:center;margin-top:30px;">
-                <a href="/" style="color:#00b894;text-decoration:none;font-weight:600;">
-                    &larr; Retour a l'accueil
+            <div class="contact-back-wrap">
+                <a href="/" class="contact-back-link">
+                    &larr; Retour à l'accueil
                 </a>
             </div>
         </div>

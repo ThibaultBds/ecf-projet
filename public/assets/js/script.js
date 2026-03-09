@@ -1,4 +1,4 @@
-// === FONCTIONS UTILITAIRES ===
+﻿// === FONCTIONS UTILITAIRES ===
 
 function validerEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -6,10 +6,10 @@ function validerEmail(email) {
 
 function showToast(message, type) {
     type = type || 'success';
-    var toast = document.createElement('div');
+    const toast = document.createElement('div');
     toast.className = 'toast ' + type;
     toast.innerHTML =
-        '<span class="material-icons" style="vertical-align:middle;margin-right:8px;">' +
+        '<span class="material-icons toast-icon">' +
         (type === 'success' ? 'check_circle' : 'error') +
         '</span>' + message;
 
@@ -21,9 +21,9 @@ function showToast(message, type) {
     }, 3000);
 }
 
-// === BASE DE DONNÉES DES DISTANCES ===
+// === BASE DE DONNEES DES DISTANCES ===
 
-var distances = {
+const distances = {
     'Paris-Lyon': 465, 'Paris-Marseille': 775, 'Paris-Nice': 930,
     'Paris-Toulouse': 680, 'Paris-Bordeaux': 580, 'Paris-Lille': 225,
     'Paris-Nantes': 380, 'Paris-Strasbourg': 490, 'Lyon-Marseille': 315,
@@ -32,16 +32,16 @@ var distances = {
 };
 
 function calculerDistanceApproximative(villeDepart, villeArrivee) {
-    var cle1 = villeDepart + '-' + villeArrivee;
-    var cle2 = villeArrivee + '-' + villeDepart;
+    const cle1 = villeDepart + '-' + villeArrivee;
+    const cle2 = villeArrivee + '-' + villeDepart;
     return distances[cle1] || distances[cle2] || 0;
 }
 
 function calculerTempsTrajet(distanceKm, vitesseMoyenne) {
     vitesseMoyenne = vitesseMoyenne || 90;
-    var heures = distanceKm / vitesseMoyenne;
-    var heuresEntieres = Math.floor(heures);
-    var minutes = Math.round((heures - heuresEntieres) * 60);
+    const heures = distanceKm / vitesseMoyenne;
+    const heuresEntieres = Math.floor(heures);
+    const minutes = Math.round((heures - heuresEntieres) * 60);
     return heuresEntieres + 'h' + (minutes < 10 ? '0' : '') + minutes;
 }
 
@@ -51,16 +51,16 @@ function calculerPrixParPersonne(prixEssence, nombrePassagers) {
 }
 
 function calculerEconomieCO2(distanceKm, nombrePassagers) {
-    var co2ParKm = 0.12;
-    var co2Total = distanceKm * co2ParKm;
-    var co2Economise = co2Total * (nombrePassagers / (nombrePassagers + 1));
+    const co2ParKm = 0.12;
+    const co2Total = distanceKm * co2ParKm;
+    const co2Economise = co2Total * (nombrePassagers / (nombrePassagers + 1));
     return Math.round(co2Economise * 100) / 100;
 }
 
 function calculerEconomieTrajet(distanceKm, nombrePassagers, prixEssenceAuLitre) {
     prixEssenceAuLitre = prixEssenceAuLitre || 1.65;
-    var consommation = 7;
-    var coutEssence = (distanceKm / 100) * consommation * prixEssenceAuLitre;
+    const consommation = 7;
+    const coutEssence = (distanceKm / 100) * consommation * prixEssenceAuLitre;
     return {
         distance: distanceKm,
         prixParPersonne: calculerPrixParPersonne(coutEssence, nombrePassagers),
@@ -72,23 +72,23 @@ function calculerEconomieTrajet(distanceKm, nombrePassagers, prixEssenceAuLitre)
 // === CALCULATEUR DE COVOITURAGE (page accueil) ===
 
 function mettreAJourCalculs() {
-    var depart = document.getElementById('depart');
-    var arrivee = document.getElementById('arrivee');
-    var selectPlaces = document.querySelector('.search-bar select[name="places"]');
-    var resultDiv = document.getElementById('calculation-results');
+    const depart = document.getElementById('depart');
+    const arrivee = document.getElementById('arrivee');
+    const selectPlaces = document.querySelector('.search-bar select[name="places"]');
+    const resultDiv = document.getElementById('calculation-results');
 
     if (!depart || !arrivee || !selectPlaces || !resultDiv) return;
 
-    var villeDepart = depart.value;
-    var villeArrivee = arrivee.value;
-    var places = selectPlaces.value;
+    const villeDepart = depart.value;
+    const villeArrivee = arrivee.value;
+    const places = selectPlaces.value;
 
     if (villeDepart && villeArrivee && places && places !== '') {
-        var distance = calculerDistanceApproximative(villeDepart, villeArrivee);
+        const distance = calculerDistanceApproximative(villeDepart, villeArrivee);
 
         if (distance > 0) {
-            var nombrePassagers = places === '4+' ? 4 : parseInt(places);
-            var economie = calculerEconomieTrajet(distance, nombrePassagers);
+            const nombrePassagers = places === '4+' ? 4 : parseInt(places, 10);
+            const economie = calculerEconomieTrajet(distance, nombrePassagers);
 
             document.getElementById('calc-distance').textContent = economie.distance + ' km';
             document.getElementById('calc-time').textContent = economie.tempsTrajet;
@@ -104,32 +104,32 @@ function mettreAJourCalculs() {
     }
 }
 
-// === CALENDRIER PERSONNALISÉ ===
+// === CALENDRIER PERSONNALISE ===
 
 function setupCalendar() {
-    var dateInput = document.getElementById('dateInput');
-    var calendarPopup = document.getElementById('calendarPopup');
+    const dateInput = document.getElementById('dateInput');
+    const calendarPopup = document.getElementById('calendarPopup');
     if (!dateInput || !calendarPopup) return;
 
     function pad(n) { return n < 10 ? '0' + n : n; }
 
     function renderCalendar(month, year) {
-        var selected = dateInput.value.match(/^(\d{2}) \/ (\d{2}) \/ (\d{4})$/);
-        var selectedDay = selected ? parseInt(selected[1], 10) : null;
-        var selectedMonth = selected ? parseInt(selected[2], 10) - 1 : null;
-        var selectedYear = selected ? parseInt(selected[3], 10) : null;
+        const selected = dateInput.value.match(/^(\d{2}) \/ (\d{2}) \/ (\d{4})$/);
+        const selectedDay = selected ? parseInt(selected[1], 10) : null;
+        const selectedMonth = selected ? parseInt(selected[2], 10) - 1 : null;
+        const selectedYear = selected ? parseInt(selected[3], 10) : null;
 
-        var firstDay = new Date(year, month, 1).getDay();
-        var daysInMonth = new Date(year, month + 1, 0).getDate();
-        var html = '<table><thead><tr>' +
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        let html = '<table><thead><tr>' +
             '<th>Lun</th><th>Mar</th><th>Mer</th><th>Jeu</th><th>Ven</th><th>Sam</th><th>Dim</th>' +
             '</tr></thead><tbody><tr>';
 
-        var dayOfWeek = (firstDay + 6) % 7;
-        for (var i = 0; i < dayOfWeek; i++) html += '<td></td>';
+        let dayOfWeek = (firstDay + 6) % 7;
+        for (let i = 0; i < dayOfWeek; i++) html += '<td></td>';
 
-        for (var d = 1; d <= daysInMonth; d++) {
-            var isSelected = (selectedDay === d && selectedMonth === month && selectedYear === year);
+        for (let d = 1; d <= daysInMonth; d++) {
+            const isSelected = (selectedDay === d && selectedMonth === month && selectedYear === year);
             html += '<td class="' + (isSelected ? 'selected' : '') + '" data-day="' + d + '">' + pad(d) + '</td>';
             dayOfWeek++;
             if (dayOfWeek === 7 && d !== daysInMonth) {
@@ -144,10 +144,10 @@ function setupCalendar() {
         }
 
         html += '</tr></tbody></table>';
-        html += '<div style="text-align:center;margin-top:6px;">' +
-            '<button type="button" id="prevMonth" style="margin-right:10px;">&lt;</button>' +
-            '<span style="font-weight:bold;">' + pad(month + 1) + ' / ' + year + '</span>' +
-            '<button type="button" id="nextMonth" style="margin-left:10px;">&gt;</button>' +
+        html += '<div class="calendar-controls">' +
+            '<button type="button" id="prevMonth" class="calendar-nav-btn prev">&lt;</button>' +
+            '<span class="calendar-current">' + pad(month + 1) + ' / ' + year + '</span>' +
+            '<button type="button" id="nextMonth" class="calendar-nav-btn next">&gt;</button>' +
             '</div>';
 
         calendarPopup.innerHTML = html;
@@ -161,13 +161,13 @@ function setupCalendar() {
             renderCalendar(month === 11 ? 0 : month + 1, month === 11 ? year + 1 : year);
         };
 
-        var cells = calendarPopup.querySelectorAll('td[data-day]');
-        for (var c = 0; c < cells.length; c++) {
+        const cells = calendarPopup.querySelectorAll('td[data-day]');
+        for (let c = 0; c < cells.length; c++) {
             (function(td) {
                 td.onclick = function(e) {
                     e.stopPropagation();
-                    var day = pad(parseInt(td.dataset.day, 10));
-                    var m = pad(month + 1);
+                    const day = pad(parseInt(td.dataset.day, 10));
+                    const m = pad(month + 1);
                     dateInput.value = day + ' / ' + m + ' / ' + year;
                     calendarPopup.style.display = 'none';
                 };
@@ -176,11 +176,11 @@ function setupCalendar() {
     }
 
     dateInput.addEventListener('focus', function() {
-        var rect = dateInput.getBoundingClientRect();
+        const rect = dateInput.getBoundingClientRect();
         calendarPopup.style.left = rect.left + window.scrollX + 'px';
         calendarPopup.style.top = (rect.bottom + window.scrollY + 2) + 'px';
         calendarPopup.style.display = 'block';
-        var now = new Date();
+        const now = new Date();
         renderCalendar(now.getMonth(), now.getFullYear());
     });
 
@@ -194,20 +194,20 @@ function setupCalendar() {
 // === INITIALISATION ===
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Calendrier personnalisé
+    // Calendrier personnalise
     setupCalendar();
 
     // Calculateur (page accueil)
-    var departInput = document.getElementById('depart');
-    var arriveeInput = document.getElementById('arrivee');
-    var placesSelect = document.querySelector('.search-bar select[name="places"]');
+    const departInput = document.getElementById('depart');
+    const arriveeInput = document.getElementById('arrivee');
+    const placesSelect = document.querySelector('.search-bar select[name="places"]');
 
     if (departInput) departInput.addEventListener('input', mettreAJourCalculs);
     if (arriveeInput) arriveeInput.addEventListener('input', mettreAJourCalculs);
     if (placesSelect) placesSelect.addEventListener('change', mettreAJourCalculs);
 
     // CTA dynamique (page accueil)
-    var ctaDynamic = document.getElementById('cta-dynamic');
+    const ctaDynamic = document.getElementById('cta-dynamic');
     if (ctaDynamic && window.ecorideUser) {
         ctaDynamic.textContent = 'Voir mes trajets';
         ctaDynamic.href = '/my-trips';

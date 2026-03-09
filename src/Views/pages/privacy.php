@@ -1,10 +1,10 @@
-<main>
-    <div style="max-width:800px;margin:40px auto;padding:0 20px;">
+﻿<main>
+    <div class="static-page-wrap">
         <h2 class="page-title-hero">
             <span class="material-icons page-icon-large">privacy_tip</span> Politique de confidentialite
         </h2>
 
-        <div style="background:white;padding:30px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+        <div class="static-page-card">
             <h3>1. Collecte des donnees</h3>
             <p>Nous collectons uniquement les informations necessaires au fonctionnement du service : nom, prenom, email.</p>
 
@@ -25,13 +25,13 @@
             <h3>5. Contact</h3>
             <p>Pour toute question : contact@ecoride.fr</p>
 
-            <p style="background:#e6f9ed;padding:15px;border-radius:8px;border-left:4px solid #00b894;">
+            <p class="static-page-note">
                 <strong>Note :</strong> Dans le cadre de ce projet etudiant, aucune donnee reelle n'est stockee ou utilisee commercialement.
             </p>
         </div>
 
-        <div style="text-align:center;margin-top:30px;">
-            <a href="/register" style="color:#00b894;text-decoration:none;font-weight:600;">&larr; Retour a l'inscription</a>
+        <div class="static-page-back-wrap">
+            <a href="/register" class="static-page-back-link">&larr; Retour a l'inscription</a>
         </div>
     </div>
 </main>
