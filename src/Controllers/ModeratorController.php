@@ -187,7 +187,7 @@ class ModeratorController extends BaseController
 
                     if ($driver) {
                         try {
-                            Mailer::send(
+                            (new Mailer())->send(
                                 $driver['email'],
                                 "Incident résolu - EcoRide",
                                 "Bonjour {$driver['username']},\n\nL'incident signalé sur le trajet #{$tripId} a été examiné. La décision est en votre faveur : vous avez été crédité du montant du trajet.\n\nEcoRide"
@@ -209,7 +209,7 @@ class ModeratorController extends BaseController
                             $tripId
                         );
                         try {
-                            Mailer::send(
+                            (new Mailer())->send(
                                 $passenger['email'],
                                 "Incident résolu - EcoRide",
                                 "Bonjour {$passenger['username']},\n\nL'incident sur le trajet #{$tripId} a été examiné. La décision est en votre faveur : vous avez été remboursé de " . ((int)$trip['price'] + 2) . " crédits.\n\nEcoRide"
@@ -221,7 +221,7 @@ class ModeratorController extends BaseController
 
                     if ($driver) {
                         try {
-                            Mailer::send(
+                            (new Mailer())->send(
                                 $driver['email'],
                                 "Incident résolu - EcoRide",
                                 "Bonjour {$driver['username']},\n\nL'incident signalé sur le trajet #{$tripId} a été examiné. La décision est en faveur du passager : aucun crédit ne vous a été attribué pour ce trajet.\n\nEcoRide"
