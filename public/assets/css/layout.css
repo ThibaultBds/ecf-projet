@@ -224,6 +224,12 @@ header.container-header > nav#navbar #auth-links.visible {
   margin: 0;
   border-radius: 0;
   box-shadow: none;
+  position: relative;
+  top: -2px;
+}
+
+header.container-header {
+  border-bottom: 0 !important;
 }
 
 .hero h2 {
