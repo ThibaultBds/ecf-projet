@@ -10,8 +10,9 @@ class UserController extends BaseController
     public function profile()
     {
         $userId = AuthManager::id();
-        $userData = User::find($userId);
-        $myTrips = User::recentTrips($userId, 10);
+        $userModel = new User();
+        $userData = $userModel->find($userId);
+        $myTrips = $userModel->recentTrips($userId, 10);
 
         $error = $_SESSION['flash_error'] ?? '';
         $success = $_SESSION['flash_success'] ?? '';
@@ -29,6 +30,7 @@ class UserController extends BaseController
     public function update()
     {
         $userId = AuthManager::id();
+        $userModel = new User();
         $type = $_POST['user_type'] ?? '';
 
         $isDriver = false;
@@ -47,7 +49,7 @@ class UserController extends BaseController
             exit;
         }
 
-        User::update($userId, [
+        $userModel->update($userId, [
             'is_driver' => $isDriver ? 1 : 0,
             'is_passenger' => $isPassenger ? 1 : 0
         ]);
@@ -59,7 +61,8 @@ class UserController extends BaseController
 
         // If user just became a driver and has no vehicle, redirect to vehicle page
         if ($isDriver) {
-            $vehicles = \App\Models\Vehicle::byUser($userId);
+            $vehicleModel = new \App\Models\Vehicle();
+            $vehicles = $vehicleModel->byUser($userId);
             if (empty($vehicles)) {
                 $_SESSION['flash_success'] = 'Profil mis à jour ! Veuillez maintenant ajouter un véhicule.';
                 header('Location: /driver/vehicles');
@@ -74,6 +77,7 @@ class UserController extends BaseController
     public function uploadPhoto()
     {
         $userId = AuthManager::id();
+        $userModel = new User();
 
         if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== 0) {
             $_SESSION['flash_error'] = "Erreur upload.";
@@ -115,7 +119,7 @@ class UserController extends BaseController
             exit;
         }
 
-        User::updatePhoto($userId, $newFileName);
+        $userModel->updatePhoto($userId, $newFileName);
 
         $_SESSION['flash_success'] = "Photo mise à jour.";
         header('Location: /profile');
@@ -125,7 +129,8 @@ class UserController extends BaseController
     public function deletePhoto()
     {
         $userId = AuthManager::id();
-        $user = User::find($userId);
+        $userModel = new User();
+        $user = $userModel->find($userId);
 
         if (!empty($user['photo'])) {
 
@@ -135,7 +140,7 @@ class UserController extends BaseController
             unlink($filePath);
         }
 
-        User::updatePhoto($userId, null);
+        $userModel->updatePhoto($userId, null);
         }
 
         $_SESSION['flash_success'] = "Photo supprimée.";
