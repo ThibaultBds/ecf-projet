@@ -6,18 +6,27 @@ use App\Models\User;
 
 class UserRepository
 {
+    private User $userModel;
+
+    public function __construct(?User $userModel = null)
+    {
+        $this->userModel = $userModel ?? new User();
+    }
+
     public function findById(int $id): ?array
     {
-        return 
+        $user = $this->userModel->find($id);
+        return $user ?: null;
     }
 
     public function findByEmail(string $email): ?array
     {
-        return User::findBy('email', $email);
+        $user = $this->userModel->findByEmail($email);
+        return $user ?: null;
     }
 
     public function findAll(): array
     {
-        return User::all();
+        return $this->userModel->findAll();
     }
 }

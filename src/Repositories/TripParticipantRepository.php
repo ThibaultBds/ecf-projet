@@ -6,13 +6,20 @@ use App\Models\TripParticipant;
 
 class TripParticipantRepository
 {
+    private TripParticipant $tripParticipantModel;
+
+    public function __construct(?TripParticipant $tripParticipantModel = null)
+    {
+        $this->tripParticipantModel = $tripParticipantModel ?? new TripParticipant();
+    }
+
     public function findByTrip(int $tripId): array
     {
-        return TripParticipant::byTrip($tripId);
+        return $this->tripParticipantModel->byTrip($tripId);
     }
 
     public function removeParticipation(int $tripId, int $userId)
     {
-        TripParticipant::removeParticipation($tripId, $userId);
+        $this->tripParticipantModel->removeParticipation($tripId, $userId);
     }
 }
