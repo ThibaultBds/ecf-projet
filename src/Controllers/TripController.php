@@ -4,14 +4,10 @@ namespace App\Controllers;
 
 use App\Controllers\DriverController;
 use App\Core\Auth\AuthManager;
-use App\Core\Database;
-use App\Core\Mailer;
 use App\Models\Review;
-use App\Models\Trip;
 use App\Models\TripParticipant;
 use App\Models\User;
 use App\Services\TripService;
-use Exception;
 
 class TripController extends BaseController
 {
@@ -100,13 +96,13 @@ class TripController extends BaseController
             $tripId = (int) ($_POST['trip_id'] ?? 0);
 
             if ($action === 'cancel_participation') {
-                $this->handleCancelParticipation($tripId, $userId);
+                $this->tripService->cancelParticipation($tripId, $userId);
             } elseif ($action === 'update_trip_status') {
-                $this->handleUpdateTripStatus($tripId, $userId, $_POST['status'] ?? '');
+                $this->tripService->updateTripStatus($tripId, $userId, $_POST['status'] ?? '');
             } elseif ($action === 'validate_trip') {
-                $this->handleValidateTrip($tripId, $userId);
+                $this->tripService->validateTrip($tripId, $userId);
             } elseif ($action === 'report_problem') {
-                $this->handleReportProblem($tripId, $userId);
+                $this->tripService->reportProblem($tripId, $userId, $_POST['problem_comment'] ?? '');
             }
 
             header('Location: /my-trips?success=Action effectuee avec succes');
@@ -116,20 +112,7 @@ class TripController extends BaseController
         $isDriver = !empty($_SESSION['user']['is_driver']);
         $tripsData = $this->tripService->getMyTripsData($userId, $isDriver);
 
-        // Recupere les incidents resolus pour ce passager (map trip_id => decision)
-        $resolvedIncidents = [];
-        try {
-            $mongo = \App\Core\MongoDB::getInstance();
-            $incidents = $mongo->find('trip_incidents', [
-                'reporter_id' => $userId,
-                'status' => 'resolved',
-            ]);
-            foreach ($incidents as $inc) {
-                $resolvedIncidents[(int) $inc['trip_id']] = $inc['decision'] ?? '';
-            }
-        } catch (\Throwable $e) {
-            // MongoDB indisponible: on affiche juste "Litige" sans detail.
-        }
+        $resolvedIncidents = $this->tripService->getResolvedIncidents($userId);
 
         $this->render('trips/my-trips', [
             'title' => 'Mes Trajets - EcoRide',
@@ -142,153 +125,4 @@ class TripController extends BaseController
         ]);
     }
 
-    private function handleCancelParticipation($tripId, $userId)
-    {
-        $pdo = Database::getInstance()->getConnection();
-        $tripModel = new Trip();
-        $participantModel = new TripParticipant();
-        $userModel = new User();
-
-        try {
-            $pdo->beginTransaction();
-
-            $participantModel->removeParticipation((int) $tripId, (int) $userId);
-
-            $stmt = $pdo->prepare("UPDATE trips SET available_seats = available_seats + 1 WHERE trip_id = ?");
-            $stmt->execute([$tripId]);
-
-            $trip = $tripModel->find((int) $tripId);
-            if ($trip) {
-                $userModel->addCredits($userId, (int) $trip['price'] + 2, 'refund', 'Annulation participation', $tripId);
-            }
-
-            $pdo->commit();
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            error_log("Erreur annulation participation : " . $e->getMessage());
-        }
-    }
-
-    private function handleUpdateTripStatus($tripId, $userId, $newStatus)
-    {
-        $validStatuses = ['started', 'completed', 'cancelled'];
-        if (!in_array($newStatus, $validStatuses)) {
-            return;
-        }
-
-        $tripModel = new Trip();
-        $participantModel = new TripParticipant();
-        $userModel = new User();
-        $pdo = Database::getInstance()->getConnection();
-
-        $trip = $tripModel->find((int) $tripId);
-        if (!$trip || $trip['chauffeur_id'] != $userId) {
-            return;
-        }
-
-        if ($newStatus === 'started' && $trip['status'] !== 'scheduled') return;
-        if ($newStatus === 'completed' && $trip['status'] !== 'started') return;
-        if ($newStatus === 'cancelled' && !in_array($trip['status'], ['scheduled', 'started'])) return;
-
-        try {
-            $pdo->beginTransaction();
-
-            $tripModel->update((int) $tripId, ['status' => $newStatus]);
-            $participants = $participantModel->byTrip((int) $tripId);
-
-            if ($newStatus === 'cancelled') {
-                foreach ($participants as $p) {
-                    $userModel->addCredits($p['user_id'], (int) $trip['price'], 'refund', 'Remboursement annulation trajet', $tripId);
-                    $passenger = $userModel->find((int) $p['user_id']);
-                    if ($passenger) {
-                        Mailer::send(
-                            $passenger['email'],
-                            "Trajet annule - EcoRide",
-                            "Bonjour {$passenger['username']},\n\nLe trajet #{$tripId} a ete annule par le chauffeur.\nVous avez ete rembourse de {$trip['price']} credits.\n\nEcoRide"
-                        );
-                    }
-                }
-                $userModel->addCredits($userId, 2, 'refund', 'Remboursement frais plateforme', $tripId);
-            }
-
-            if ($newStatus === 'completed') {
-                foreach ($participants as $p) {
-                    $passenger = $userModel->find((int) $p['user_id']);
-                    if ($passenger) {
-                        Mailer::send(
-                            $passenger['email'],
-                            "Votre trajet est termine - EcoRide",
-                            "Bonjour {$passenger['username']},\n\nVotre trajet #{$tripId} est termine.\nRendez-vous dans votre espace pour valider le trajet et laisser un avis.\n\nEcoRide"
-                        );
-                    }
-                }
-            }
-
-            $pdo->commit();
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            error_log("Erreur mise a jour statut : " . $e->getMessage());
-        }
-    }
-
-    private function handleValidateTrip($tripId, $userId)
-    {
-        $tripModel = new Trip();
-        $participantModel = new TripParticipant();
-        $userModel = new User();
-        $pdo = Database::getInstance()->getConnection();
-
-        $trip = $tripModel->find((int) $tripId);
-        if (!$trip || $trip['status'] !== 'completed') return;
-        if (!$participantModel->isParticipating((int) $tripId, (int) $userId)) return;
-
-        $stmt = $pdo->prepare("SELECT * FROM trip_participants WHERE trip_id = ? AND user_id = ?");
-        $stmt->execute([$tripId, $userId]);
-        $participant = $stmt->fetch();
-
-        if (!$participant || $participant['status'] === 'validated') return;
-
-        try {
-            $pdo->beginTransaction();
-
-            $stmt = $pdo->prepare("UPDATE trip_participants SET status = 'validated' WHERE trip_id = ? AND user_id = ?");
-            $stmt->execute([$tripId, $userId]);
-
-            $userModel->addCredits($trip['chauffeur_id'], (int) $trip['price'], 'credit', 'Validation trajet passager', $tripId);
-
-            $pdo->commit();
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            error_log("Erreur validation trajet : " . $e->getMessage());
-        }
-    }
-
-    private function handleReportProblem($tripId, $userId)
-    {
-        $tripModel = new Trip();
-        $participantModel = new TripParticipant();
-        $trip = $tripModel->find((int) $tripId);
-        if (!$trip || $trip['status'] !== 'completed') return;
-        if (!$participantModel->isParticipating((int) $tripId, (int) $userId)) return;
-
-        $comment = trim($_POST['problem_comment'] ?? '');
-
-        try {
-            $mongo = \App\Core\MongoDB::getInstance();
-            $mongo->insertOne('trip_incidents', [
-                'trip_id' => (int) $tripId,
-                'reporter_id' => (int) $userId,
-                'chauffeur_id' => (int) $trip['chauffeur_id'],
-                'comment' => $comment,
-                'status' => 'pending',
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-
-            $pdo = Database::getInstance()->getConnection();
-            $stmt = $pdo->prepare("UPDATE trip_participants SET status = 'disputed' WHERE trip_id = ? AND user_id = ?");
-            $stmt->execute([$tripId, $userId]);
-        } catch (Exception $e) {
-            error_log("Erreur signalement : " . $e->getMessage());
-        }
-    }
 }
