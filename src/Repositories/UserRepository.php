@@ -6,14 +6,14 @@ use App\Models\User;
 
 class UserRepository
 {
-    public function findBYId(int $id): ?array
+    public function findById(int $id): ?array
     {
-        return User::find($id);
+        return 
     }
 
     public function findByEmail(string $email): ?array
     {
-        return User::findBY('email', $email);
+        return User::findBy('email', $email);
     }
 
     public function findAll(): array

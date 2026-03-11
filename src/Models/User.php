@@ -4,92 +4,95 @@ namespace App\Models;
 
 class User extends BaseModel
 {
-    protected static $table = 'users';
-    protected static $primaryKey = 'user_id';
+    protected ?string $table = 'users';
+    protected string $primaryKey = 'user_id';
 
-    public static function findByEmail($email)
+    public function findByEmail($email)
     {
-        return static::findBy('email', strtolower(trim($email)));
+        return $this->findBy('email', strtolower(trim($email)));
     }
 
-    public static function findByUsername($username)
+    public function findByUsername($username)
     {
-        return static::findBy('username', $username);
+        return $this->findBy('username', $username);
     }
 
-    public static function exists($email, $username)
+    public function exists($email, $username)
     {
-        $stmt = static::query(
-            "SELECT user_id FROM users WHERE email = ? OR username = ? LIMIT 1",
-            [strtolower(trim($email)), trim($username)]
+        $stmt = $this->pdo->prepare(
+            "SELECT user_id FROM users WHERE email = ? OR username = ? LIMIT 1"
         );
+        $stmt->execute([strtolower(trim($email)), trim($username)]);
         return $stmt->fetch() !== false;
     }
 
-    public static function deductCredits($userId, $amount, $type, $reason = null, $tripId = null)
+    public function deductCredits($userId, $amount, $type, $reason = null, $tripId = null)
     {
-        $stmt = static::query(
+        $stmt = $this->pdo->prepare(
             "UPDATE users 
-             SET credits = credits - ?
-             WHERE user_id = ? AND credits >= ?",
-            [$amount, $userId, $amount]
+            SET credits = credits - ?
+            WHERE user_id = ? AND credits >= ?"
         );
+        $stmt->execute([$amount, $userId, $amount]);
 
         if ($stmt->rowCount() > 0) {
-            self::logCredit($userId, -$amount, $type, $reason, $tripId);
+            $this->logCredit($userId, -$amount, $type, $reason, $tripId);
         }
 
         return $stmt->rowCount() > 0;
     }
 
-    public static function addCredits($userId, $amount, $type, $reason = null, $tripId = null)
+    public function addCredits($userId, $amount, $type, $reason = null, $tripId = null)
     {
-        static::query(
+        $stmt = $this->pdo->prepare(
             "UPDATE users 
              SET credits = credits + ?
-             WHERE user_id = ?",
-            [$amount, $userId]
+             WHERE user_id = ?"
         );
+        $stmt->execute([$amount, $userId]);
 
-        self::logCredit($userId, $amount, $type, $reason, $tripId);
+        $this->logCredit($userId, $amount, $type, $reason, $tripId);
     }
 
-    public static function recentTrips($userId, $limit = 10)
+    public function recentTrips($userId, $limit = 10)
     {
         $limit = (int) $limit;
 
-        return static::query(
+        $stmt = $this->pdo->prepare(
             "SELECT t.*,
-                    cd.name AS ville_depart,
-                    ca.name AS ville_arrivee,
-                    CASE WHEN t.chauffeur_id = ? THEN 'chauffeur' ELSE 'passager' END as role_trajet
-             FROM trips t
-             JOIN cities cd ON t.city_depart_id = cd.city_id
-             JOIN cities ca ON t.city_arrival_id = ca.city_id
-             LEFT JOIN trip_participants tp 
-                ON t.trip_id = tp.trip_id AND tp.user_id = ?
-             WHERE t.chauffeur_id = ? OR tp.user_id = ?
-             ORDER BY t.departure_datetime DESC
-             LIMIT {$limit}",
-            [$userId, $userId, $userId, $userId]
-        )->fetchAll();
+                cd.name AS ville_depart,
+                ca.name AS ville_arrivee,
+                CASE WHEN t.chauffeur_id = ? THEN 'chauffeur' ELSE 'passager' END as role_trajet
+         FROM trips t
+         JOIN cities cd ON t.city_depart_id = cd.city_id
+         JOIN cities ca ON t.city_arrival_id = ca.city_id
+         LEFT JOIN trip_participants tp
+            ON t.trip_id = tp.trip_id AND tp.user_id = ?
+         WHERE t.chauffeur_id = ? OR tp.user_id = ?
+         ORDER BY t.departure_datetime DESC
+         LIMIT {$limit}"
+        );
+
+        $stmt->execute([$userId, $userId, $userId, $userId]);
+        return $stmt->fetchAll();
     }
 
-    public static function logCredit($userId, $amount, $type, $reason = null, $tripId = null)
+    public function logCredit($userId, $amount, $type, $reason = null, $tripId = null)
     {
-        static::query(
+        $stmt = $this->pdo->prepare(
             "INSERT INTO credit_logs
              (user_id, amount, type, reason, trip_id, created_at)
-             VALUES (?, ?, ?, ?, ?, NOW())",
-            [$userId, $amount, $type, $reason, $tripId]
+             VALUES (?, ?, ?, ?, ?, NOW())"
         );
+        $stmt->execute([$userId, $amount, $type, $reason, $tripId]);
     }
 
-    public static function updatePhoto($userId, $photoName)
+    public function updatePhoto($userId, $photoName)
     {
-        return static::query(
-            "UPDATE users SET photo = ? WHERE user_id = ?",
-            [$photoName, $userId]
+        $stmt = $this->pdo->prepare(
+            "UPDATE users SET photo = ? WHERE user_id = ?"
         );
+        $stmt->execute([$photoName, $userId]);
+        return $stmt;
     }
 }

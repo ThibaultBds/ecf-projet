@@ -4,134 +4,57 @@ namespace App\Models;
 
 use App\Core\Database;
 
-abstract class BaseModel
+class BaseModel
 {
-    protected static $table;
-    protected static $primaryKey = 'id';
-    protected $attributes = [];
+    protected ?string $table = null;
+    protected string $primaryKey = 'id';
+    protected $pdo;
 
-    protected static function getConnection()
+    public function __construct()
     {
-        return Database::getInstance()->getConnection();
+        $this->pdo = Database::getInstance()->getConnection();
     }
 
-    private static function validateIdentifier($name)
+    public function findAll(): array
     {
-        if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $name)) {
-            throw new \InvalidArgumentException("Invalid SQL identifier: {$name}");
-        }
-    }
-
-    public static function query($sql, $params = [])
-    {
-        $pdo = static::getConnection();
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        return $stmt;
-    }
-
-    public static function find($id)
-    {
-        $table = static::$table;
-        $pk = static::$primaryKey;
-        $stmt = static::query("SELECT * FROM {$table} WHERE {$pk} = ? LIMIT 1", [$id]);
-        return $stmt->fetch() ?: null;
-    }
-
-    public static function all($orderBy = null)
-    {
-        $table = static::$table;
-        $sql = "SELECT * FROM {$table}";
-
-        if ($orderBy) {
-            static::validateIdentifier($orderBy);
-            $sql .= " ORDER BY {$orderBy}";
-        }
-
-        return static::query($sql)->fetchAll();
-    }
-
-    public static function where($column, $value)
-    {
-        static::validateIdentifier($column);
-        $table = static::$table;
-        $stmt = static::query("SELECT * FROM {$table} WHERE {$column} = ?", [$value]);
+        $stmt = $this->pdo->query("SELECT * FROM $this->table");
         return $stmt->fetchAll();
     }
 
-    public static function findBy($column, $value)
+    public function find(int $id): mixed
     {
-        static::validateIdentifier($column);
-        $table = static::$table;
-        $stmt = static::query("SELECT * FROM {$table} WHERE {$column} = ? LIMIT 1", [$value]);
-        return $stmt->fetch() ?: null;
+        $stmt = $this->pdo->prepare("SELECT * FROM $this->table WHERE $this->primaryKey = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
     }
 
-    public static function count($condition = null, $params = [])
+    public function findBy(string $column, mixed $value): mixed
     {
-        $table = static::$table;
-        $sql = "SELECT COUNT(*) as total FROM {$table}";
-
-        if ($condition) {
-            $sql .= " WHERE {$condition}";
-        }
-
-        $result = static::query($sql, $params)->fetch();
-        return (int) $result['total'];
+        $stmt = $this->pdo->prepare("SELECT * FROM $this->table WHERE $column = ? LIMIT 1");
+        $stmt->execute([$value]);
+        return $stmt->fetch();
     }
 
-    public static function create($data)
+    public function create(array $data): int
     {
-        $table = static::$table;
         $columns = implode(', ', array_keys($data));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
 
-        $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-        static::query($sql, array_values($data));
-
-        $pdo = static::getConnection();
-        return $pdo->lastInsertId();
+        $stmt = $this->pdo->prepare("INSERT INTO $this->table ($columns) VALUES ($placeholders)");
+        $stmt->execute(array_values($data));
+        return (int) $this->pdo->lastInsertId();
     }
 
-    public static function update($id, $data)
+    public function update(int $id, array $data): void
     {
-        $table = static::$table;
-        $pk = static::$primaryKey;
-
-        $sets = [];
-        $values = [];
-        foreach ($data as $column => $value) {
-            static::validateIdentifier($column);
-            $sets[] = "{$column} = ?";
-            $values[] = $value;
-        }
-        $values[] = $id;
-
-        $setString = implode(', ', $sets);
-        $sql = "UPDATE {$table} SET {$setString} WHERE {$pk} = ?";
-
-        static::query($sql, $values);
+        $sets = implode(', ', array_map(fn($col) => "$col = ?", array_keys($data)));
+        $stmt = $this->pdo->prepare("UPDATE $this->table SET $sets WHERE $this->primaryKey = ?");
+        $stmt->execute([...array_values($data), $id]);
     }
 
-    public static function destroy($id)
+    public function delete(int $id): void
     {
-        $table = static::$table;
-        $pk = static::$primaryKey;
-        static::query("DELETE FROM {$table} WHERE {$pk} = ?", [$id]);
-    }
-
-    public static function beginTransaction()
-    {
-        static::getConnection()->beginTransaction();
-    }
-
-    public static function commit()
-    {
-        static::getConnection()->commit();
-    }
-
-    public static function rollback()
-    {
-        static::getConnection()->rollBack();
+        $stmt = $this->pdo->prepare("DELETE FROM $this->table WHERE $this->primaryKey = ?");
+        $stmt->execute([$id]);
     }
 }

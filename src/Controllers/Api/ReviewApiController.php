@@ -43,7 +43,7 @@ class ReviewApiController extends BaseController
         }
 
         try {
-            Review::create([
+            (new Review())->create([
                 'trip_id' => $tripId,
                 'reviewer_id' => $userId,
                 'driver_id' => $driverId,

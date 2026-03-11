@@ -27,7 +27,7 @@ class DriverController extends BaseController
             'title'         => 'Espace Chauffeur - EcoRide',
             'user'          => $user,
             'trips'         => $trips,
-            'upcoming_trips'=> $upcoming_trips,
+            'upcoming_trips' => $upcoming_trips,
             'past_trips'    => $past_trips,
         ]);
     }
@@ -66,136 +66,82 @@ class DriverController extends BaseController
         return Database::getInstance()->getConnection()->lastInsertId();
     }
 
+    private function renderCreateTrip(array $user, array $vehicles, string $error = '')
+    {
+        return $this->render('driver/create-trip', [
+            'title'    => 'Créer un trajet - EcoRide',
+            'user'     => $user,
+            'vehicles' => $vehicles,
+            'error'    => $error,
+            'success'  => ''
+        ]);
+    }
+
     public function storeTrip()
     {
-        $userId = AuthManager::id();
-        $user = User::find($userId);
-
-        $villeDepart = trim($_POST['ville_depart'] ?? '');
-        $villeArrivee = trim($_POST['ville_arrivee'] ?? '');
-        $dateDepart = $_POST['date_depart'] ?? '';
-        $heureDepart = $_POST['heure_depart'] ?? '';
-        $heureArrivee = $_POST['heure_arrivee'] ?? '';
-        $places = (int) ($_POST['places'] ?? 0);
-        $prix = (float) ($_POST['prix'] ?? 0);
-
-        if (
-            empty($villeDepart) ||
-            empty($villeArrivee) ||
-            empty($dateDepart) ||
-            empty($heureDepart) ||
-            empty($heureArrivee))
-            {
-            $vehicles = Vehicle::byUser($userId);
-            return $this->render('driver/create-trip', [
-                'title' => 'Créer un trajet - EcoRide',
-                'user' => $user,
-                'vehicles' => $vehicles,
-                'error' => 'Veuillez remplir tous les champs obligatoires.',
-                'success' => ''
-            ]);
-        }
-
+        $userId   = AuthManager::id();
+        $user     = User::find($userId);
         $vehicles = Vehicle::byUser($userId);
 
-        if ($prix < 1 || $prix > 100) {
-            return $this->render('driver/create-trip', [
-                'title' => 'Créer un trajet - EcoRide',
-                'user' => $user,
-                'vehicles' => $vehicles,
-                'error' => 'Le prix doit être entre 1€ et 100€.',
-                'success' => ''
-            ]);
-        }
+        $villeDepart  = trim($_POST['ville_depart'] ?? '');
+        $villeArrivee = trim($_POST['ville_arrivee'] ?? '');
+        $dateDepart   = $_POST['date_depart'] ?? '';
+        $heureDepart  = $_POST['heure_depart'] ?? '';
+        $heureArrivee = $_POST['heure_arrivee'] ?? '';
+        $places       = (int) ($_POST['places'] ?? 0);
+        $prix         = (float) ($_POST['prix'] ?? 0);
 
+        if (!$villeDepart || !$villeArrivee || !$dateDepart || !$heureDepart || !$heureArrivee) {
+            return $this->renderCreateTrip($user, $vehicles, 'Veuillez remplir tous les champs obligatoires.');
+        }
+        if ($prix < 1 || $prix > 100) {
+            return $this->renderCreateTrip($user, $vehicles, 'Le prix doit être entre 1€ et 100€.');
+        }
         if ($places < 1 || $places > 4) {
-            return $this->render('driver/create-trip', [
-                'title' => 'Créer un trajet - EcoRide',
-                'user' => $user,
-                'vehicles' => $vehicles,
-                'error' => 'Le nombre de places doit être entre 1 et 4.',
-                'success' => ''
-            ]);
+            return $this->renderCreateTrip($user, $vehicles, 'Le nombre de places doit être entre 1 et 4.');
         }
 
         $departureDateTime = $dateDepart . ' ' . $heureDepart . ':00';
         if (strtotime($departureDateTime) <= time()) {
-            return $this->render('driver/create-trip', [
-                'title' => 'Créer un trajet - EcoRide',
-                'user' => $user,
-                'vehicles' => $vehicles,
-                'error' => 'La date de départ doit être dans le futur.',
-                'success' => ''
-            ]);
+            return $this->renderCreateTrip($user, $vehicles, 'La date de départ doit être dans le futur.');
         }
 
-        // Price + 2 EUR platform fee
         $totalCost = $prix + 2;
         if ($user['credits'] < $totalCost) {
-            return $this->render('driver/create-trip', [
-                'title' => 'Créer un trajet - EcoRide',
-                'user' => $user,
-                'vehicles' => $vehicles,
-                'error' => "Crédits insuffisants. Vous avez {$user['credits']} crédits, il en faut {$totalCost} (prix + 2€ frais).",
-                'success' => ''
-            ]);
+            return $this->renderCreateTrip($user, $vehicles, "Crédits insuffisants. Vous avez {$user['credits']} crédits, il en faut {$totalCost} (prix + 2€ frais).");
         }
 
         $vehicleId = (int) ($_POST['vehicle_id'] ?? 0);
         if ($vehicleId > 0) {
             if (!Vehicle::belongsToUser($vehicleId, $userId)) {
-                return $this->render('driver/create-trip', [
-                    'title' => 'Créer un trajet - EcoRide',
-                    'user' => $user,
-                    'vehicles' => Vehicle::byUser($userId),
-                    'error' => 'Véhicule invalide.',
-                    'success' => ''
-                ]);
+                return $this->renderCreateTrip($user, $vehicles, 'Véhicule invalide.');
             }
         } else {
             $vehicle = Vehicle::firstByUser($userId);
             if (!$vehicle) {
-                return $this->render('driver/create-trip', [
-                    'title' => 'Créer un trajet - EcoRide',
-                    'user' => $user,
-                    'vehicles' => [],
-                    'error' => 'Vous devez d\'abord ajouter un véhicule.',
-                    'success' => ''
-                ]);
+                return $this->renderCreateTrip($user, [], 'Vous devez d\'abord ajouter un véhicule.');
             }
             $vehicleId = $vehicle['vehicle_id'];
+        }
+
+        $arrivalDateTime = $dateDepart . ' ' . $heureArrivee . ':00';
+        if (strtotime($arrivalDateTime) <= strtotime($departureDateTime)) {
+            return $this->renderCreateTrip($user, $vehicles, "L'heure d'arrivée doit être après l'heure de départ.");
         }
 
         try {
             BaseModel::beginTransaction();
 
-            $cityDepartId = $this->findOrCreateCity($villeDepart);
-            $cityArrivalId = $this->findOrCreateCity($villeArrivee);
-
-            $arrivalDateTime = $dateDepart . ' ' . $heureArrivee . ':00';
-
-            if (strtotime($arrivalDateTime) <= strtotime($departureDateTime)) {
-                BaseModel::rollback();
-                return $this->render('driver/create-trip', [
-                    'title' => 'Créer un trajet - EcoRide',
-                    'user' => $user,
-                    'vehicles' => Vehicle::byUser($userId),
-                    'error' => "L'heure d'arrivée doit être après l'heure de départ.",
-                    'success' => ''
-                ]);
-            }
-
-
             Trip::create([
-                'chauffeur_id' => $userId,
-                'vehicle_id' => $vehicleId,
-                'city_depart_id' => $cityDepartId,
-                'city_arrival_id' => $cityArrivalId,
+                'chauffeur_id'       => $userId,
+                'vehicle_id'         => $vehicleId,
+                'city_depart_id'     => $this->findOrCreateCity($villeDepart),
+                'city_arrival_id'    => $this->findOrCreateCity($villeArrivee),
                 'departure_datetime' => $departureDateTime,
-                'arrival_datetime' => $arrivalDateTime,
-                'price' => $prix,
-                'available_seats' => $places,
-                'status' => 'scheduled'
+                'arrival_datetime'   => $arrivalDateTime,
+                'price'              => $prix,
+                'available_seats'    => $places,
+                'status'             => 'scheduled'
             ]);
 
             User::deductCredits($userId, $prix, 'debit', 'Création trajet', null);
@@ -209,13 +155,7 @@ class DriverController extends BaseController
         } catch (Exception $e) {
             BaseModel::rollback();
             error_log("Erreur création trajet : " . $e->getMessage());
-            return $this->render('driver/create-trip', [
-                'title' => 'Créer un trajet - EcoRide',
-                'user' => $user,
-                'vehicles' => Vehicle::byUser($userId),
-                'error' => 'Une erreur est survenue lors de la création du trajet.',
-                'success' => ''
-            ]);
+            return $this->renderCreateTrip($user, $vehicles, 'Une erreur est survenue lors de la création du trajet.');
         }
     }
 
@@ -273,5 +213,4 @@ class DriverController extends BaseController
             return [];
         }
     }
-
 }
