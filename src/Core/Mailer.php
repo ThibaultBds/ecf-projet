@@ -4,12 +4,12 @@ namespace App\Core;
 
 class Mailer
 {
-    public static function send(string $to, string $subject, string $message): bool
+    public function send(string $to, string $subject, string $message): bool
     {
         $apiKey = getenv('BREVO_API_KEY');
 
         if ($apiKey) {
-            return self::sendBrevoApi($to, $subject, $message, $apiKey);
+            return $this->sendBrevoApi($to, $subject, $message, $apiKey);
         }
 
         // Fallback local : mail() via Mailhog
@@ -21,7 +21,7 @@ class Mailer
         return mail($to, $subject, $message, $headers);
     }
 
-    private static function sendBrevoApi(string $to, string $subject, string $message, string $apiKey): bool
+    private function sendBrevoApi(string $to, string $subject, string $message, string $apiKey): bool
     {
         $payload = json_encode([
             'sender'      => ['name' => 'EcoRide', 'email' => getenv('MAIL_FROM') ?: 'noreply@ecoride.fr'],
