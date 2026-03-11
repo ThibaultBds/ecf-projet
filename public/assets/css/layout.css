@@ -8,6 +8,16 @@ header.container-header {
   border-radius: 0;
   position: relative;
   z-index: 40;
+  margin-bottom: 0;
+}
+
+main {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+main > :first-child {
+  margin-top: 0 !important;
 }
 
 header.container-header h1 {

@@ -23,9 +23,7 @@
     <nav id="navbar"></nav>
 </header>
 
-<main>
-    <?= $content ?>
-</main>
+<main><?= $content ?></main>
 
 <footer class="site-footer">
     <p>&copy; <?= date('Y') ?> EcoRide - Tous droits réservés</p>
