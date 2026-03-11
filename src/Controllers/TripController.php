@@ -2,73 +2,46 @@
 
 namespace App\Controllers;
 
-use App\Models\Trip;
-use App\Models\Review;
-use App\Models\User;
-use App\Models\TripParticipant;
-use App\Models\BaseModel;
-use App\Core\Auth\AuthManager;
-use App\Core\Mailer;
 use App\Controllers\DriverController;
+use App\Core\Auth\AuthManager;
+use App\Core\Database;
+use App\Core\Mailer;
+use App\Models\Review;
+use App\Models\Trip;
+use App\Models\TripParticipant;
+use App\Models\User;
+use App\Services\TripService;
 use Exception;
 
 class TripController extends BaseController
 {
+    private TripService $tripService;
+
+    public function __construct()
+    {
+        $this->tripService = new TripService();
+    }
+
     public function index()
     {
-        // The custom calendar widget sends dates as "DD / MM / YYYY"
-        $rawDate = trim($_GET['date'] ?? '');
-        if (preg_match('#^(\d{2})\s*/\s*(\d{2})\s*/\s*(\d{4})$#', $rawDate, $m)) {
-            $rawDate = "{$m[3]}-{$m[2]}-{$m[1]}";
-        }
-
-        $filters = [
-            'depart' => $_GET['depart'] ?? '',
-            'arrivee' => $_GET['arrivee'] ?? '',
-            'date' => $rawDate,
-            'prix_max' => $_GET['prix_max'] ?? null,
-            'note_min' => $_GET['note_min'] ?? null,
-            'ecologique' => $_GET['ecologique'] ?? '',
-            'duree_max' => $_GET['duree_max'] ?? null
-        ];
-
-        $hasSearched = !empty($filters['depart']) || !empty($filters['arrivee']) || !empty($filters['date']);
-        $covoiturages = $hasSearched ? Trip::search($filters) : [];
-
-        $nearestDate = null;
-        if ($hasSearched && empty($covoiturages)) {
-            $nearestDate = Trip::nearestDate($filters['depart'], $filters['arrivee']);
-        }
+        $filters = $this->tripService->buildSearchFiltersFromQuery($_GET);
+        $searchData = $this->tripService->searchTrips($filters);
 
         $this->render('trips/index', [
             'title' => 'Covoiturages - EcoRide',
-            'covoiturages' => $covoiturages,
-            'filters' => $filters,
-            'hasSearched' => $hasSearched,
-            'nearestDate' => $nearestDate,
+            'covoiturages' => $searchData['trips'],
+            'filters' => $searchData['filters'],
+            'hasSearched' => $searchData['hasSearched'],
+            'nearestDate' => $searchData['nearestDate'],
             'isDriver' => !empty($_SESSION['user']['is_driver']),
             'isLoggedIn' => AuthManager::check(),
         ]);
     }
 
-    public function search() 
+    public function search()
     {
-        $rawDate = trim($_GET['date'] ?? '');
-        if (preg_match('#^\d{2}\s*/\s*(\d{2})\s*/\s*(\d{4})$#', $rawDate, $m)) {
-            $rawDate = "{m3[3])-{$m[2]}-{$m[1]}";
-        }
-
-        $filters = [
-            'depart' => $_GET['depart'] ?? '',
-            'arrivee' => $_GET['arrivee'] ?? '',
-            'date' => $rawDate,
-            'prix_max' => $_GET['prix_max'] ?? null,
-            'note_min' => $_GET['note_min'] ?? null,
-            'ecologique' => $_GET['ecologique'] ?? '',
-            'duree_max' => $_GET['duree_max'] ?? null,
-        ];
-
-        $covoiturages = Trip::search($filters);
+        $filters = $this->tripService->buildSearchFiltersFromQuery($_GET);
+        $covoiturages = $this->tripService->searchTripsForApi($filters);
 
         header('Content-Type: application/json');
         echo json_encode($covoiturages);
@@ -77,22 +50,25 @@ class TripController extends BaseController
 
     public function show($id)
     {
-        $covoiturage = Trip::findWithDetails($id);
+        $covoiturage = $this->tripService->findTripWithDetails((int) $id);
 
         if (!$covoiturage) {
             http_response_code(404);
-            $this->render('errors/404', ['title' => 'Trajet non trouvé']);
+            $this->render('errors/404', ['title' => 'Trajet non trouve']);
             return;
         }
 
-        $reviews = Review::byDriver($covoiturage['chauffeur_id']);
+        $reviewModel = new Review();
+        $reviews = $reviewModel->byDriver($covoiturage['chauffeur_id']);
 
         $user_credit = 0;
         $isParticipating = false;
         if (AuthManager::check()) {
-            $user = User::find(AuthManager::id());
+            $userModel = new User();
+            $participantModel = new TripParticipant();
+            $user = $userModel->find(AuthManager::id());
             $user_credit = (int) ($user['credits'] ?? 0);
-            $isParticipating = TripParticipant::isParticipating($id, AuthManager::id());
+            $isParticipating = $participantModel->isParticipating($id, AuthManager::id());
         }
 
         $credit_requis = (int) $covoiturage['price'];
@@ -101,16 +77,16 @@ class TripController extends BaseController
             $driverPrefs = DriverController::getDriverPreferences((int) $covoiturage['chauffeur_id']);
         } catch (\Throwable $e) {
             $driverPrefs = [];
-}
+        }
 
         $this->render('trips/show', [
-            'title' => $covoiturage['ville_depart'] . ' → ' . $covoiturage['ville_arrivee'] . ' - EcoRide',
+            'title' => $covoiturage['ville_depart'] . ' -> ' . $covoiturage['ville_arrivee'] . ' - EcoRide',
             'covoiturage' => $covoiturage,
             'reviews' => $reviews,
             'user_credit' => $user_credit,
             'credit_requis' => $credit_requis,
             'isParticipating' => $isParticipating,
-            'driverPrefs' => $driverPrefs
+            'driverPrefs' => $driverPrefs,
         ]);
     }
 
@@ -133,69 +109,62 @@ class TripController extends BaseController
                 $this->handleReportProblem($tripId, $userId);
             }
 
-            header('Location: /my-trips?success=Action effectuée avec succès');
+            header('Location: /my-trips?success=Action effectuee avec succes');
             exit;
         }
 
         $isDriver = !empty($_SESSION['user']['is_driver']);
-        $trajets_conduits = $isDriver ? Trip::byDriver($userId) : [];
-        $participations = Trip::byPassenger($userId);
+        $tripsData = $this->tripService->getMyTripsData($userId, $isDriver);
 
-        $upcomingStatuses = ['scheduled', 'started'];
-        $upcoming_conduits      = array_values(array_filter($trajets_conduits, fn($t) => in_array($t['status'], $upcomingStatuses)));
-        $past_conduits          = array_values(array_filter($trajets_conduits, fn($t) => !in_array($t['status'], $upcomingStatuses)));
-        $upcoming_participations = array_values(array_filter($participations, fn($t) => in_array($t['status'], $upcomingStatuses)));
-        $past_participations    = array_values(array_filter($participations, fn($t) => !in_array($t['status'], $upcomingStatuses)));
-
-        // Récupère les incidents résolus pour ce passager (map trip_id => decision)
+        // Recupere les incidents resolus pour ce passager (map trip_id => decision)
         $resolvedIncidents = [];
         try {
             $mongo = \App\Core\MongoDB::getInstance();
             $incidents = $mongo->find('trip_incidents', [
                 'reporter_id' => $userId,
-                'status'      => 'resolved',
+                'status' => 'resolved',
             ]);
             foreach ($incidents as $inc) {
-                $resolvedIncidents[(int)$inc['trip_id']] = $inc['decision'] ?? '';
+                $resolvedIncidents[(int) $inc['trip_id']] = $inc['decision'] ?? '';
             }
         } catch (\Throwable $e) {
-            // MongoDB indisponible : on affiche juste "Litige" sans détail
+            // MongoDB indisponible: on affiche juste "Litige" sans detail.
         }
 
         $this->render('trips/my-trips', [
             'title' => 'Mes Trajets - EcoRide',
-            'upcoming_conduits'       => $upcoming_conduits,
-            'past_conduits'           => $past_conduits,
-            'upcoming_participations' => $upcoming_participations,
-            'past_participations'     => $past_participations,
-            'resolvedIncidents'       => $resolvedIncidents,
-            'error' => $error
+            'upcoming_conduits' => $tripsData['upcoming_conduits'],
+            'past_conduits' => $tripsData['past_conduits'],
+            'upcoming_participations' => $tripsData['upcoming_participations'],
+            'past_participations' => $tripsData['past_participations'],
+            'resolvedIncidents' => $resolvedIncidents,
+            'error' => $error,
         ]);
     }
 
     private function handleCancelParticipation($tripId, $userId)
     {
+        $pdo = Database::getInstance()->getConnection();
+        $tripModel = new Trip();
+        $participantModel = new TripParticipant();
+        $userModel = new User();
+
         try {
-            BaseModel::beginTransaction();
+            $pdo->beginTransaction();
 
-            TripParticipant::query(
-                "DELETE FROM trip_participants WHERE trip_id = ? AND user_id = ?",
-                [$tripId, $userId]
-            );
+            $participantModel->removeParticipation((int) $tripId, (int) $userId);
 
-            Trip::query(
-                "UPDATE trips SET available_seats = available_seats + 1 WHERE trip_id = ?",
-                [$tripId]
-            );
+            $stmt = $pdo->prepare("UPDATE trips SET available_seats = available_seats + 1 WHERE trip_id = ?");
+            $stmt->execute([$tripId]);
 
-            $trip = Trip::find($tripId);
+            $trip = $tripModel->find((int) $tripId);
             if ($trip) {
-                User::addCredits($userId, (int) $trip['price'] + 2, 'refund', 'Annulation participation', $tripId);
+                $userModel->addCredits($userId, (int) $trip['price'] + 2, 'refund', 'Annulation participation', $tripId);
             }
 
-            BaseModel::commit();
+            $pdo->commit();
         } catch (Exception $e) {
-            BaseModel::rollback();
+            $pdo->rollBack();
             error_log("Erreur annulation participation : " . $e->getMessage());
         }
     }
@@ -207,7 +176,12 @@ class TripController extends BaseController
             return;
         }
 
-        $trip = Trip::find($tripId);
+        $tripModel = new Trip();
+        $participantModel = new TripParticipant();
+        $userModel = new User();
+        $pdo = Database::getInstance()->getConnection();
+
+        $trip = $tripModel->find((int) $tripId);
         if (!$trip || $trip['chauffeur_id'] != $userId) {
             return;
         }
@@ -217,82 +191,85 @@ class TripController extends BaseController
         if ($newStatus === 'cancelled' && !in_array($trip['status'], ['scheduled', 'started'])) return;
 
         try {
-            BaseModel::beginTransaction();
+            $pdo->beginTransaction();
 
-            Trip::update($tripId, ['status' => $newStatus]);
-
-            $participants = TripParticipant::byTrip($tripId);
+            $tripModel->update((int) $tripId, ['status' => $newStatus]);
+            $participants = $participantModel->byTrip((int) $tripId);
 
             if ($newStatus === 'cancelled') {
                 foreach ($participants as $p) {
-                    User::addCredits($p['user_id'], (int) $trip['price'], 'refund', 'Remboursement annulation trajet', $tripId);
-                    $passenger = User::find($p['user_id']);
+                    $userModel->addCredits($p['user_id'], (int) $trip['price'], 'refund', 'Remboursement annulation trajet', $tripId);
+                    $passenger = $userModel->find((int) $p['user_id']);
                     if ($passenger) {
                         Mailer::send(
                             $passenger['email'],
-                            "Trajet annulé - EcoRide",
-                            "Bonjour {$passenger['username']},\n\nLe trajet #{$tripId} a été annulé par le chauffeur.\nVous avez été remboursé de {$trip['price']} crédits.\n\nEcoRide"
+                            "Trajet annule - EcoRide",
+                            "Bonjour {$passenger['username']},\n\nLe trajet #{$tripId} a ete annule par le chauffeur.\nVous avez ete rembourse de {$trip['price']} credits.\n\nEcoRide"
                         );
                     }
                 }
-                User::addCredits($userId, 2, 'refund', 'Remboursement frais plateforme', $tripId);
+                $userModel->addCredits($userId, 2, 'refund', 'Remboursement frais plateforme', $tripId);
             }
 
             if ($newStatus === 'completed') {
                 foreach ($participants as $p) {
-                    $passenger = User::find($p['user_id']);
+                    $passenger = $userModel->find((int) $p['user_id']);
                     if ($passenger) {
                         Mailer::send(
                             $passenger['email'],
-                            "Votre trajet est terminé - EcoRide",
-                            "Bonjour {$passenger['username']},\n\nVotre trajet #{$tripId} est terminé.\nRendez-vous dans votre espace pour valider le trajet et laisser un avis.\n\nEcoRide"
+                            "Votre trajet est termine - EcoRide",
+                            "Bonjour {$passenger['username']},\n\nVotre trajet #{$tripId} est termine.\nRendez-vous dans votre espace pour valider le trajet et laisser un avis.\n\nEcoRide"
                         );
                     }
                 }
             }
 
-            BaseModel::commit();
+            $pdo->commit();
         } catch (Exception $e) {
-            BaseModel::rollback();
-            error_log("Erreur mise à jour statut : " . $e->getMessage());
+            $pdo->rollBack();
+            error_log("Erreur mise a jour statut : " . $e->getMessage());
         }
     }
 
     private function handleValidateTrip($tripId, $userId)
     {
-        $trip = Trip::find($tripId);
-        if (!$trip || $trip['status'] !== 'completed') return;
-        if (!TripParticipant::isParticipating($tripId, $userId)) return;
+        $tripModel = new Trip();
+        $participantModel = new TripParticipant();
+        $userModel = new User();
+        $pdo = Database::getInstance()->getConnection();
 
-        $participant = TripParticipant::query(
-            "SELECT * FROM trip_participants WHERE trip_id = ? AND user_id = ?",
-            [$tripId, $userId]
-        )->fetch();
+        $trip = $tripModel->find((int) $tripId);
+        if (!$trip || $trip['status'] !== 'completed') return;
+        if (!$participantModel->isParticipating((int) $tripId, (int) $userId)) return;
+
+        $stmt = $pdo->prepare("SELECT * FROM trip_participants WHERE trip_id = ? AND user_id = ?");
+        $stmt->execute([$tripId, $userId]);
+        $participant = $stmt->fetch();
 
         if (!$participant || $participant['status'] === 'validated') return;
 
         try {
-            BaseModel::beginTransaction();
+            $pdo->beginTransaction();
 
-            TripParticipant::query(
-                "UPDATE trip_participants SET status = 'validated' WHERE trip_id = ? AND user_id = ?",
-                [$tripId, $userId]
-            );
+            $stmt = $pdo->prepare("UPDATE trip_participants SET status = 'validated' WHERE trip_id = ? AND user_id = ?");
+            $stmt->execute([$tripId, $userId]);
 
-            User::addCredits($trip['chauffeur_id'], (int) $trip['price'], 'credit', 'Validation trajet passager', $tripId);
+            $userModel->addCredits($trip['chauffeur_id'], (int) $trip['price'], 'credit', 'Validation trajet passager', $tripId);
 
-            BaseModel::commit();
+            $pdo->commit();
         } catch (Exception $e) {
-            BaseModel::rollback();
+            $pdo->rollBack();
             error_log("Erreur validation trajet : " . $e->getMessage());
         }
     }
 
     private function handleReportProblem($tripId, $userId)
     {
-        $trip = Trip::find($tripId);
+        $tripModel = new Trip();
+        $participantModel = new TripParticipant();
+        $trip = $tripModel->find((int) $tripId);
         if (!$trip || $trip['status'] !== 'completed') return;
-        if (!TripParticipant::isParticipating($tripId, $userId)) return;
+        if (!$participantModel->isParticipating((int) $tripId, (int) $userId)) return;
 
         $comment = trim($_POST['problem_comment'] ?? '');
 
@@ -304,13 +281,12 @@ class TripController extends BaseController
                 'chauffeur_id' => (int) $trip['chauffeur_id'],
                 'comment' => $comment,
                 'status' => 'pending',
-                'created_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s'),
             ]);
 
-            TripParticipant::query(
-                "UPDATE trip_participants SET status = 'disputed' WHERE trip_id = ? AND user_id = ?",
-                [$tripId, $userId]
-            );
+            $pdo = Database::getInstance()->getConnection();
+            $stmt = $pdo->prepare("UPDATE trip_participants SET status = 'disputed' WHERE trip_id = ? AND user_id = ?");
+            $stmt->execute([$tripId, $userId]);
         } catch (Exception $e) {
             error_log("Erreur signalement : " . $e->getMessage());
         }
