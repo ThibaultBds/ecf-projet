@@ -2,28 +2,27 @@
 
 namespace App\Controllers;
 
-use App\Models\BaseModel;
-use App\Core\MongoDB;
 use App\Core\Mailer;
+use App\Core\MongoDB;
+use App\Models\BaseModel;
 use App\Models\User;
-
 
 class ModeratorController extends BaseController
 {
     public function index()
     {
         try {
-            $pendingReviews = BaseModel::query("
-                SELECT r.id, r.rating, r.comment, r.status, r.created_at,
-                       reviewer.username AS reviewer_name, reviewer.email AS reviewer_email,
-                       driver.username AS driver_name
-                FROM reviews r
-                JOIN users reviewer ON reviewer.user_id = r.reviewer_id
-                JOIN users driver ON driver.user_id = r.driver_id
-                WHERE r.status = 'pending'
-                ORDER BY r.created_at DESC
-                LIMIT 50
-            ")->fetchAll(\PDO::FETCH_ASSOC);
+            $pendingReviews = BaseModel::query(
+                "SELECT r.id, r.rating, r.comment, r.status, r.created_at,
+                        reviewer.username AS reviewer_name, reviewer.email AS reviewer_email,
+                        driver.username AS driver_name
+                 FROM reviews r
+                 JOIN users reviewer ON reviewer.user_id = r.reviewer_id
+                 JOIN users driver ON driver.user_id = r.driver_id
+                 WHERE r.status = 'pending'
+                 ORDER BY r.created_at DESC
+                 LIMIT 50"
+            )->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $pendingReviews = [];
         }
@@ -37,7 +36,7 @@ class ModeratorController extends BaseController
                 $mongo->find('trip_incidents', ['status' => 'resolved'])
             );
 
-            foreach ($allIncidents as &$inc) {
+            foreach ($allIncidents as &$incident) {
                 $tripInfo = BaseModel::query(
                     "SELECT t.trip_id, t.departure_datetime, t.arrival_datetime,
                             cd.name AS ville_depart, ca.name AS ville_arrivee,
@@ -49,19 +48,19 @@ class ModeratorController extends BaseController
                      JOIN users driver ON t.chauffeur_id = driver.user_id
                      JOIN users reporter ON reporter.user_id = ?
                      WHERE t.trip_id = ?",
-                    [$inc['reporter_id'], $inc['trip_id']]
+                    [$incident['reporter_id'], $incident['trip_id']]
                 )->fetch();
 
                 if ($tripInfo) {
-                    $inc = array_merge($inc, $tripInfo);
+                    $incident = array_merge($incident, $tripInfo);
                 }
             }
-            unset($inc);
+            unset($incident);
 
             $incidents = array_values(array_filter($allIncidents, fn($i) => ($i['status'] ?? '') === 'pending'));
             $resolvedIncidents = array_values(array_filter($allIncidents, fn($i) => ($i['status'] ?? '') === 'resolved'));
         } catch (\Throwable $e) {
-            // MongoDB might not be available
+            // MongoDB optionnel
         }
 
         try {
@@ -73,13 +72,14 @@ class ModeratorController extends BaseController
         }
 
         $this->render('moderator/index', [
-            'pendingReviews'    => $pendingReviews,
-            'incidents'         => $incidents,
+            'pendingReviews' => $pendingReviews,
+            'incidents' => $incidents,
             'resolvedIncidents' => $resolvedIncidents,
-            'contactMessages'   => $contactMessages,
+            'contactMessages' => $contactMessages,
             'success' => $_SESSION['flash_success'] ?? '',
-            'error'   => $_SESSION['flash_error'] ?? ''
+            'error' => $_SESSION['flash_error'] ?? '',
         ]);
+
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     }
 
@@ -96,15 +96,10 @@ class ModeratorController extends BaseController
     public function approveReview()
     {
         $reviewId = (int) ($_POST['review_id'] ?? 0);
-
         if ($reviewId > 0) {
-            BaseModel::query(
-                "UPDATE reviews SET status = 'approved' WHERE id = ?",
-                [$reviewId]
-            );
-            $_SESSION['flash_success'] = 'Avis approuvé.';
+            BaseModel::query("UPDATE reviews SET status = 'approved' WHERE id = ?", [$reviewId]);
+            $_SESSION['flash_success'] = 'Avis approuve.';
         }
-
         header('Location: /moderator');
         exit;
     }
@@ -112,135 +107,119 @@ class ModeratorController extends BaseController
     public function rejectReview()
     {
         $reviewId = (int) ($_POST['review_id'] ?? 0);
-
         if ($reviewId > 0) {
-            BaseModel::query(
-                "UPDATE reviews SET status = 'rejected' WHERE id = ?",
-                [$reviewId]
-            );
-            $_SESSION['flash_success'] = 'Avis rejeté.';
+            BaseModel::query("UPDATE reviews SET status = 'rejected' WHERE id = ?", [$reviewId]);
+            $_SESSION['flash_success'] = 'Avis rejete.';
         }
-
         header('Location: /moderator');
         exit;
     }
 
     public function resolveIncident()
-{
-    $tripId = (int) ($_POST['trip_id'] ?? 0);
-    $reporterId = (int) ($_POST['reporter_id'] ?? 0);
-    $creditDriver = ($_POST['credit_driver'] ?? '1') === '1';
+    {
+        $userModel = new User();
+        $mailer = new Mailer();
 
-    if ($tripId > 0 && $reporterId > 0) {
-        try {
-            $validStatuses = ['validated', 'disputed'];
-            $participantStatus = $creditDriver ? 'validated' : 'disputed';
-            
-            if (!in_array($participantStatus, $validStatuses, true)) {
-                throw new \Exception("Invalid participant status: " . $participantStatus);
-            }
+        $tripId = (int) ($_POST['trip_id'] ?? 0);
+        $reporterId = (int) ($_POST['reporter_id'] ?? 0);
+        $creditDriver = ($_POST['credit_driver'] ?? '1') === '1';
 
-            $mongo = MongoDB::getInstance();
-            $mongo->updateWhere(
-                'trip_incidents',
-                ['$or' => [
-                    ['trip_id' => $tripId,         'reporter_id' => $reporterId],
-                    ['trip_id' => (string)$tripId, 'reporter_id' => (string)$reporterId],
-                ]],
-                [
-                    'status' => 'resolved',
-                    'resolved_at' => date('Y-m-d H:i:s'),
-                    'decision' => $creditDriver ? 'favor_driver' : 'favor_passenger',
-                ]
-            );
+        if ($tripId > 0 && $reporterId > 0) {
+            try {
+                $participantStatus = $creditDriver ? 'validated' : 'disputed';
+                if (!in_array($participantStatus, ['validated', 'disputed'], true)) {
+                    throw new \RuntimeException('Invalid participant status');
+                }
 
-            $stmt = BaseModel::query(
-                "UPDATE trip_participants
-                 SET status = ?
-                 WHERE trip_id = ? AND user_id = ?",
-                [$participantStatus, $tripId, $reporterId]
-            );
-            
-            if ($stmt && $stmt->rowCount() === 0) {
-                error_log("Warning: No participant found for trip_id=$tripId, user_id=$reporterId when resolving incident");
-            }
+                $mongo = MongoDB::getInstance();
+                $mongo->updateWhere(
+                    'trip_incidents',
+                    ['$or' => [
+                        ['trip_id' => $tripId, 'reporter_id' => $reporterId],
+                        ['trip_id' => (string) $tripId, 'reporter_id' => (string) $reporterId],
+                    ]],
+                    [
+                        'status' => 'resolved',
+                        'resolved_at' => date('Y-m-d H:i:s'),
+                        'decision' => $creditDriver ? 'favor_driver' : 'favor_passenger',
+                    ]
+                );
 
-            $trip = BaseModel::query(
-                "SELECT chauffeur_id, price
-                 FROM trips
-                 WHERE trip_id = ?
-                 LIMIT 1",
-                [$tripId]
-            )->fetch();
+                BaseModel::query(
+                    "UPDATE trip_participants
+                     SET status = ?
+                     WHERE trip_id = ? AND user_id = ?",
+                    [$participantStatus, $tripId, $reporterId]
+                );
 
-            if ($trip) {
-                $driver = User::find($trip['chauffeur_id']);
+                $trip = BaseModel::query(
+                    "SELECT chauffeur_id, price
+                     FROM trips
+                     WHERE trip_id = ?
+                     LIMIT 1",
+                    [$tripId]
+                )->fetch();
 
-                if ($creditDriver) {
-                    User::addCredits(
-                        $trip['chauffeur_id'],
-                        (int)$trip['price'],
-                        'credit',
-                        'Résolution incident — décision en faveur du chauffeur',
-                        $tripId
-                    );
+                if ($trip) {
+                    $driverId = (int) $trip['chauffeur_id'];
+                    $tripPrice = (int) $trip['price'];
+                    $driver = $userModel->find($driverId);
 
-                    if ($driver) {
-                        try {
-                            (new Mailer())->send(
-                                $driver['email'],
-                                "Incident résolu - EcoRide",
-                                "Bonjour {$driver['username']},\n\nL'incident signalé sur le trajet #{$tripId} a été examiné. La décision est en votre faveur : vous avez été crédité du montant du trajet.\n\nEcoRide"
-                            );
-                        } catch (\Throwable $mailErr) {
-                            error_log("Mailer error resolveIncident (favor driver): " . $mailErr->getMessage());
-                        }
-                    }
-
-                    $_SESSION['flash_success'] = 'Incident résolu — décision en faveur du chauffeur (crédité).';
-                } else {
-                    $passenger = User::find($reporterId);
-                    if ($passenger) {
-                        User::addCredits(
-                            $reporterId,
-                            (int)$trip['price'] + 2,
-                            'refund',
-                            'Remboursement incident — décision en faveur du passager',
+                    if ($creditDriver) {
+                        $userModel->addCredits(
+                            $driverId,
+                            $tripPrice,
+                            'credit',
+                            'Resolution incident - decision en faveur du chauffeur',
                             $tripId
                         );
-                        try {
-                            (new Mailer())->send(
-                                $passenger['email'],
-                                "Incident résolu - EcoRide",
-                                "Bonjour {$passenger['username']},\n\nL'incident sur le trajet #{$tripId} a été examiné. La décision est en votre faveur : vous avez été remboursé de " . ((int)$trip['price'] + 2) . " crédits.\n\nEcoRide"
-                            );
-                        } catch (\Throwable $mailErr) {
-                            error_log("Mailer error resolveIncident (favor passenger mail): " . $mailErr->getMessage());
-                        }
-                    }
 
-                    if ($driver) {
-                        try {
-                            (new Mailer())->send(
+                        if ($driver) {
+                            $mailer->send(
                                 $driver['email'],
-                                "Incident résolu - EcoRide",
-                                "Bonjour {$driver['username']},\n\nL'incident signalé sur le trajet #{$tripId} a été examiné. La décision est en faveur du passager : aucun crédit ne vous a été attribué pour ce trajet.\n\nEcoRide"
+                                'Incident resolu - EcoRide',
+                                "Bonjour {$driver['username']},\n\nL incident signale sur le trajet #{$tripId} a ete examine. La decision est en votre faveur : vous avez ete credite du montant du trajet.\n\nEcoRide"
                             );
-                        } catch (\Throwable $mailErr) {
-                            error_log("Mailer error resolveIncident (favor passenger): " . $mailErr->getMessage());
                         }
+
+                        $_SESSION['flash_success'] = 'Incident resolu - decision en faveur du chauffeur.';
+                    } else {
+                        $passenger = $userModel->find($reporterId);
+                        if ($passenger) {
+                            $refund = $tripPrice + 2;
+                            $userModel->addCredits(
+                                $reporterId,
+                                $refund,
+                                'refund',
+                                'Remboursement incident - decision en faveur du passager',
+                                $tripId
+                            );
+
+                            $mailer->send(
+                                $passenger['email'],
+                                'Incident resolu - EcoRide',
+                                "Bonjour {$passenger['username']},\n\nL incident sur le trajet #{$tripId} a ete examine. La decision est en votre faveur : vous avez ete rembourse de {$refund} credits.\n\nEcoRide"
+                            );
+                        }
+
+                        if ($driver) {
+                            $mailer->send(
+                                $driver['email'],
+                                'Incident resolu - EcoRide',
+                                "Bonjour {$driver['username']},\n\nL incident signale sur le trajet #{$tripId} a ete examine. La decision est en faveur du passager : aucun credit ne vous a ete attribue pour ce trajet.\n\nEcoRide"
+                            );
+                        }
+
+                        $_SESSION['flash_success'] = 'Incident resolu - decision en faveur du passager.';
                     }
-
-                    $_SESSION['flash_success'] = 'Incident résolu — décision en faveur du passager (remboursé).';
                 }
+            } catch (\Throwable $e) {
+                error_log('resolveIncident error: ' . $e->getMessage());
+                $_SESSION['flash_error'] = 'Erreur: ' . $e->getMessage();
             }
-        } catch (\Throwable $e) {
-            error_log("resolveIncident error: " . $e->getMessage());
-            $_SESSION['flash_error'] = 'Erreur : ' . $e->getMessage();
         }
-    }
 
-    header('Location: /moderator');
-    exit;
-}
+        header('Location: /moderator');
+        exit;
+    }
 }

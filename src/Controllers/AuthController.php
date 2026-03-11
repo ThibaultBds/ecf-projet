@@ -13,10 +13,11 @@ class AuthController extends BaseController
         if (!empty($_GET['redirect'])) {
             $_SESSION['intended_url'] = $_GET['redirect'];
         }
+
         $this->render('auth/login', [
             'title' => 'Connexion - EcoRide',
             'error' => '',
-            'email' => ''
+            'email' => '',
         ]);
     }
 
@@ -29,17 +30,16 @@ class AuthController extends BaseController
             return $this->render('auth/login', [
                 'title' => 'Connexion - EcoRide',
                 'error' => 'Veuillez remplir tous les champs.',
-                'email' => $email
+                'email' => $email,
             ]);
         }
 
         $result = AuthManager::login($email, $password);
-
         if (!$result['success']) {
             return $this->render('auth/login', [
                 'title' => 'Connexion - EcoRide',
                 'error' => $result['message'],
-                'email' => $email
+                'email' => $email,
             ]);
         }
 
@@ -54,21 +54,23 @@ class AuthController extends BaseController
         if (!empty($_GET['redirect'])) {
             $_SESSION['intended_url'] = $_GET['redirect'];
         }
+
         $this->render('auth/register', [
             'title' => 'Inscription - EcoRide',
             'error' => '',
             'success' => '',
-            'old' => []
+            'old' => [],
         ]);
     }
 
     public function register()
     {
+        $userModel = new User();
+
         $username = trim($_POST['username'] ?? '');
         $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
         $passwordConfirm = $_POST['password_confirm'] ?? '';
-
         $old = ['username' => $username, 'email' => $email];
 
         if (empty($username) || empty($email) || empty($password) || empty($passwordConfirm)) {
@@ -76,7 +78,7 @@ class AuthController extends BaseController
                 'title' => 'Inscription - EcoRide',
                 'error' => 'Veuillez remplir tous les champs.',
                 'success' => '',
-                'old' => $old
+                'old' => $old,
             ]);
         }
 
@@ -85,16 +87,16 @@ class AuthController extends BaseController
                 'title' => 'Inscription - EcoRide',
                 'error' => 'Adresse email invalide.',
                 'success' => '',
-                'old' => $old
+                'old' => $old,
             ]);
         }
 
         if (strlen($password) < 8) {
             return $this->render('auth/register', [
                 'title' => 'Inscription - EcoRide',
-                'error' => 'Le mot de passe doit contenir au moins 8 caractères.',
+                'error' => 'Le mot de passe doit contenir au moins 8 caracteres.',
                 'success' => '',
-                'old' => $old
+                'old' => $old,
             ]);
         }
 
@@ -103,43 +105,42 @@ class AuthController extends BaseController
                 'title' => 'Inscription - EcoRide',
                 'error' => 'Les mots de passe ne correspondent pas.',
                 'success' => '',
-                'old' => $old
+                'old' => $old,
             ]);
         }
 
-        if (User::exists($email, $username)) {
+        if ($userModel->exists($email, $username)) {
             return $this->render('auth/register', [
                 'title' => 'Inscription - EcoRide',
-                'error' => 'Cet email ou ce pseudo est déjà utilisé.',
+                'error' => 'Cet email ou ce pseudo est deja utilise.',
                 'success' => '',
-                'old' => $old
+                'old' => $old,
             ]);
         }
 
         try {
-            User::create([
-            'username' => $username,
-            'email' => $email,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
-            'credits' => 20,
-            'role' => 'user',
-            'is_driver' => 0,
-            'is_passenger' => 1
-]);
+            $userModel->create([
+                'username' => $username,
+                'email' => $email,
+                'password' => password_hash($password, PASSWORD_DEFAULT),
+                'credits' => 20,
+                'role' => 'user',
+                'is_driver' => 0,
+                'is_passenger' => 1,
+            ]);
 
-
-            $_SESSION['flash_success'] = 'Compte créé avec succès ! Connectez-vous.';
+            $_SESSION['flash_success'] = 'Compte cree avec succes ! Connectez-vous.';
             $redirectAfter = $_SESSION['intended_url'] ?? null;
             session_write_close();
             header('Location: /login' . ($redirectAfter ? '?redirect=' . urlencode($redirectAfter) : ''));
             exit;
         } catch (Exception $e) {
-            error_log("Erreur inscription : " . $e->getMessage());
+            error_log('Erreur inscription : ' . $e->getMessage());
             return $this->render('auth/register', [
                 'title' => 'Inscription - EcoRide',
-                'error' => 'Une erreur est survenue lors de l\'inscription.',
+                'error' => 'Une erreur est survenue lors de l inscription.',
                 'success' => '',
-                'old' => $old
+                'old' => $old,
             ]);
         }
     }
@@ -147,12 +148,12 @@ class AuthController extends BaseController
     public function logout()
     {
         $csrfToken = $_SESSION['csrf_token'] ?? null;
-        
+
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_unset();
             session_destroy();
         }
-        
+
         session_start();
         $_SESSION['csrf_token'] = $csrfToken ?? bin2hex(random_bytes(32));
 

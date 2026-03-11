@@ -2,18 +2,20 @@
 
 namespace App\Controllers;
 
-use App\Models\User;
 use App\Models\BaseModel;
+use App\Models\User;
 
 class AdminController extends BaseController
 {
     public function index()
     {
+        $userModel = new User();
+
         $stats = [
-            'users' => User::count(),
-            'trips' => (int) BaseModel::query("SELECT COUNT(*) as total FROM trips WHERE status = 'scheduled'")->fetch()['total'],
-            'pending_reviews' => (int) BaseModel::query("SELECT COUNT(*) as total FROM reviews WHERE status = 'pending'")->fetch()['total'],
-            'platform_credits' => (int) BaseModel::query("SELECT COALESCE(-SUM(amount), 0) as total FROM credit_logs WHERE type = 'platform_fee'")->fetch()['total']
+            'users' => $userModel->count(),
+            'trips' => (int) BaseModel::query("SELECT COUNT(*) AS total FROM trips WHERE status = 'scheduled'")->fetch()['total'],
+            'pending_reviews' => (int) BaseModel::query("SELECT COUNT(*) AS total FROM reviews WHERE status = 'pending'")->fetch()['total'],
+            'platform_credits' => (int) BaseModel::query("SELECT COALESCE(-SUM(amount), 0) AS total FROM credit_logs WHERE type = 'platform_fee'")->fetch()['total'],
         ];
 
         $tripsPerDay = BaseModel::query(
@@ -50,8 +52,9 @@ class AdminController extends BaseController
             'creditsPerDay' => $creditsPerDay,
             'contactMessages' => $contactMessages,
             'success' => $_SESSION['flash_success'] ?? '',
-            'error' => $_SESSION['flash_error'] ?? ''
+            'error' => $_SESSION['flash_error'] ?? '',
         ]);
+
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     }
 
@@ -66,17 +69,18 @@ class AdminController extends BaseController
         )->fetchAll(\PDO::FETCH_ASSOC);
 
         $this->render('admin/trips', [
-            'title' => 'Trajets planifiés - Admin',
+            'title' => 'Trajets planifies - Admin',
             'trips' => $trips,
         ]);
     }
 
     public function suspendUser()
     {
+        $userModel = new User();
         $userId = (int) ($_POST['user_id'] ?? 0);
 
         if ($userId > 0) {
-            User::update($userId, ['suspended' => 1]);
+            $userModel->update($userId, ['suspended' => 1]);
             $_SESSION['flash_success'] = 'Utilisateur suspendu.';
         }
 
@@ -86,11 +90,12 @@ class AdminController extends BaseController
 
     public function activateUser()
     {
+        $userModel = new User();
         $userId = (int) ($_POST['user_id'] ?? 0);
 
         if ($userId > 0) {
-            User::update($userId, ['suspended' => 0]);
-            $_SESSION['flash_success'] = 'Utilisateur réactivé.';
+            $userModel->update($userId, ['suspended' => 0]);
+            $_SESSION['flash_success'] = 'Utilisateur reactive.';
         }
 
         header('Location: /admin');
@@ -109,7 +114,7 @@ class AdminController extends BaseController
 
     public function addCredits()
     {
-        $userId  = (int) ($_POST['user_id'] ?? 0);
+        $userId = (int) ($_POST['user_id'] ?? 0);
         $credits = (int) ($_POST['credits'] ?? 0);
 
         if ($userId > 0 && $credits > 0) {
@@ -117,7 +122,7 @@ class AdminController extends BaseController
                 "UPDATE users SET credits = credits + ? WHERE user_id = ?",
                 [$credits, $userId]
             );
-            $_SESSION['flash_success'] = "$credits crédit(s) ajouté(s).";
+            $_SESSION['flash_success'] = "{$credits} credit(s) ajoute(s).";
         }
 
         header('Location: /admin');
@@ -126,6 +131,8 @@ class AdminController extends BaseController
 
     public function createEmployee()
     {
+        $userModel = new User();
+
         $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
         $username = trim($_POST['username'] ?? '');
@@ -137,27 +144,27 @@ class AdminController extends BaseController
             exit;
         }
 
-        if (!in_array($role, ['employe', 'user'])) {
-            $_SESSION['flash_error'] = 'Rôle invalide.';
+        if (!in_array($role, ['employe', 'user'], true)) {
+            $_SESSION['flash_error'] = 'Role invalide.';
             header('Location: /admin');
             exit;
         }
 
-        if (User::exists($email, $username)) {
-            $_SESSION['flash_error'] = 'Email ou pseudo déjà utilisé.';
+        if ($userModel->exists($email, $username)) {
+            $_SESSION['flash_error'] = 'Email ou pseudo deja utilise.';
             header('Location: /admin');
             exit;
         }
 
-        User::create([
+        $userModel->create([
             'username' => $username,
             'email' => $email,
             'password' => password_hash($password, PASSWORD_DEFAULT),
             'credits' => 0,
-            'role' => $role
+            'role' => $role,
         ]);
 
-        $_SESSION['flash_success'] = "Compte $role créé avec succès !";
+        $_SESSION['flash_success'] = "Compte {$role} cree avec succes !";
         header('Location: /admin');
         exit;
     }
