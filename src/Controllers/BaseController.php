@@ -14,8 +14,8 @@ class BaseController
         }
 
         ob_start();
-        require $viewPath; 
-        $content = ob_get_clean();
+        require $viewPath;
+        $content = ltrim(ob_get_clean(), "\xEF\xBB\xBF");
 
         require dirname(__DIR__, 2) . '/templates/layout.php';
 
