@@ -18,7 +18,7 @@ main {
   padding-top: 0;
 }
 
-main > :first-child {
+main > .hero:first-child {
   margin-top: 0;
 }
 
