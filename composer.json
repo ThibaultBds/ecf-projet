@@ -1,8 +1,9 @@
 {
   "require": {
-    "php": "^8.0",
+    "php": "^8.2",
     "ext-pdo": "*",
     "ext-pdo_mysql": "*",
+    "ext-mongodb": "*",
     "phpmailer/phpmailer": "^7.0"
   },
   "autoload": {
