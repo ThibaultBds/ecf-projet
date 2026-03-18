@@ -1,7 +1,6 @@
 button,
 .btn-primary,
-.btn-secondary,
-.btn-danger {
+.btn-secondary {
   border-radius: 10px;
   transition: all 0.2s ease;
 }
@@ -89,17 +88,17 @@ button:hover {
 }
 
 .btn-error {
-  background: linear-gradient(90deg, #ff6b6b, #e74c3c) !important;
-  color: white !important;
-  border: none !important;
-  padding: 10px 14px !important;
-  border-radius: 8px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease !important;
+  background: linear-gradient(90deg, #ff6b6b, #e74c3c);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
 }
 
 .btn-error:hover {
@@ -253,15 +252,12 @@ button:hover {
 }
 
 .hero .cta-btn.secondary {
-  background: rgba(255,255,255,0.12) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  box-shadow: none !important;
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: none;
 }
 
-.login-cta-btn, .register-cta-btn {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
 
 .admin-badge {
   display: inline-flex;
@@ -337,28 +333,6 @@ button:hover {
   color: #fff;
 }
 
-.trip-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px !important;
-  border-radius: 999px !important;
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  font-size: 0.85rem !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.4px !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
-  border: 1px solid rgba(0,0,0,0.06) !important;
-  vertical-align: middle;
-}
-
-.trip-status[style*="#636e72"],
-.trip-status[style*="#b2bec3"] {
-  color: #ffffff !important;
-  background: #636e72 !important;
-  border-color: rgba(0,0,0,0.06) !important;
-}
 
 .card-light {
   background: #f8f9fa;
@@ -567,9 +541,9 @@ button:hover {
 .trip-actions .btn-view,
 .trip-actions .btn-edit,
 .trip-actions .btn-cancel {
-  padding: 10px 14px !important;
-  border-radius: 12px !important;
-  font-size: 0.95rem !important;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.95rem;
   margin-bottom: 8px;
 }
 
@@ -782,16 +756,16 @@ button:hover {
 }
 
 #dateInput {
-  background: white !important;
-  color: #c8e6c9 !important;
-  font-weight: bold !important;
-  letter-spacing: 2px !important;
-  text-align: center !important;
-  cursor: pointer !important;
+  background: white;
+  color: #c8e6c9;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-align: center;
+  cursor: pointer;
 }
 
 #dateInput:focus {
-  outline: none !important;
+  outline: none;
 }
 
 .calc-grid {
