@@ -1,19 +1,19 @@
-﻿<section class="detail-container trip-detail-page">
+<section class="detail-container trip-detail-page">
     <div class="detail-card trip-detail-card">
 
         <div class="detail-header trip-detail-header">
             <h2 class="trip-detail-title">
-                <?= htmlspecialchars($covoiturage['ville_depart']) ?> → <?= htmlspecialchars($covoiturage['ville_arrivee']) ?>
+                <?= htmlspecialchars($covoiturage->villeDepart) ?> → <?= htmlspecialchars($covoiturage->villeArrivee) ?>
             </h2>
             <p class="trip-driver-line">
-                <?php if (!empty($covoiturage['conducteur_photo'])): ?>
-                    <img src="/uploads/<?= htmlspecialchars($covoiturage['conducteur_photo']) ?>" alt="Photo" class="trip-driver-photo">
+                <?php if (!empty($covoiturage->conducteurPhoto)): ?>
+                    <img src="/uploads/<?= htmlspecialchars($covoiturage->conducteurPhoto) ?>" alt="Photo" class="trip-driver-photo">
                 <?php else: ?>
                     <span class="material-icons trip-driver-fallback-icon">account_circle</span>
                 <?php endif; ?>
-                <span>Conducteur : <?= htmlspecialchars($covoiturage['conducteur']) ?></span>
+                <span>Conducteur : <?= htmlspecialchars($covoiturage->conducteur) ?></span>
             </p>
-            <?php if ($covoiturage['energy_type'] === 'electrique'): ?>
+            <?php if ($covoiturage->energyType === 'electrique'): ?>
                 <div class="trip-eco-badge">⚡ Trajet écologique</div>
             <?php endif; ?>
         </div>
@@ -23,26 +23,26 @@
                 <h4 class="trip-info-title">
                     <span class="material-icons trip-info-icon">schedule</span> Date et heure
                 </h4>
-                <p><?= date('d/m/Y à H:i', strtotime($covoiturage['departure_datetime'])) ?></p>
+                <p><?= date('d/m/Y à H:i', strtotime($covoiturage->departureDatetime)) ?></p>
             </div>
             <div class="info-item">
                 <h4 class="trip-info-title">
                     <span class="material-icons trip-info-icon">directions_car</span> Véhicule
                 </h4>
-                <p><?= htmlspecialchars($covoiturage['brand']) ?> <?= htmlspecialchars($covoiturage['model']) ?></p>
-                <p class="trip-subtext"><?= ucfirst(htmlspecialchars($covoiturage['energy_type'])) ?></p>
+                <p><?= htmlspecialchars($covoiturage->brand) ?> <?= htmlspecialchars($covoiturage->model) ?></p>
+                <p class="trip-subtext"><?= ucfirst(htmlspecialchars($covoiturage->energyType)) ?></p>
             </div>
             <div class="info-item">
                 <h4 class="trip-info-title">
                     <span class="material-icons trip-info-icon">people</span> Places disponibles
                 </h4>
-                <p><?= (int)$covoiturage['available_seats'] ?> / <?= (int)$covoiturage['seats_available'] ?> places</p>
+                <p><?= (int) $covoiturage->availableSeats ?> / <?= (int) $covoiturage->seatsAvailable ?> places</p>
             </div>
             <div class="info-item">
                 <h4 class="trip-info-title">
                     <span class="material-icons trip-info-icon">euro</span> Prix
                 </h4>
-                <p class="trip-price"><?= number_format($covoiturage['price'], 2) ?>€</p>
+                <p class="trip-price"><?= number_format($covoiturage->price, 2) ?>€</p>
                 <p class="trip-subtext">Crédits requis : <?= $credit_requis ?></p>
             </div>
         </div>
@@ -53,17 +53,17 @@
             <div class="trip-pref-tags">
                 <?php
                 $prefIcons = [
-                    'fumeur' => ['smoking_rooms', 'Fumeur accepté', 'Non-fumeur'],
-                    'animaux' => ['pets', 'Animaux acceptés', 'Pas d\'animaux'],
-                    'musique' => ['music_note', 'Musique', 'Silence préféré'],
+                    'fumeur'     => ['smoking_rooms', 'Fumeur accepté', 'Non-fumeur'],
+                    'animaux'    => ['pets', 'Animaux acceptés', 'Pas d\'animaux'],
+                    'musique'    => ['music_note', 'Musique', 'Silence préféré'],
                     'discussion' => ['chat', '', ''],
                 ];
                 $discussionLabels = ['plaisir' => 'Discussion avec plaisir', 'un_peu' => 'Discussion modérée', 'silence' => 'Silence préféré'];
 
                 foreach (['fumeur', 'animaux', 'musique'] as $key):
-                    $val = $driverPrefs[$key] ?? 'non';
-                    $icon = $prefIcons[$key][0];
-                    $label = ($val === 'oui') ? $prefIcons[$key][1] : $prefIcons[$key][2];
+                    $val        = $driverPrefs[$key] ?? 'non';
+                    $icon       = $prefIcons[$key][0];
+                    $label      = ($val === 'oui') ? $prefIcons[$key][1] : $prefIcons[$key][2];
                     $colorClass = ($val === 'oui') ? 'pref-positive' : 'pref-neutral';
                 ?>
                     <span class="trip-pref-tag <?= $colorClass ?>">
@@ -104,15 +104,15 @@
                 <?php foreach ($reviews as $review): ?>
                     <div class="review-card trip-review-card">
                         <div class="trip-review-head">
-                            <strong><?= htmlspecialchars($review['reviewer_name']) ?></strong>
+                            <strong><?= htmlspecialchars($review->reviewerName) ?></strong>
                             <div class="trip-review-stars">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <span class="material-icons trip-star <?= $i <= $review['rating'] ? 'trip-star-on' : 'trip-star-off' ?>">star</span>
+                                    <span class="material-icons trip-star <?= $i <= $review->rating ? 'trip-star-on' : 'trip-star-off' ?>">star</span>
                                 <?php endfor; ?>
                             </div>
                         </div>
-                        <p class="trip-review-comment">"<?= htmlspecialchars($review['comment']) ?>"</p>
-                        <small class="trip-review-date"><?= date('d/m/Y', strtotime($review['created_at'])) ?></small>
+                        <p class="trip-review-comment">"<?= htmlspecialchars($review->comment) ?>"</p>
+                        <small class="trip-review-date"><?= date('d/m/Y', strtotime($review->createdAt)) ?></small>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -125,12 +125,12 @@
                         <span class="material-icons trip-inline-icon">check_circle</span>
                         Vous participez déjà à ce trajet
                     </p>
-                <?php elseif ((int)$covoiturage['chauffeur_id'] === ($_SESSION['user']['id'] ?? 0)): ?>
+                <?php elseif ((int) $covoiturage->chauffeurId === ($_SESSION['user']['id'] ?? 0)): ?>
                     <p class="trip-participation-note trip-note-neutral">
                         <span class="material-icons trip-inline-icon">directions_car</span>
                         Vous êtes le conducteur de ce trajet
                     </p>
-                <?php elseif ((int)$covoiturage['available_seats'] > 0): ?>
+                <?php elseif ((int) $covoiturage->availableSeats > 0): ?>
                     <?php if ($user_credit >= $credit_requis): ?>
                         <p class="trip-participation-note trip-note-success trip-note-gap">
                             <span class="material-icons trip-inline-icon">account_balance_wallet</span>
@@ -155,10 +155,10 @@
                     <h3 class="trip-login-title">Rejoignez l'aventure EcoRide !</h3>
                     <p class="trip-login-text">Connectez-vous pour participer à ce covoiturage</p>
                     <div class="trip-login-links">
-                        <a href="/login?redirect=/trip/<?= $covoiturage['trip_id'] ?>" class="trip-login-link trip-login-link-soft">
+                        <a href="/login?redirect=/trip/<?= $covoiturage->tripId ?>" class="trip-login-link trip-login-link-soft">
                             <span class="material-icons">login</span> Se connecter
                         </a>
-                        <a href="/register?redirect=/trip/<?= $covoiturage['trip_id'] ?>" class="trip-login-link trip-login-link-solid">
+                        <a href="/register?redirect=/trip/<?= $covoiturage->tripId ?>" class="trip-login-link trip-login-link-solid">
                             <span class="material-icons">person_add</span> Créer un compte
                         </a>
                     </div>
@@ -177,8 +177,8 @@
     <div class="trip-modal-card">
         <span class="material-icons trip-modal-ok-icon">check_circle</span>
         <h3 class="trip-modal-title">Confirmer votre participation</h3>
-        <p><strong>Trajet :</strong> <?= htmlspecialchars($covoiturage['ville_depart']) ?> → <?= htmlspecialchars($covoiturage['ville_arrivee']) ?></p>
-        <p><strong>Prix :</strong> <?= number_format($covoiturage['price'], 2) ?>€</p>
+        <p><strong>Trajet :</strong> <?= htmlspecialchars($covoiturage->villeDepart) ?> → <?= htmlspecialchars($covoiturage->villeArrivee) ?></p>
+        <p><strong>Prix :</strong> <?= number_format($covoiturage->price, 2) ?>€</p>
         <p><strong>Crédits :</strong> <?= $credit_requis ?></p>
         <div class="trip-modal-actions">
             <button type="button" id="cancel-btn" class="btn-secondary trip-modal-btn">Annuler</button>
@@ -214,11 +214,11 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmBtn.addEventListener('click', function() {
             confirmBtn.disabled = true;
             var fd = new FormData();
-            fd.append('trip_id', '<?= (int)$covoiturage['trip_id'] ?>');
+            fd.append('trip_id', '<?= $covoiturage->tripId ?>');
             fd.append('credits', '<?= $credit_requis ?>');
             fd.append('csrf_token', '<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>');
 
-            fetch('/api/trip/<?= (int)$covoiturage['trip_id'] ?>/join', { method: 'POST', body: fd })
+            fetch('/api/trip/<?= $covoiturage->tripId ?>/join', { method: 'POST', body: fd })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     confirmModal.close();

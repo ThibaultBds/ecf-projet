@@ -4,21 +4,21 @@ namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
 use App\Core\Auth\AuthManager;
-use App\Models\Review;
-use App\Models\TripParticipant;
+use App\Repositories\ReviewRepository;
+use App\Repositories\TripParticipantRepository;
 use Exception;
 
 class ReviewApiController extends BaseController
 {
     public function submit()
     {
-        $userId = AuthManager::id();
-        $tripParticipantModel = new TripParticipant();
-        $reviewModel = new Review();
+        $userId          = AuthManager::id();
+        $participantRepo = new TripParticipantRepository();
+        $reviewRepo      = new ReviewRepository();
 
-        $tripId = (int) ($_POST['trip_id'] ?? 0);
+        $tripId  = (int) ($_POST['trip_id'] ?? 0);
         $driverId = (int) ($_POST['driver_id'] ?? 0);
-        $rating = (int) ($_POST['rating'] ?? 0);
+        $rating  = (int) ($_POST['rating'] ?? 0);
         $comment = trim($_POST['comment'] ?? '');
 
         if ($rating < 1 || $rating > 5) {
@@ -33,26 +33,26 @@ class ReviewApiController extends BaseController
             exit;
         }
 
-        if (!$tripParticipantModel->isParticipating($tripId, $userId)) {
+        if (!$participantRepo->isParticipating($tripId, $userId)) {
             $_SESSION['flash_error'] = 'Vous ne participez pas a ce trajet.';
             header('Location: /my-trips');
             exit;
         }
 
-        if ($tripParticipantModel->hasReviewed($tripId, $userId)) {
+        if ($participantRepo->hasReviewed($tripId, $userId)) {
             $_SESSION['flash_error'] = 'Vous avez deja note ce trajet.';
             header('Location: /my-trips');
             exit;
         }
 
         try {
-            $reviewModel->create([
-                'trip_id' => $tripId,
+            $reviewRepo->create([
+                'trip_id'     => $tripId,
                 'reviewer_id' => $userId,
-                'driver_id' => $driverId,
-                'rating' => $rating,
-                'comment' => $comment,
-                'status' => 'pending',
+                'driver_id'   => $driverId,
+                'rating'      => $rating,
+                'comment'     => $comment,
+                'status'      => 'pending',
             ]);
 
             header('Location: /my-trips?success=Avis envoye avec succes !');

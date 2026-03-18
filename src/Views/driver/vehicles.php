@@ -1,4 +1,4 @@
-﻿<main class="member-container">
+<main class="member-container">
     <h2 class="page-title-hero">
         <span class="material-icons page-icon-large">directions_car</span> Mes Véhicules
     </h2>
@@ -61,21 +61,21 @@
                     <div class="ride-content">
                         <p class="ride-title">
                             <span class="material-icons ride-icon">directions_car</span>
-                            <?= htmlspecialchars($v['brand']) ?> <?= htmlspecialchars($v['model']) ?>
+                            <?= htmlspecialchars($v->brand) ?> <?= htmlspecialchars($v->model) ?>
                         </p>
                         <p class="small-muted">
-                            Couleur : <?= htmlspecialchars($v['color']) ?>
-                            | Plaque : <?= htmlspecialchars($v['license_plate']) ?>
-                            | <?= ucfirst(htmlspecialchars($v['energy_type'])) ?>
-                            | <?= $v['seats_available'] ?> places
+                            Couleur : <?= htmlspecialchars($v->color) ?>
+                            | Plaque : <?= htmlspecialchars($v->licensePlate) ?>
+                            | <?= ucfirst(htmlspecialchars($v->energyType)) ?>
+                            | <?= $v->seatsAvailable ?> places
                         </p>
-                        <?php if ($v['energy_type'] === 'electrique'): ?>
+                        <?php if ($v->energyType === 'electrique'): ?>
                             <span class="eco-badge eco-badge-inline">⚡ Écologique</span>
                         <?php endif; ?>
                     </div>
                     <form method="POST" action="/driver/vehicles/delete" class="inline-form">
                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                        <input type="hidden" name="vehicle_id" value="<?= $v['vehicle_id'] ?>">
+                        <input type="hidden" name="vehicle_id" value="<?= $v->vehicleId ?>">
                         <button type="submit" class="btn-danger" onclick="return confirm('Supprimer ce véhicule ?');">Supprimer</button>
                     </form>
                 </div>

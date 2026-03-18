@@ -3,35 +3,36 @@
 namespace App\Controllers;
 
 use App\Core\Auth\AuthManager;
-use App\Models\Vehicle;
+use App\Repositories\VehicleRepository;
 
 class VehicleController extends BaseController
 {
     public function index()
     {
-        $userId = AuthManager::id();
-        $vehicleModel = new Vehicle();
-        $vehicles = $vehicleModel->byUser($userId);
+        $userId      = AuthManager::id();
+        $vehicleRepo = new VehicleRepository();
+        $vehicles    = $vehicleRepo->byUser($userId);
 
         $this->render('driver/vehicles', [
-            'title' => 'Mes Véhicules - EcoRide',
+            'title'    => 'Mes Véhicules - EcoRide',
             'vehicles' => $vehicles,
-            'error' => $_SESSION['flash_error'] ?? '',
-            'success' => $_SESSION['flash_success'] ?? ''
+            'error'    => $_SESSION['flash_error'] ?? '',
+            'success'  => $_SESSION['flash_success'] ?? '',
         ]);
         unset($_SESSION['flash_error'], $_SESSION['flash_success']);
     }
 
     public function store()
     {
-        $userId = AuthManager::id();
-        $vehicleModel = new Vehicle();
-        $brand = trim($_POST['brand'] ?? '');
-        $model = trim($_POST['model'] ?? '');
-        $color = trim($_POST['color'] ?? '');
-        $licensePlate = strtoupper(trim($_POST['license_plate'] ?? ''));
-        $energyType = $_POST['energy_type'] ?? 'essence';
-        $seatsAvailable = (int) ($_POST['seats_available'] ?? 4);
+        $userId      = AuthManager::id();
+        $vehicleRepo = new VehicleRepository();
+
+        $brand            = trim($_POST['brand'] ?? '');
+        $model            = trim($_POST['model'] ?? '');
+        $color            = trim($_POST['color'] ?? '');
+        $licensePlate     = strtoupper(trim($_POST['license_plate'] ?? ''));
+        $energyType       = $_POST['energy_type'] ?? 'essence';
+        $seatsAvailable   = (int) ($_POST['seats_available'] ?? 4);
         $registrationDate = $_POST['registration_date'] ?? date('Y-m-d');
 
         if (empty($brand) || empty($model) || empty($color) || empty($licensePlate)) {
@@ -40,7 +41,7 @@ class VehicleController extends BaseController
             exit;
         }
 
-        if (!$vehicleModel->isValidPlate($licensePlate)) {
+        if (!$vehicleRepo->isValidPlate($licensePlate)) {
             $_SESSION['flash_error'] = 'Format de plaque invalide (ex: AB-123-CD).';
             header('Location: /driver/vehicles');
             exit;
@@ -53,15 +54,15 @@ class VehicleController extends BaseController
         }
 
         try {
-            $vehicleModel->create([
-                'user_id' => $userId,
-                'brand' => $brand,
-                'model' => $model,
-                'color' => $color,
-                'license_plate' => $licensePlate,
-                'energy_type' => $energyType,
-                'seats_available' => $seatsAvailable,
-                'registration_date' => $registrationDate
+            $vehicleRepo->create([
+                'user_id'           => $userId,
+                'brand'             => $brand,
+                'model'             => $model,
+                'color'             => $color,
+                'license_plate'     => $licensePlate,
+                'energy_type'       => $energyType,
+                'seats_available'   => $seatsAvailable,
+                'registration_date' => $registrationDate,
             ]);
         } catch (\Exception $e) {
             $_SESSION['flash_error'] = 'Cette plaque d\'immatriculation est déjà enregistrée.';
@@ -76,18 +77,18 @@ class VehicleController extends BaseController
 
     public function update()
     {
-        $userId = AuthManager::id();
-        $vehicleModel = new Vehicle();
-        $vehicleId = (int) ($_POST['vehicle_id'] ?? 0);
+        $userId      = AuthManager::id();
+        $vehicleRepo = new VehicleRepository();
+        $vehicleId   = (int) ($_POST['vehicle_id'] ?? 0);
 
-        if (!$vehicleModel->belongsToUser($vehicleId, $userId)) {
+        if (!$vehicleRepo->belongsToUser($vehicleId, $userId)) {
             $_SESSION['flash_error'] = 'Véhicule non trouvé.';
             header('Location: /driver/vehicles');
             exit;
         }
 
         $licensePlate = strtoupper(trim($_POST['license_plate'] ?? ''));
-        if (!empty($licensePlate) && !$vehicleModel->isValidPlate($licensePlate)) {
+        if (!empty($licensePlate) && !$vehicleRepo->isValidPlate($licensePlate)) {
             $_SESSION['flash_error'] = 'Format de plaque invalide.';
             header('Location: /driver/vehicles');
             exit;
@@ -104,7 +105,7 @@ class VehicleController extends BaseController
         }
 
         if (!empty($data)) {
-            $vehicleModel->update($vehicleId, $data);
+            $vehicleRepo->update($vehicleId, $data);
         }
 
         $_SESSION['flash_success'] = 'Véhicule mis à jour !';
@@ -114,17 +115,17 @@ class VehicleController extends BaseController
 
     public function destroy()
     {
-        $userId = AuthManager::id();
-        $vehicleModel = new Vehicle();
-        $vehicleId = (int) ($_POST['vehicle_id'] ?? 0);
+        $userId      = AuthManager::id();
+        $vehicleRepo = new VehicleRepository();
+        $vehicleId   = (int) ($_POST['vehicle_id'] ?? 0);
 
-        if (!$vehicleModel->belongsToUser($vehicleId, $userId)) {
+        if (!$vehicleRepo->belongsToUser($vehicleId, $userId)) {
             $_SESSION['flash_error'] = 'Véhicule non trouvé.';
             header('Location: /driver/vehicles');
             exit;
         }
 
-        $vehicleModel->destroy($vehicleId);
+        $vehicleRepo->destroy($vehicleId);
         $_SESSION['flash_success'] = 'Véhicule supprimé.';
         header('Location: /driver/vehicles');
         exit;

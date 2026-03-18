@@ -4,9 +4,9 @@ namespace App\Controllers;
 
 use App\Controllers\DriverController;
 use App\Core\Auth\AuthManager;
-use App\Models\Review;
-use App\Models\TripParticipant;
-use App\Models\User;
+use App\Repositories\ReviewRepository;
+use App\Repositories\TripParticipantRepository;
+use App\Repositories\UserRepository;
 use App\Services\TripService;
 
 class TripController extends BaseController
@@ -20,23 +20,23 @@ class TripController extends BaseController
 
     public function index()
     {
-        $filters = $this->tripService->buildSearchFiltersFromQuery($_GET);
+        $filters    = $this->tripService->buildSearchFiltersFromQuery($_GET);
         $searchData = $this->tripService->searchTrips($filters);
 
         $this->render('trips/index', [
-            'title' => 'Covoiturages - EcoRide',
+            'title'        => 'Covoiturages - EcoRide',
             'covoiturages' => $searchData['trips'],
-            'filters' => $searchData['filters'],
-            'hasSearched' => $searchData['hasSearched'],
-            'nearestDate' => $searchData['nearestDate'],
-            'isDriver' => !empty($_SESSION['user']['is_driver']),
-            'isLoggedIn' => AuthManager::check(),
+            'filters'      => $searchData['filters'],
+            'hasSearched'  => $searchData['hasSearched'],
+            'nearestDate'  => $searchData['nearestDate'],
+            'isDriver'     => !empty($_SESSION['user']['is_driver']),
+            'isLoggedIn'   => AuthManager::check(),
         ]);
     }
 
     public function search()
     {
-        $filters = $this->tripService->buildSearchFiltersFromQuery($_GET);
+        $filters      = $this->tripService->buildSearchFiltersFromQuery($_GET);
         $covoiturages = $this->tripService->searchTripsForApi($filters);
 
         header('Content-Type: application/json');
@@ -54,42 +54,41 @@ class TripController extends BaseController
             return;
         }
 
-        $reviewModel = new Review();
-        $reviews = $reviewModel->byDriver($covoiturage['chauffeur_id']);
+        $reviewRepo = new ReviewRepository();
+        $reviews    = $reviewRepo->byDriver($covoiturage->chauffeurId);
 
-        $user_credit = 0;
+        $userCredit      = 0;
         $isParticipating = false;
+
         if (AuthManager::check()) {
-            $userModel = new User();
-            $participantModel = new TripParticipant();
-            $user = $userModel->find(AuthManager::id());
-            $user_credit = (int) ($user['credits'] ?? 0);
-            $isParticipating = $participantModel->isParticipating($id, AuthManager::id());
+            $userRepo        = new UserRepository();
+            $participantRepo = new TripParticipantRepository();
+            $user            = $userRepo->findById(AuthManager::id());
+            $userCredit      = $user ? $user->credits : 0;
+            $isParticipating = $participantRepo->isParticipating($id, AuthManager::id());
         }
 
-        $credit_requis = (int) $covoiturage['price'];
-
         try {
-            $driverPrefs = DriverController::getDriverPreferences((int) $covoiturage['chauffeur_id']);
+            $driverPrefs = DriverController::getDriverPreferences((int) $covoiturage->chauffeurId);
         } catch (\Throwable $e) {
             $driverPrefs = [];
         }
 
         $this->render('trips/show', [
-            'title' => $covoiturage['ville_depart'] . ' -> ' . $covoiturage['ville_arrivee'] . ' - EcoRide',
-            'covoiturage' => $covoiturage,
-            'reviews' => $reviews,
-            'user_credit' => $user_credit,
-            'credit_requis' => $credit_requis,
+            'title'           => $covoiturage->villeDepart . ' -> ' . $covoiturage->villeArrivee . ' - EcoRide',
+            'covoiturage'     => $covoiturage,
+            'reviews'         => $reviews,
+            'user_credit'     => $userCredit,
+            'credit_requis'   => (int) $covoiturage->price,
             'isParticipating' => $isParticipating,
-            'driverPrefs' => $driverPrefs,
+            'driverPrefs'     => $driverPrefs,
         ]);
     }
 
     public function myTrips()
     {
         $userId = AuthManager::id();
-        $error = '';
+        $error  = '';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['action'] ?? '';
@@ -109,20 +108,18 @@ class TripController extends BaseController
             exit;
         }
 
-        $isDriver = !empty($_SESSION['user']['is_driver']);
-        $tripsData = $this->tripService->getMyTripsData($userId, $isDriver);
-
+        $isDriver          = !empty($_SESSION['user']['is_driver']);
+        $tripsData         = $this->tripService->getMyTripsData($userId, $isDriver);
         $resolvedIncidents = $this->tripService->getResolvedIncidents($userId);
 
         $this->render('trips/my-trips', [
-            'title' => 'Mes Trajets - EcoRide',
-            'upcoming_conduits' => $tripsData['upcoming_conduits'],
-            'past_conduits' => $tripsData['past_conduits'],
+            'title'                   => 'Mes Trajets - EcoRide',
+            'upcoming_conduits'       => $tripsData['upcoming_conduits'],
+            'past_conduits'           => $tripsData['past_conduits'],
             'upcoming_participations' => $tripsData['upcoming_participations'],
-            'past_participations' => $tripsData['past_participations'],
-            'resolvedIncidents' => $resolvedIncidents,
-            'error' => $error,
+            'past_participations'     => $tripsData['past_participations'],
+            'resolvedIncidents'       => $resolvedIncidents,
+            'error'                   => $error,
         ]);
     }
-
 }

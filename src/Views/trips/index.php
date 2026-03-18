@@ -1,4 +1,4 @@
-﻿<section class="page-header">
+<section class="page-header">
     <h2>Covoiturages disponibles</h2>
     <p>Trouvez le trajet qui vous convient !</p>
 </section>
@@ -136,46 +136,46 @@
 
         <?php foreach ($covoiturages as $c): ?>
             <div class="ride-card"
-                 data-price="<?= $c['price'] ?>"
-                 data-ecological="<?= $c['energy_type'] === 'electrique' ? 'true' : 'false' ?>"
-                 data-rating="<?= $c['note_conducteur'] ?? 0 ?>">
+                 data-price="<?= $c->price ?>"
+                 data-ecological="<?= $c->energyType === 'electrique' ? 'true' : 'false' ?>"
+                 data-rating="<?= $c->noteConducteur ?? 0 ?>">
 
                 <div class="ride-header">
-                    <h3><?= htmlspecialchars($c['ville_depart']) ?> &rarr; <?= htmlspecialchars($c['ville_arrivee']) ?></h3>
-                    <div class="ride-price"><?= number_format($c['price'], 2) ?>€</div>
+                    <h3><?= htmlspecialchars($c->villeDepart) ?> &rarr; <?= htmlspecialchars($c->villeArrivee) ?></h3>
+                    <div class="ride-price"><?= number_format($c->price, 2) ?>€</div>
                 </div>
 
                 <div class="ride-details">
                     <p>
                         <span class="material-icons">schedule</span>
-                        <?= date('d/m/Y', strtotime($c['departure_datetime'])) ?> à <?= date('H:i', strtotime($c['departure_datetime'])) ?>
-                        <?php if (!empty($c['arrival_datetime'])): ?>
-                            &rarr; <?= date('H:i', strtotime($c['arrival_datetime'])) ?>
+                        <?= date('d/m/Y', strtotime($c->departureDatetime)) ?> à <?= date('H:i', strtotime($c->departureDatetime)) ?>
+                        <?php if (!empty($c->arrivalDatetime)): ?>
+                            &rarr; <?= date('H:i', strtotime($c->arrivalDatetime)) ?>
                         <?php endif; ?>
                     </p>
                     <p class="trips-driver-line">
-                        <?php if (!empty($c['conducteur_photo'])): ?>
-                            <img src="/uploads/<?= htmlspecialchars($c['conducteur_photo']) ?>" alt="Photo" class="trips-driver-photo">
+                        <?php if (!empty($c->conducteurPhoto)): ?>
+                            <img src="/uploads/<?= htmlspecialchars($c->conducteurPhoto) ?>" alt="Photo" class="trips-driver-photo">
                         <?php else: ?>
                             <span class="material-icons trips-driver-fallback">account_circle</span>
                         <?php endif; ?>
-                        <?= htmlspecialchars($c['conducteur']) ?>
-                        <?php if (round($c['note_conducteur'], 1) > 0): ?>
-                            <span class="trips-driver-rating">&#9733; <?= round($c['note_conducteur'], 1) ?>/5</span>
+                        <?= htmlspecialchars($c->conducteur) ?>
+                        <?php if (round($c->noteConducteur, 1) > 0): ?>
+                            <span class="trips-driver-rating">&#9733; <?= round($c->noteConducteur, 1) ?>/5</span>
                         <?php endif; ?>
                     </p>
-                    <p><span class="material-icons">directions_car</span> <?= htmlspecialchars($c['brand']) ?> <?= htmlspecialchars($c['model']) ?></p>
-                    <p><span class="material-icons">people</span> <?= (int)$c['available_seats'] ?> place<?= (int)$c['available_seats'] > 1 ? 's' : '' ?> restante<?= (int)$c['available_seats'] > 1 ? 's' : '' ?></p>
+                    <p><span class="material-icons">directions_car</span> <?= htmlspecialchars($c->brand) ?> <?= htmlspecialchars($c->model) ?></p>
+                    <p><span class="material-icons">people</span> <?= (int) $c->availableSeats ?> place<?= (int) $c->availableSeats > 1 ? 's' : '' ?> restante<?= (int) $c->availableSeats > 1 ? 's' : '' ?></p>
                 </div>
 
-                <?php if ($c['energy_type'] === 'electrique'): ?>
+                <?php if ($c->energyType === 'electrique'): ?>
                     <div class="eco-badge">⚡ Écologique</div>
                 <?php else: ?>
                     <div class="eco-badge trips-non-eco-badge">🚗 Non écologique</div>
                 <?php endif; ?>
 
                 <div class="ride-actions">
-                    <a href="/trip/<?= (int)$c['trip_id'] ?>" class="btn-primary">Voir détails</a>
+                    <a href="/trip/<?= $c->tripId ?>" class="btn-primary">Voir détails</a>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -221,15 +221,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     html += `
                         <div class="ride-card">
                             <div class="ride-header">
-                                <h3>${c.ville_depart} &rarr; ${c.ville_arrivee}</h3>
+                                <h3>${c.villeDepart} &rarr; ${c.villeArrivee}</h3>
                                 <div class="ride-price">${parseFloat(c.price).toFixed(2)}€</div>
                             </div>
                             <div class="ride-details">
                                 <p>${c.conducteur} &bull; ${c.brand} ${c.model}</p>
-                                <p>${c.available_seats} place(s) &bull; ${c.departure_datetime}</p>
+                                <p>${c.availableSeats} place(s) &bull; ${c.departureDatetime}</p>
                             </div>
                             <div class="ride-actions">
-                                <a href="/trip/${c.trip_id}" class="btn-primary">Voir détails</a>
+                                <a href="/trip/${c.tripId}" class="btn-primary">Voir détails</a>
                             </div>
                         </div>`;
                 });
@@ -241,4 +241,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-

@@ -3,37 +3,39 @@
 namespace App\Controllers;
 
 use App\Core\Auth\AuthManager;
-use App\Models\User;
+use App\Repositories\UserRepository;
+use App\Repositories\VehicleRepository;
 
 class UserController extends BaseController
 {
     public function profile()
     {
-        $userId = AuthManager::id();
-        $userModel = new User();
-        $userData = $userModel->find($userId);
-        $myTrips = $userModel->recentTrips($userId, 10);
+        $userId   = AuthManager::id();
+        $userRepo = new UserRepository();
 
-        $error = $_SESSION['flash_error'] ?? '';
+        $userData = $userRepo->findById($userId);
+        $myTrips  = $userRepo->recentTrips($userId, 10);
+
+        $error   = $_SESSION['flash_error'] ?? '';
         $success = $_SESSION['flash_success'] ?? '';
         unset($_SESSION['flash_error'], $_SESSION['flash_success']);
 
         $this->render('user/profile', [
-            'title' => 'Mon Profil - EcoRide',
+            'title'    => 'Mon Profil - EcoRide',
             'userData' => $userData,
-            'myTrips' => $myTrips,
-            'error' => $error,
-            'success' => $success
+            'myTrips'  => $myTrips,
+            'error'    => $error,
+            'success'  => $success,
         ]);
     }
 
     public function update()
     {
-        $userId = AuthManager::id();
-        $userModel = new User();
-        $type = $_POST['user_type'] ?? '';
+        $userId   = AuthManager::id();
+        $userRepo = new UserRepository();
+        $type     = $_POST['user_type'] ?? '';
 
-        $isDriver = false;
+        $isDriver    = false;
         $isPassenger = false;
 
         if ($type === 'chauffeur') {
@@ -41,7 +43,7 @@ class UserController extends BaseController
         } elseif ($type === 'passager') {
             $isPassenger = true;
         } elseif ($type === 'les_deux') {
-            $isDriver = true;
+            $isDriver    = true;
             $isPassenger = true;
         } else {
             $_SESSION['flash_error'] = 'Type invalide.';
@@ -49,21 +51,19 @@ class UserController extends BaseController
             exit;
         }
 
-        $userModel->update($userId, [
-            'is_driver' => $isDriver ? 1 : 0,
-            'is_passenger' => $isPassenger ? 1 : 0
+        $userRepo->update($userId, [
+            'is_driver'    => $isDriver ? 1 : 0,
+            'is_passenger' => $isPassenger ? 1 : 0,
         ]);
 
-        $_SESSION['user']['is_driver'] = $isDriver;
+        $_SESSION['user']['is_driver']    = $isDriver;
         $_SESSION['user']['is_passenger'] = $isPassenger;
 
         $_SESSION['flash_success'] = 'Profil mis à jour avec succès !';
 
-        // If user just became a driver and has no vehicle, redirect to vehicle page
         if ($isDriver) {
-            $vehicleModel = new \App\Models\Vehicle();
-            $vehicles = $vehicleModel->byUser($userId);
-            if (empty($vehicles)) {
+            $vehicleRepo = new VehicleRepository();
+            if (empty($vehicleRepo->byUser($userId))) {
                 $_SESSION['flash_success'] = 'Profil mis à jour ! Veuillez maintenant ajouter un véhicule.';
                 header('Location: /driver/vehicles');
                 exit;
@@ -76,8 +76,8 @@ class UserController extends BaseController
 
     public function uploadPhoto()
     {
-        $userId = AuthManager::id();
-        $userModel = new User();
+        $userId   = AuthManager::id();
+        $userRepo = new UserRepository();
 
         if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== 0) {
             $_SESSION['flash_error'] = "Erreur upload.";
@@ -85,16 +85,11 @@ class UserController extends BaseController
             exit;
         }
 
-        $file = $_FILES['photo'];
-
-        // Check actual MIME type (not just the extension) to prevent spoofing
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $file     = $_FILES['photo'];
+        $finfo    = new \finfo(FILEINFO_MIME_TYPE);
         $realType = $finfo->file($file['tmp_name']);
 
-        $allowedTypes = [
-            'image/jpeg' => 'jpg',
-            'image/png'  => 'png'
-        ];
+        $allowedTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
 
         if (!array_key_exists($realType, $allowedTypes)) {
             $_SESSION['flash_error'] = "Format invalide (jpg ou png uniquement).";
@@ -102,24 +97,21 @@ class UserController extends BaseController
             exit;
         }
 
-        $extension = $allowedTypes[$realType];
-
+        $extension   = $allowedTypes[$realType];
         $newFileName = 'user_' . $userId . '_' . time() . '.' . $extension;
+        $uploadDir   = __DIR__ . '/../../public/uploads';
 
-        $uploadDir = __DIR__ . '/../../public/uploads';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
 
-        $destination = $uploadDir . '/' . $newFileName;
-
-        if (!move_uploaded_file($file['tmp_name'], $destination)) {
+        if (!move_uploaded_file($file['tmp_name'], $uploadDir . '/' . $newFileName)) {
             $_SESSION['flash_error'] = "Erreur sauvegarde fichier.";
             header('Location: /profile');
             exit;
         }
 
-        $userModel->updatePhoto($userId, $newFileName);
+        $userRepo->updatePhoto($userId, $newFileName);
 
         $_SESSION['flash_success'] = "Photo mise à jour.";
         header('Location: /profile');
@@ -128,19 +120,16 @@ class UserController extends BaseController
 
     public function deletePhoto()
     {
-        $userId = AuthManager::id();
-        $userModel = new User();
-        $user = $userModel->find($userId);
+        $userId   = AuthManager::id();
+        $userRepo = new UserRepository();
+        $user     = $userRepo->findById($userId);
 
-        if (!empty($user['photo'])) {
-
-        $filePath = __DIR__ . '/../../public/uploads/' . $user['photo'];
-
-        if (file_exists($filePath)) {
-            unlink($filePath);
-        }
-
-        $userModel->updatePhoto($userId, null);
+        if ($user && !empty($user->photo)) {
+            $filePath = __DIR__ . '/../../public/uploads/' . $user->photo;
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            $userRepo->updatePhoto($userId, null);
         }
 
         $_SESSION['flash_success'] = "Photo supprimée.";

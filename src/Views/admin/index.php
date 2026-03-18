@@ -1,7 +1,7 @@
-﻿<?php
+<?php
 $roleLabels = [
-    'user' => 'Utilisateur',
-    'admin' => 'Administrateur',
+    'user'    => 'Utilisateur',
+    'admin'   => 'Administrateur',
     'employe' => 'Employé',
 ];
 ?>
@@ -151,30 +151,30 @@ $roleLabels = [
                 <tbody>
                     <?php foreach ($users as $u): ?>
                         <tr class="admin-row">
-                            <td><?= $u['user_id'] ?></td>
-                            <td><?= htmlspecialchars($u['username'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($u['email']) ?></td>
+                            <td><?= $u->userId ?></td>
+                            <td><?= htmlspecialchars($u->username ?? '') ?></td>
+                            <td><?= htmlspecialchars($u->email) ?></td>
                             <td>
-                                <span class="admin-badge <?= strtolower($u['role'] ?? '') ?>"><?= $roleLabels[$u['role'] ?? ''] ?? ($u['role'] ?? '') ?></span>
+                                <span class="admin-badge <?= strtolower($u->role ?? '') ?>"><?= $roleLabels[$u->role ?? ''] ?? ($u->role ?? '') ?></span>
                             </td>
-                            <td><?= (int)($u['credits'] ?? 0) ?></td>
+                            <td><?= (int) ($u->credits ?? 0) ?></td>
                             <td class="admin-user-actions-cell">
-                                <?php if (empty($u['suspended'])): ?>
+                                <?php if (empty($u->suspended)): ?>
                                     <form method="POST" action="/admin/suspend-user" class="inline-form">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                        <input type="hidden" name="user_id" value="<?= (int)$u['user_id'] ?>">
+                                        <input type="hidden" name="user_id" value="<?= (int) $u->userId ?>">
                                         <button type="submit" class="btn-danger admin-btn-sm">Suspendre</button>
                                     </form>
                                 <?php else: ?>
                                     <form method="POST" action="/admin/activate-user" class="inline-form">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                        <input type="hidden" name="user_id" value="<?= (int)$u['user_id'] ?>">
+                                        <input type="hidden" name="user_id" value="<?= (int) $u->userId ?>">
                                         <button type="submit" class="btn-primary admin-btn-sm">Réactiver</button>
                                     </form>
                                 <?php endif; ?>
                                 <form method="POST" action="/admin/add-credits" class="admin-credit-form">
                                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                    <input type="hidden" name="user_id" value="<?= (int)$u['user_id'] ?>">
+                                    <input type="hidden" name="user_id" value="<?= (int) $u->userId ?>">
                                     <input type="number" name="credits" min="1" max="9999" placeholder="Crédits" class="admin-credit-input">
                                     <button type="submit" class="admin-credit-plus-btn">+</button>
                                 </form>
@@ -189,7 +189,7 @@ $roleLabels = [
     <div class="profile-box admin-messages-box" id="messages">
         <h3 class="profil-titre">
             Messages de contact
-            <?php $unread = count(array_filter($contactMessages ?? [], fn($m) => !$m['is_read'])); ?>
+            <?php $unread = count(array_filter($contactMessages ?? [], fn($m) => !$m->isRead)); ?>
             <?php if ($unread > 0): ?>
                 <span class="admin-unread-badge"><?= $unread ?> non lu<?= $unread > 1 ? 's' : '' ?></span>
             <?php endif; ?>
@@ -198,19 +198,19 @@ $roleLabels = [
             <p class="admin-empty-text">Aucun message reçu.</p>
         <?php else: ?>
             <?php foreach ($contactMessages as $msg): ?>
-                <div class="admin-message-card <?= $msg['is_read'] ? 'is-read' : 'is-unread' ?>">
+                <div class="admin-message-card <?= $msg->isRead ? 'is-read' : 'is-unread' ?>">
                     <div class="admin-message-head">
                         <div>
-                            <strong><?= htmlspecialchars($msg['nom']) ?></strong>
-                            &lt;<a href="mailto:<?= htmlspecialchars($msg['email']) ?>" class="admin-message-mail-link"><?= htmlspecialchars($msg['email']) ?></a>&gt;
-                            &mdash; <em><?= htmlspecialchars($msg['sujet']) ?></em>
+                            <strong><?= htmlspecialchars($msg->nom) ?></strong>
+                            &lt;<a href="mailto:<?= htmlspecialchars($msg->email) ?>" class="admin-message-mail-link"><?= htmlspecialchars($msg->email) ?></a>&gt;
+                            &mdash; <em><?= htmlspecialchars($msg->sujet) ?></em>
                         </div>
                         <div class="admin-message-meta">
-                            <span class="admin-message-date"><?= date('d/m/Y H:i', strtotime($msg['created_at'])) ?></span>
-                            <?php if (!$msg['is_read']): ?>
+                            <span class="admin-message-date"><?= date('d/m/Y H:i', strtotime($msg->createdAt)) ?></span>
+                            <?php if (!$msg->isRead): ?>
                                 <form method="POST" action="/admin/mark-message-read" class="inline-form">
                                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                    <input type="hidden" name="message_id" value="<?= (int)$msg['id'] ?>">
+                                    <input type="hidden" name="message_id" value="<?= (int) $msg->id ?>">
                                     <button type="submit" class="btn-primary admin-btn-xs">Marquer lu</button>
                                 </form>
                             <?php else: ?>
@@ -218,7 +218,7 @@ $roleLabels = [
                             <?php endif; ?>
                         </div>
                     </div>
-                    <div class="admin-message-body"><?= htmlspecialchars($msg['message']) ?></div>
+                    <div class="admin-message-body"><?= htmlspecialchars($msg->message) ?></div>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>

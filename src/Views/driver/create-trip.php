@@ -1,4 +1,4 @@
-﻿<main class="member-container">
+<main class="member-container">
     <h2 class="page-title-hero">
         <span class="material-icons page-icon-large">add_road</span> Créer un trajet
     </h2>
@@ -10,12 +10,12 @@
     <div class="profile-box">
         <p class="trip-create-credit-info">
             <span class="material-icons icon-middle">account_balance_wallet</span>
-            Vos crédits : <strong><?= (int)($user['credits'] ?? 0) ?></strong>
+            Vos crédits : <strong><?= (int) $user->credits ?></strong>
             | Frais plateforme : <strong>2 crédits</strong>
         </p>
 
         <form method="POST" action="/driver/create-trip" class="form-container">
-            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
 
             <div class="input-group">
                 <label for="ville_depart">Ville de départ *</label>
@@ -59,9 +59,9 @@
                 <?php if (!empty($vehicles)): ?>
                     <select id="vehicle_id" name="vehicle_id" required class="select-field">
                         <?php foreach ($vehicles as $v): ?>
-                            <option value="<?= $v['vehicle_id'] ?>">
-                                <?= htmlspecialchars($v['brand']) ?> <?= htmlspecialchars($v['model']) ?>
-                                (<?= htmlspecialchars($v['license_plate']) ?> - <?= ucfirst($v['energy_type']) ?>)
+                            <option value="<?= $v->vehicleId ?>">
+                                <?= htmlspecialchars($v->brand) ?> <?= htmlspecialchars($v->model) ?>
+                                (<?= htmlspecialchars($v->licensePlate) ?> - <?= ucfirst($v->energyType) ?>)
                             </option>
                         <?php endforeach; ?>
                     </select>

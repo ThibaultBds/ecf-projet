@@ -6,7 +6,7 @@ class BaseController
 {
     protected function render(string $view, array $data = [])
     {
-        extract($data);
+        extract($data, EXTR_SKIP);
 
         $viewPath = dirname(__DIR__) . '/Views/' . $view . '.php';
                if (!file_exists($viewPath)) {

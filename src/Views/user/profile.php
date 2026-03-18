@@ -1,17 +1,17 @@
-﻿<?php
+<?php
 $statusLabels = [
     'scheduled' => 'Planifié',
-    'started' => 'En cours',
+    'started'   => 'En cours',
     'completed' => 'Terminé',
     'cancelled' => 'Annulé',
 ];
 $roleLabels = [
-    'user' => 'Utilisateur',
-    'admin' => 'Administrateur',
+    'user'    => 'Utilisateur',
+    'admin'   => 'Administrateur',
     'employe' => 'Employé',
 ];
-$isDriver = !empty($userData['is_driver']);
-$isPassenger = !empty($userData['is_passenger']);
+$isDriver    = !empty($userData->isDriver);
+$isPassenger = !empty($userData->isPassenger);
 $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeur' : 'passager');
 ?>
 <main class="page-wrapper">
@@ -24,8 +24,8 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
     <h3 class="profil-titre">Photo de profil</h3>
 
     <div class="profile-photo-wrap">
-        <?php if (!empty($userData['photo'])): ?>
-            <img src="/uploads/<?= htmlspecialchars($userData['photo']) ?>"
+        <?php if (!empty($userData->photo)): ?>
+            <img src="/uploads/<?= htmlspecialchars($userData->photo) ?>"
                  alt="Photo de profil"
                  class="profile-photo"
                  onerror="this.classList.add('is-hidden');this.nextElementSibling.classList.remove('is-hidden');">
@@ -42,7 +42,7 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
     </form>
 </div>
 
-<?php if (!empty($userData['photo'])): ?>
+<?php if (!empty($userData->photo)): ?>
     <form method="POST" action="/profile/delete-photo" class="profile-photo-delete-form">
         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
         <button type="submit" class="btn-danger">Supprimer la photo</button>
@@ -65,14 +65,14 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
                 <span class="material-icons profile-icon">email</span>
                 <div>
                     <strong class="profile-strong">Email</strong>
-                    <p class="profile-value"><?= htmlspecialchars($userData['email'] ?? '') ?></p>
+                    <p class="profile-value"><?= htmlspecialchars($userData->email ?? '') ?></p>
                 </div>
             </div>
             <div class="profile-item">
                 <span class="material-icons profile-icon">person</span>
                 <div>
                     <strong class="profile-strong">Pseudo</strong>
-                    <p class="profile-value"><?= htmlspecialchars($userData['username'] ?? '') ?></p>
+                    <p class="profile-value"><?= htmlspecialchars($userData->username ?? '') ?></p>
                 </div>
             </div>
             <div class="profile-item">
@@ -94,7 +94,7 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
                 <span class="material-icons profile-icon">account_balance_wallet</span>
                 <div>
                     <strong class="profile-strong">Crédits</strong>
-                    <p class="profile-value profile-credits"><?= (int)($userData['credits'] ?? 0) ?></p>
+                    <p class="profile-value profile-credits"><?= (int) ($userData->credits ?? 0) ?></p>
                 </div>
             </div>
         </div>
@@ -106,9 +106,9 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
             <label for="user_type" class="form-label">Je suis :</label>
             <select name="user_type" id="user_type" required class="select-field">
-                <option value="passager" <?= $currentType === 'passager' ? 'selected' : '' ?>>Passager</option>
+                <option value="passager"  <?= $currentType === 'passager'  ? 'selected' : '' ?>>Passager</option>
                 <option value="chauffeur" <?= $currentType === 'chauffeur' ? 'selected' : '' ?>>Chauffeur</option>
-                <option value="les_deux" <?= $currentType === 'les_deux' ? 'selected' : '' ?>>Chauffeur &amp; Passager</option>
+                <option value="les_deux"  <?= $currentType === 'les_deux'  ? 'selected' : '' ?>>Chauffeur &amp; Passager</option>
             </select>
             <button type="submit" class="btn-primary">Mettre à jour</button>
         </form>
@@ -137,12 +137,12 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
                 <span>Voir mes trajets</span>
             </a>
 
-            <?php if (($userData['role'] ?? '') === 'admin'): ?>
+            <?php if (($userData->role ?? '') === 'admin'): ?>
                 <a href="/admin" class="profil-lien profil-link-admin">
                     <span class="material-icons">admin_panel_settings</span>
                     <span>Administration</span>
                 </a>
-            <?php elseif (($userData['role'] ?? '') === 'employe'): ?>
+            <?php elseif (($userData->role ?? '') === 'employe'): ?>
                 <a href="/moderator" class="profil-lien profil-link-moderator">
                     <span class="material-icons">shield</span>
                     <span>Modération</span>
@@ -162,12 +162,12 @@ $currentType = ($isDriver && $isPassenger) ? 'les_deux' : ($isDriver ? 'chauffeu
                         <div class="trajet-infos">
                             <span class="material-icons">location_on</span>
                             <span class="trajet-ville">
-                                <?= htmlspecialchars($t['ville_depart']) ?> &rarr; <?= htmlspecialchars($t['ville_arrivee']) ?>
+                                <?= htmlspecialchars($t->villeDepart) ?> &rarr; <?= htmlspecialchars($t->villeArrivee) ?>
                             </span>
-                            <span class="trajet-date"><?= date('d/m/Y', strtotime($t['departure_datetime'])) ?></span>
+                            <span class="trajet-date"><?= date('d/m/Y', strtotime($t->departureDatetime)) ?></span>
                         </div>
-                        <span class="admin-badge <?= htmlspecialchars($t['status']) ?>">
-                            <?= $statusLabels[$t['status']] ?? htmlspecialchars($t['status']) ?>
+                        <span class="admin-badge <?= htmlspecialchars($t->status) ?>">
+                            <?= $statusLabels[$t->status] ?? htmlspecialchars($t->status) ?>
                         </span>
                     </div>
                 <?php endforeach; ?>

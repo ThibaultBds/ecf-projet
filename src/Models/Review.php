@@ -2,34 +2,23 @@
 
 namespace App\Models;
 
-class Review extends BaseModel
+use App\Core\Hydratable;
+
+class Review implements BaseModel
 {
-    protected ?string $table = 'reviews';
+    use Hydratable;
 
-    public function byDriver($driverId)
-    {
-        $stmt = $this->pdo->prepare(
-            "SELECT r.*, u.username AS reviewer_name
-         FROM reviews r
-         JOIN users u ON r.reviewer_id = u.user_id
-         WHERE r.driver_id = ? AND r.status = 'approved'
-         ORDER BY r.created_at DESC"
-        );
-        $stmt->execute([$driverId]);
-        return $stmt->fetchAll();
-    }
+    public int $id;
+    public int $tripId;
+    public int $reviewerId;
+    public int $driverId;
+    public int $rating;
+    public ?string $comment;
+    public string $status;
+    public string $createdAt;
 
-
-    public function averageRating($driverId)
-    {
-        $stmt = $this->pdo->prepare("SELECT AVG(rating) as avg_rating, COUNT(*) as total
-             FROM reviews
-             WHERE driver_id = ? AND status != 'rejected'");
-        $stmt->execute([$driverId]);
-        return $stmt->fetch();
-        return [
-            'average' => $result['avg_rating'] ? round((float)$result['avg_rating'], 1) : null,
-            'count' => (int)$result['total']
-        ];
-    }
+    // Champs joints
+    public ?string $reviewerName = null;
+    public ?string $driverName = null;
+    public ?string $reviewerEmail = null;
 }

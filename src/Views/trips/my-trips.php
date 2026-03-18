@@ -1,12 +1,12 @@
 <?php
 $statusLabels = [
     'scheduled' => 'Planifié',
-    'started' => 'En cours',
+    'started'   => 'En cours',
     'completed' => 'Terminé',
     'cancelled' => 'Annulé',
     'confirmed' => 'Confirmé',
     'validated' => 'Validé',
-    'disputed' => 'Litige',
+    'disputed'  => 'Litige',
 ];
 ?>
 <main class="member-container">
@@ -41,22 +41,22 @@ $statusLabels = [
                     <div class="ride-card-history card-light">
                         <div class="ride-content">
                             <p class="ride-title">
-                                <a href="/trip/<?= (int)$trajet['trip_id'] ?>" class="trip-link">
+                                <a href="/trip/<?= $trajet->tripId ?>" class="trip-link">
                                     <span class="material-icons ride-icon">directions_car</span>
-                                    <?= htmlspecialchars($trajet['ville_depart']) ?> &rarr; <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                                    <?= htmlspecialchars($trajet->villeDepart) ?> &rarr; <?= htmlspecialchars($trajet->villeArrivee) ?>
                                 </a>
                             </p>
                             <p class="small-muted">
-                                Départ : <?= date('d/m/Y H:i', strtotime($trajet['departure_datetime'])) ?>
-                                &nbsp;|&nbsp; <?= (int)($trajet['nb_participants'] ?? 0) ?> passager(s)
-                                <span class="muted-status">Statut : <strong><?= $statusLabels[$trajet['status']] ?? ucfirst($trajet['status']) ?></strong></span>
+                                Départ : <?= date('d/m/Y H:i', strtotime($trajet->departureDatetime)) ?>
+                                &nbsp;|&nbsp; <?= (int) ($trajet->nbParticipants ?? 0) ?> passager(s)
+                                <span class="muted-status">Statut : <strong><?= $statusLabels[$trajet->status] ?? ucfirst($trajet->status) ?></strong></span>
                             </p>
                         </div>
                         <form method="POST" action="/my-trips" class="ride-actions">
                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                            <input type="hidden" name="trip_id" value="<?= $trajet['trip_id'] ?>">
+                            <input type="hidden" name="trip_id" value="<?= $trajet->tripId ?>">
                             <input type="hidden" name="status" value="">
-                            <?php if ($trajet['status'] === 'scheduled'): ?>
+                            <?php if ($trajet->status === 'scheduled'): ?>
                                 <button type="submit" name="action" value="update_trip_status" class="btn-primary btn-status-started"
                                         onclick="this.form.querySelector('[name=status]').value='started';">
                                     <span class="material-icons trip-action-icon">play_arrow</span> Démarrer
@@ -65,7 +65,7 @@ $statusLabels = [
                                         onclick="this.form.querySelector('[name=status]').value='cancelled';">
                                     Annuler
                                 </button>
-                            <?php elseif ($trajet['status'] === 'started'): ?>
+                            <?php elseif ($trajet->status === 'started'): ?>
                                 <button type="submit" name="action" value="update_trip_status" class="btn-primary btn-status-completed"
                                         onclick="this.form.querySelector('[name=status]').value='completed';">
                                     <span class="material-icons trip-action-icon">flag</span> Arrivée à destination
@@ -84,21 +84,21 @@ $statusLabels = [
             </h3>
             <div class="trips-grid">
                 <?php foreach ($past_conduits as $trajet): ?>
-                    <div class="ride-card-history card-light <?= $trajet['status'] === 'cancelled' ? 'card-cancelled' : '' ?>">
+                    <div class="ride-card-history card-light <?= $trajet->status === 'cancelled' ? 'card-cancelled' : '' ?>">
                         <div class="ride-content">
                             <p class="ride-title">
-                                <a href="/trip/<?= (int)$trajet['trip_id'] ?>" class="trip-link">
+                                <a href="/trip/<?= $trajet->tripId ?>" class="trip-link">
                                     <span class="material-icons ride-icon">directions_car</span>
-                                    <?= htmlspecialchars($trajet['ville_depart']) ?> &rarr; <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                                    <?= htmlspecialchars($trajet->villeDepart) ?> &rarr; <?= htmlspecialchars($trajet->villeArrivee) ?>
                                 </a>
                             </p>
                             <p class="small-muted">
-                                Départ : <?= date('d/m/Y H:i', strtotime($trajet['departure_datetime'])) ?>
-                                &nbsp;|&nbsp; <?= (int)($trajet['nb_participants'] ?? 0) ?> passager(s)
-                                <span class="muted-status">Statut : <strong><?= $statusLabels[$trajet['status']] ?? ucfirst($trajet['status']) ?></strong></span>
+                                Départ : <?= date('d/m/Y H:i', strtotime($trajet->departureDatetime)) ?>
+                                &nbsp;|&nbsp; <?= (int) ($trajet->nbParticipants ?? 0) ?> passager(s)
+                                <span class="muted-status">Statut : <strong><?= $statusLabels[$trajet->status] ?? ucfirst($trajet->status) ?></strong></span>
                             </p>
                         </div>
-                        <?php if ($trajet['status'] === 'cancelled'): ?>
+                        <?php if ($trajet->status === 'cancelled'): ?>
                             <span class="trip-status-note status-muted">
                                 <span class="material-icons trip-status-icon">cancel</span> Annulé
                             </span>
@@ -130,24 +130,24 @@ $statusLabels = [
                     <div class="ride-card-history card-light">
                         <div class="ride-content">
                             <p class="ride-title">
-                                <a href="/trip/<?= (int)$trajet['trip_id'] ?>" class="trip-link">
+                                <a href="/trip/<?= $trajet->tripId ?>" class="trip-link">
                                     <span class="material-icons ride-icon">person</span>
-                                    <?= htmlspecialchars($trajet['ville_depart']) ?> &rarr; <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                                    <?= htmlspecialchars($trajet->villeDepart) ?> &rarr; <?= htmlspecialchars($trajet->villeArrivee) ?>
                                 </a>
                             </p>
                             <p class="small-muted">
-                                Départ : <?= date('d/m/Y H:i', strtotime($trajet['departure_datetime'])) ?>
-                                | Conducteur : <?= htmlspecialchars($trajet['conducteur'] ?? '') ?>
-                                <span class="muted-status">Statut : <strong><?= $statusLabels[$trajet['status']] ?? ucfirst($trajet['status']) ?></strong></span>
+                                Départ : <?= date('d/m/Y H:i', strtotime($trajet->departureDatetime)) ?>
+                                | Conducteur : <?= htmlspecialchars($trajet->conducteur ?? '') ?>
+                                <span class="muted-status">Statut : <strong><?= $statusLabels[$trajet->status] ?? ucfirst($trajet->status) ?></strong></span>
                             </p>
                         </div>
-                        <?php if ($trajet['status'] === 'scheduled'): ?>
+                        <?php if ($trajet->status === 'scheduled'): ?>
                             <form method="POST" action="/my-trips" class="ride-actions">
                                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                <input type="hidden" name="trip_id" value="<?= $trajet['trip_id'] ?>">
+                                <input type="hidden" name="trip_id" value="<?= $trajet->tripId ?>">
                                 <button type="submit" name="action" value="cancel_participation" class="btn-danger">Annuler ma participation</button>
                             </form>
-                        <?php elseif ($trajet['status'] === 'started'): ?>
+                        <?php elseif ($trajet->status === 'started'): ?>
                             <span class="trip-status-note status-info-strong">
                                 <span class="material-icons trip-status-icon-middle">directions_car</span> Trajet en cours
                             </span>
@@ -165,36 +165,36 @@ $statusLabels = [
             <div class="trips-grid">
                 <?php foreach ($past_participations as $trajet): ?>
                     <?php
-                    $pStatus = $trajet['participant_status'] ?? '';
-                    $hasReviewed = !empty($trajet['has_reviewed']);
+                    $pStatus     = $trajet->participantStatus ?? '';
+                    $hasReviewed = !empty($trajet->hasReviewed);
                     ?>
-                    <div class="ride-card-history card-light ride-card-stack <?= $trajet['status'] === 'cancelled' ? 'card-cancelled' : '' ?>">
+                    <div class="ride-card-history card-light ride-card-stack <?= $trajet->status === 'cancelled' ? 'card-cancelled' : '' ?>">
                         <div class="ride-content">
                             <p class="ride-title">
-                                <a href="/trip/<?= (int)$trajet['trip_id'] ?>" class="trip-link">
+                                <a href="/trip/<?= $trajet->tripId ?>" class="trip-link">
                                     <span class="material-icons ride-icon">person</span>
-                                    <?= htmlspecialchars($trajet['ville_depart']) ?> &rarr; <?= htmlspecialchars($trajet['ville_arrivee']) ?>
+                                    <?= htmlspecialchars($trajet->villeDepart) ?> &rarr; <?= htmlspecialchars($trajet->villeArrivee) ?>
                                 </a>
                             </p>
                             <p class="small-muted">
-                                Départ : <?= date('d/m/Y H:i', strtotime($trajet['departure_datetime'])) ?>
-                                | Conducteur : <?= htmlspecialchars($trajet['conducteur'] ?? '') ?>
-                                &mdash; Statut : <strong><?= $statusLabels[$trajet['status']] ?? ucfirst($trajet['status']) ?></strong>
+                                Départ : <?= date('d/m/Y H:i', strtotime($trajet->departureDatetime)) ?>
+                                | Conducteur : <?= htmlspecialchars($trajet->conducteur ?? '') ?>
+                                &mdash; Statut : <strong><?= $statusLabels[$trajet->status] ?? ucfirst($trajet->status) ?></strong>
                             </p>
                         </div>
 
-                        <?php if ($trajet['status'] === 'cancelled'): ?>
+                        <?php if ($trajet->status === 'cancelled'): ?>
                             <span class="trip-status-note status-muted">
                                 <span class="material-icons trip-status-icon">cancel</span> Annulé &mdash; crédits remboursés
                             </span>
 
-                        <?php elseif ($trajet['status'] === 'completed'): ?>
+                        <?php elseif ($trajet->status === 'completed'): ?>
                             <div class="trip-actions-column">
 
                                 <?php if ($pStatus === 'confirmed'): ?>
                                     <form method="POST" action="/my-trips" class="w-100">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                        <input type="hidden" name="trip_id" value="<?= $trajet['trip_id'] ?>">
+                                        <input type="hidden" name="trip_id" value="<?= $trajet->tripId ?>">
                                         <button type="submit" name="action" value="validate_trip" class="btn-primary btn-status-completed w-100">
                                             <span class="material-icons trip-action-icon">check_circle</span> Tout s'est bien passé
                                         </button>
@@ -205,7 +205,7 @@ $statusLabels = [
                                         </summary>
                                         <form method="POST" action="/my-trips" class="trip-problem-form">
                                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                            <input type="hidden" name="trip_id" value="<?= $trajet['trip_id'] ?>">
+                                            <input type="hidden" name="trip_id" value="<?= $trajet->tripId ?>">
                                             <textarea name="problem_comment" rows="3" required placeholder="Décrivez le problème..." class="trip-problem-textarea"></textarea>
                                             <button type="submit" name="action" value="report_problem" class="btn-danger w-100">Envoyer le signalement</button>
                                         </form>
@@ -217,7 +217,7 @@ $statusLabels = [
                                     </span>
 
                                 <?php elseif ($pStatus === 'disputed'): ?>
-                                    <?php $decision = $resolvedIncidents[(int)$trajet['trip_id']] ?? null; ?>
+                                    <?php $decision = $resolvedIncidents[$trajet->tripId] ?? null; ?>
                                     <?php if ($decision === 'favor_passenger'): ?>
                                         <span class="trip-status-note status-success-strong">
                                             <span class="material-icons trip-status-icon">verified</span>
@@ -243,12 +243,12 @@ $statusLabels = [
                                         </summary>
                                         <form action="/api/review" method="POST" class="form-container form-small form-compact trip-review-form">
                                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                            <input type="hidden" name="trip_id" value="<?= $trajet['trip_id'] ?>">
-                                            <input type="hidden" name="driver_id" value="<?= $trajet['chauffeur_id'] ?? '' ?>">
-                                            <label for="rating-<?= $trajet['trip_id'] ?>">Note (1 à 5)</label>
-                                            <input type="number" id="rating-<?= $trajet['trip_id'] ?>" name="rating" min="1" max="5" required>
-                                            <label for="comment-<?= $trajet['trip_id'] ?>">Commentaire</label>
-                                            <textarea id="comment-<?= $trajet['trip_id'] ?>" name="comment" required></textarea>
+                                            <input type="hidden" name="trip_id" value="<?= $trajet->tripId ?>">
+                                            <input type="hidden" name="driver_id" value="<?= $trajet->chauffeurId ?? '' ?>">
+                                            <label for="rating-<?= $trajet->tripId ?>">Note (1 à 5)</label>
+                                            <input type="number" id="rating-<?= $trajet->tripId ?>" name="rating" min="1" max="5" required>
+                                            <label for="comment-<?= $trajet->tripId ?>">Commentaire</label>
+                                            <textarea id="comment-<?= $trajet->tripId ?>" name="comment" required></textarea>
                                             <button type="submit" class="btn-primary">Envoyer</button>
                                         </form>
                                     </details>

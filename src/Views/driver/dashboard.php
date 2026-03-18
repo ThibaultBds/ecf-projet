@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $statusLabels = [
     'scheduled' => 'Planifié',
     'started'   => 'En cours',
@@ -14,7 +14,7 @@ $statusLabels = [
     <div class="stats-cards driver-stats-grid">
         <div class="stat-card driver-stat-card">
             <span class="material-icons driver-stat-icon driver-stat-green">account_balance_wallet</span>
-            <h3><?= (int)($user['credits'] ?? 0) ?></h3>
+            <h3><?= (int) $user->credits ?></h3>
             <p class="driver-stat-text">Crédits disponibles</p>
         </div>
         <div class="stat-card driver-stat-card">
@@ -54,37 +54,37 @@ $statusLabels = [
                         <div class="ride-content">
                             <p class="ride-title">
                                 <span class="material-icons ride-icon">directions_car</span>
-                                <?= htmlspecialchars($trip['ville_depart']) ?> &rarr; <?= htmlspecialchars($trip['ville_arrivee']) ?>
+                                <?= htmlspecialchars($trip->villeDepart) ?> &rarr; <?= htmlspecialchars($trip->villeArrivee) ?>
                             </p>
                             <p class="small-muted">
-                                <?= date('d/m/Y H:i', strtotime($trip['departure_datetime'])) ?>
-                                | <?= $trip['price'] ?>€
-                                | <?= $trip['nb_participants'] ?? 0 ?> passager(s)
+                                <?= date('d/m/Y H:i', strtotime($trip->departureDatetime)) ?>
+                                | <?= $trip->price ?>€
+                                | <?= $trip->nbParticipants ?? 0 ?> passager(s)
                             </p>
                         </div>
                         <div class="driver-trip-actions">
-                            <span class="admin-badge <?= $trip['status'] ?>"><?= $statusLabels[$trip['status']] ?? ucfirst($trip['status']) ?></span>
-                            <?php if ($trip['status'] === 'scheduled'): ?>
+                            <span class="admin-badge <?= $trip->status ?>"><?= $statusLabels[$trip->status] ?? ucfirst($trip->status) ?></span>
+                            <?php if ($trip->status === 'scheduled'): ?>
                                 <form method="POST" action="/my-trips" class="inline-form">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                                     <input type="hidden" name="action" value="update_trip_status">
                                     <input type="hidden" name="status" value="started">
-                                    <input type="hidden" name="trip_id" value="<?= $trip['trip_id'] ?>">
+                                    <input type="hidden" name="trip_id" value="<?= $trip->tripId ?>">
                                     <button type="submit" class="driver-mini-btn driver-mini-btn-start">▶ Démarrer</button>
                                 </form>
                                 <form method="POST" action="/my-trips" class="inline-form">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                                     <input type="hidden" name="action" value="update_trip_status">
                                     <input type="hidden" name="status" value="cancelled">
-                                    <input type="hidden" name="trip_id" value="<?= $trip['trip_id'] ?>">
+                                    <input type="hidden" name="trip_id" value="<?= $trip->tripId ?>">
                                     <button type="submit" class="driver-mini-btn driver-mini-btn-cancel">Annuler</button>
                                 </form>
-                            <?php elseif ($trip['status'] === 'started'): ?>
+                            <?php elseif ($trip->status === 'started'): ?>
                                 <form method="POST" action="/my-trips" class="inline-form">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                                     <input type="hidden" name="action" value="update_trip_status">
                                     <input type="hidden" name="status" value="completed">
-                                    <input type="hidden" name="trip_id" value="<?= $trip['trip_id'] ?>">
+                                    <input type="hidden" name="trip_id" value="<?= $trip->tripId ?>">
                                     <button type="submit" class="driver-mini-btn driver-mini-btn-finish">✓ Terminer</button>
                                 </form>
                             <?php endif; ?>
@@ -101,19 +101,19 @@ $statusLabels = [
             </h3>
             <div class="trips-grid">
                 <?php foreach ($past_trips as $trip): ?>
-                    <div class="ride-card-history card-light <?= $trip['status'] === 'cancelled' ? 'card-cancelled' : '' ?>">
+                    <div class="ride-card-history card-light <?= $trip->status === 'cancelled' ? 'card-cancelled' : '' ?>">
                         <div class="ride-content">
                             <p class="ride-title">
                                 <span class="material-icons ride-icon">directions_car</span>
-                                <?= htmlspecialchars($trip['ville_depart']) ?> &rarr; <?= htmlspecialchars($trip['ville_arrivee']) ?>
+                                <?= htmlspecialchars($trip->villeDepart) ?> &rarr; <?= htmlspecialchars($trip->villeArrivee) ?>
                             </p>
                             <p class="small-muted">
-                                <?= date('d/m/Y H:i', strtotime($trip['departure_datetime'])) ?>
-                                | <?= $trip['price'] ?>€
-                                | <?= $trip['nb_participants'] ?? 0 ?> passager(s)
+                                <?= date('d/m/Y H:i', strtotime($trip->departureDatetime)) ?>
+                                | <?= $trip->price ?>€
+                                | <?= $trip->nbParticipants ?? 0 ?> passager(s)
                             </p>
                         </div>
-                        <span class="admin-badge <?= $trip['status'] ?>"><?= $statusLabels[$trip['status']] ?? ucfirst($trip['status']) ?></span>
+                        <span class="admin-badge <?= $trip->status ?>"><?= $statusLabels[$trip->status] ?? ucfirst($trip->status) ?></span>
                     </div>
                 <?php endforeach; ?>
             </div>

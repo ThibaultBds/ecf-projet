@@ -24,16 +24,16 @@ $statusLabels = ['scheduled' => 'Planifié', 'started' => 'En cours', 'completed
             <tbody>
                 <?php foreach ($trips as $i => $trip): ?>
                     <tr class="admin-trips-row <?= $i % 2 === 1 ? 'admin-trips-row-alt' : '' ?>">
-                        <td><?= $trip['trip_id'] ?></td>
+                        <td><?= $trip->tripId ?></td>
                         <td>
-                            <a href="/covoiturages/<?= $trip['trip_id'] ?>" class="admin-trips-trip-link">
-                                <?= htmlspecialchars($trip['ville_depart']) ?> → <?= htmlspecialchars($trip['ville_arrivee']) ?>
+                            <a href="/covoiturages/<?= $trip->tripId ?>" class="admin-trips-trip-link">
+                                <?= htmlspecialchars($trip->villeDepart) ?> → <?= htmlspecialchars($trip->villeArrivee) ?>
                             </a>
                         </td>
-                        <td><?= htmlspecialchars($trip['chauffeur']) ?></td>
-                        <td><?= date('d/m/Y H:i', strtotime($trip['departure_datetime'])) ?></td>
-                        <td><?= $trip['available_seats'] ?></td>
-                        <td><?= $trip['price'] ?> cr.</td>
+                        <td><?= htmlspecialchars($trip->conducteur) ?></td>
+                        <td><?= date('d/m/Y H:i', strtotime($trip->departureDatetime)) ?></td>
+                        <td><?= $trip->availableSeats ?></td>
+                        <td><?= $trip->price ?> cr.</td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

@@ -35,25 +35,25 @@
                     <tbody>
                         <?php foreach ($pendingReviews as $r): ?>
                             <tr class="admin-row">
-                                <td><?= (int)$r['id'] ?></td>
-                                <td><?= htmlspecialchars($r['reviewer_name']) ?></td>
-                                <td><?= htmlspecialchars($r['driver_name']) ?></td>
+                                <td><?= $r->id ?></td>
+                                <td><?= htmlspecialchars($r->reviewerName) ?></td>
+                                <td><?= htmlspecialchars($r->driverName) ?></td>
                                 <td>
                                     <?php for ($i = 1; $i <= 5; $i++): ?>
-                                        <span class="moderator-star <?= $i <= $r['rating'] ? 'is-on' : 'is-off' ?>">&#9733;</span>
+                                        <span class="moderator-star <?= $i <= $r->rating ? 'is-on' : 'is-off' ?>">&#9733;</span>
                                     <?php endfor; ?>
                                 </td>
-                                <td class="moderator-comment-cell"><?= htmlspecialchars($r['comment'] ?? '') ?></td>
-                                <td><?= date('d/m/Y', strtotime($r['created_at'])) ?></td>
+                                <td class="moderator-comment-cell"><?= htmlspecialchars($r->comment ?? '') ?></td>
+                                <td><?= date('d/m/Y', strtotime($r->createdAt)) ?></td>
                                 <td class="moderator-actions-cell nowrap">
                                     <form method="POST" action="/moderator/approve-review" class="inline-form">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                        <input type="hidden" name="review_id" value="<?= (int)$r['id'] ?>">
+                                        <input type="hidden" name="review_id" value="<?= $r->id ?>">
                                         <button type="submit" class="btn-primary admin-btn-sm">Approuver</button>
                                     </form>
                                     <form method="POST" action="/moderator/reject-review" class="inline-form moderator-inline-gap">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                        <input type="hidden" name="review_id" value="<?= (int)$r['id'] ?>">
+                                        <input type="hidden" name="review_id" value="<?= $r->id ?>">
                                         <button type="submit" class="btn-danger admin-btn-sm">Rejeter</button>
                                     </form>
                                 </td>
@@ -179,7 +179,7 @@
         <h3 class="profil-titre">
             <span class="material-icons moderator-title-icon info">mail</span>
             Messages de contact
-            <?php $unread = count(array_filter($contactMessages ?? [], fn($m) => !$m['is_read'])); ?>
+            <?php $unread = count(array_filter($contactMessages ?? [], fn($m) => !$m->isRead)); ?>
             <?php if ($unread > 0): ?>
                 <span class="admin-unread-badge"><?= $unread ?> non lu<?= $unread > 1 ? 's' : '' ?></span>
             <?php endif; ?>
@@ -188,19 +188,19 @@
             <p class="admin-empty-text">Aucun message reçu.</p>
         <?php else: ?>
             <?php foreach ($contactMessages as $msg): ?>
-                <div class="admin-message-card <?= $msg['is_read'] ? 'is-read' : 'is-unread' ?>">
+                <div class="admin-message-card <?= $msg->isRead ? 'is-read' : 'is-unread' ?>">
                     <div class="admin-message-head">
                         <div>
-                            <strong><?= htmlspecialchars($msg['nom']) ?></strong>
-                            &lt;<a href="mailto:<?= htmlspecialchars($msg['email']) ?>" class="admin-message-mail-link"><?= htmlspecialchars($msg['email']) ?></a>&gt;
-                            &mdash; <em><?= htmlspecialchars($msg['sujet']) ?></em>
+                            <strong><?= htmlspecialchars($msg->nom) ?></strong>
+                            &lt;<a href="mailto:<?= htmlspecialchars($msg->email) ?>" class="admin-message-mail-link"><?= htmlspecialchars($msg->email) ?></a>&gt;
+                            &mdash; <em><?= htmlspecialchars($msg->sujet) ?></em>
                         </div>
                         <div class="admin-message-meta">
-                            <span class="admin-message-date"><?= date('d/m/Y H:i', strtotime($msg['created_at'])) ?></span>
-                            <?php if (!$msg['is_read']): ?>
+                            <span class="admin-message-date"><?= date('d/m/Y H:i', strtotime($msg->createdAt)) ?></span>
+                            <?php if (!$msg->isRead): ?>
                                 <form method="POST" action="/moderator/mark-message-read" class="inline-form">
                                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                                    <input type="hidden" name="message_id" value="<?= (int)$msg['id'] ?>">
+                                    <input type="hidden" name="message_id" value="<?= $msg->id ?>">
                                     <button type="submit" class="btn-primary admin-btn-xs">Marquer lu</button>
                                 </form>
                             <?php else: ?>
@@ -208,7 +208,7 @@
                             <?php endif; ?>
                         </div>
                     </div>
-                    <div class="admin-message-body"><?= htmlspecialchars($msg['message']) ?></div>
+                    <div class="admin-message-body"><?= htmlspecialchars($msg->message) ?></div>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
