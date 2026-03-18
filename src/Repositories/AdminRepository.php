@@ -48,7 +48,8 @@ class AdminRepository
     public function recentUsers(int $limit = 20): array
     {
         $stmt = $this->pdo->prepare("SELECT user_id, username, email, credits, role, is_driver, is_passenger, photo, suspended FROM users ORDER BY user_id DESC LIMIT ?");
-        $stmt->execute([$limit]);
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return User::hydrateAll($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 

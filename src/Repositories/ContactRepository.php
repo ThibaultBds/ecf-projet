@@ -18,7 +18,8 @@ class ContactRepository
     public function findAll(int $limit = 50): array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT ?");
-        $stmt->execute([$limit]);
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return ContactMessage::hydrateAll($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
