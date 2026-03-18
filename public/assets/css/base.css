@@ -68,6 +68,7 @@ body {
   line-height: 1.6;
   display: flex;
   flex-direction: column;
+  gap: 0;
   min-height: 100vh;
 }
 
@@ -106,7 +107,6 @@ textarea:focus {
   transform: translateY(-1px);
 }
 
-/* Focus visible pour l'accessibilité */
 *:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
@@ -368,7 +368,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Respect des préférences utilisateur */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

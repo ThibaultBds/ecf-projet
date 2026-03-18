@@ -5,10 +5,12 @@ header.container-header {
   justify-content: space-between;
   align-items: center;
   box-shadow: none;
+  border: none;
   border-radius: 0;
   position: relative;
   z-index: 40;
-  margin-bottom: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 main {
@@ -17,7 +19,7 @@ main {
 }
 
 main > :first-child {
-  margin-top: 0 !important;
+  margin-top: 0;
 }
 
 header.container-header h1 {
@@ -91,25 +93,14 @@ header.container-header h1 {
   background: rgba(255,255,255,0.12);
 }
 
-header.container-header > nav.navbar {
+header.container-header nav#navbar,
+header.container-header nav.navbar {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 12px;
-  width: auto;
-  padding: 10px 14px;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-}
-
-header.container-header nav#navbar,
-header.container-header nav.navbar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
   background: transparent;
+  border: none;
   padding: 0;
 }
 
@@ -129,9 +120,8 @@ header.container-header nav a {
   padding: 6px 10px;
   border-radius: 8px;
   transition: background 0.2s ease;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
+  background: transparent;
+  border: none;
 }
 
 header.container-header nav a:hover {
@@ -224,12 +214,11 @@ header.container-header > nav#navbar #auth-links.visible {
   margin: 0;
   border-radius: 0;
   box-shadow: none;
-  position: relative;
-  top: -2px;
 }
 
-header.container-header {
-  border-bottom: 0 !important;
+main > .hero {
+  margin-top: 0;
+  display: block;
 }
 
 .hero h2 {
@@ -248,25 +237,25 @@ header.container-header {
 .hero .card,
 .hero .search-card,
 .hero .search-panel {
-  background: rgba(255,255,255,0.08) !important;
-  color: #ffffff !important;
-  box-shadow: none !important;
-  border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
+  background: rgba(255,255,255,0.08);
+  color: #ffffff;
+  box-shadow: none;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
 .hero .search-bar input,
 .hero .search-bar select,
 .hero .search-bar button,
 .hero .search-bar textarea {
-  background: transparent !important;
-  color: #ffffff !important;
-  border: none !important;
+  background: transparent;
+  color: #ffffff;
+  border: none;
 }
 
 .hero .search-bar input::placeholder,
 .hero .search-bar textarea::placeholder {
-  color: rgba(255,255,255,0.9) !important;
+  color: rgba(255,255,255,0.9);
 }
 
 .page-header {
@@ -297,9 +286,6 @@ header.container-header {
   padding-top: 34px;
 }
 
-.container-header + main {
-  padding-top: 0 !important;
-}
 
 .presentation-entreprise,
 .benefits {
@@ -426,8 +412,8 @@ footer a:hover {
   width: 100vw;
   height: 100vh;
   background: rgba(30, 70, 80, 0.2);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   justify-content: center;
   align-items: center;
   transition: background var(--transition-base) var(--ease-smooth);
@@ -447,8 +433,8 @@ footer a:hover {
 
 .modal-legal-content {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: #2e5a63;
   border-radius: 18px;
@@ -542,26 +528,25 @@ footer a:hover {
     gap: 12px;
     white-space: nowrap;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     padding: 10px 14px;
-    background: rgba(0, 0, 0, 0.15) !important;
-    backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.15);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-bottom: none;
     border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
 
   header.container-header > nav#navbar a,
   header.container-header > nav.navbar a,
   #navbar a {
-    padding: 8px 12px !important;
+    padding: 8px 12px;
     border-radius: 8px;
     font-size: 0.95rem;
   }
 
   nav.navbar ul {
-    gap: 14px !important;
+    gap: 14px;
   }
 }
