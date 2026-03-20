@@ -84,7 +84,7 @@ class TripController extends BaseController
             'covoiturage'     => $covoiturage,
             'reviews'         => $reviews,
             'user_credit'     => $userCredit,
-            'credit_requis'   => (int) $covoiturage->price,
+            'credit_requis'   => (int) $covoiturage->price + 2,
             'isParticipating' => $isParticipating,
             'driverPrefs'     => $driverPrefs,
         ]);

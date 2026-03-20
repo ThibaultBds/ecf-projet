@@ -178,8 +178,8 @@
         <span class="material-icons trip-modal-ok-icon">check_circle</span>
         <h3 class="trip-modal-title">Confirmer votre participation</h3>
         <p><strong>Trajet :</strong> <?= htmlspecialchars($covoiturage->villeDepart) ?> → <?= htmlspecialchars($covoiturage->villeArrivee) ?></p>
-        <p><strong>Prix :</strong> <?= number_format($covoiturage->price, 2) ?>€</p>
-        <p><strong>Crédits :</strong> <?= $credit_requis ?></p>
+        <p><strong>Prix :</strong> <?= number_format($covoiturage->price, 2) ?>€ + 2 (frais plateforme)</p>
+        <p><strong>Total débité :</strong> <?= $credit_requis ?> crédits</p>
         <div class="trip-modal-actions">
             <button type="button" id="cancel-btn" class="btn-secondary trip-modal-btn">Annuler</button>
             <button type="button" id="confirm-btn" class="btn-primary trip-modal-btn">Confirmer</button>
