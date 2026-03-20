@@ -332,7 +332,8 @@ $statusLabels = [
                     </div>
                 <?php endforeach; ?>
             </div>
-        <?php endif; ?>
+            <?php endif; // historique ?>
+        <?php endif; // past_participations ?>
 
         <?php if (!$has_passenger_section && !$has_driver_section): ?>
             <p class="no-participation">Vous n'avez aucun trajet.
