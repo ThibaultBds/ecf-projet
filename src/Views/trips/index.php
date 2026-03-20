@@ -227,8 +227,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
-                let html = '<p>' + trajets.length + ' trajet(s) trouvé(s)</p>';
+                let html = '<p class="trips-count-text">' + trajets.length + ' trajet' + (trajets.length > 1 ? 's' : '') + ' trouvé' + (trajets.length > 1 ? 's' : '') + '</p>';
                 trajets.forEach(function(c) {
+                    const photo = c.conducteurPhoto
+                        ? `<img src="/uploads/${c.conducteurPhoto}" alt="Photo" class="trips-driver-photo">`
+                        : `<span class="material-icons trips-driver-fallback">account_circle</span>`;
+                    const note = parseFloat(c.noteConducteur) > 0
+                        ? `<span class="trips-driver-rating">&#9733; ${parseFloat(c.noteConducteur).toFixed(1)}/5</span>`
+                        : '';
+                    const arrival = c.arrivalDatetime
+                        ? ` &rarr; ${c.arrivalDatetime.substring(11,16)}`
+                        : '';
+                    const ecoBadge = c.energyType === 'electrique'
+                        ? `<div class="eco-badge">⚡ Écologique</div>`
+                        : `<div class="eco-badge trips-non-eco-badge">🚗 Non écologique</div>`;
                     html += `
                         <div class="ride-card">
                             <div class="ride-header">
@@ -236,9 +248,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="ride-price">${parseFloat(c.price).toFixed(2)}€</div>
                             </div>
                             <div class="ride-details">
-                                <p>${c.conducteur} &bull; ${c.brand} ${c.model}</p>
-                                <p>${c.availableSeats} place(s) &bull; ${c.departureDatetime}</p>
+                                <p><span class="material-icons">schedule</span>
+                                    ${c.departureDatetime.substring(0,10).split('-').reverse().join('/')} à ${c.departureDatetime.substring(11,16)}${arrival}
+                                </p>
+                                <p class="trips-driver-line">${photo} ${c.conducteur} ${note}</p>
+                                <p><span class="material-icons">directions_car</span> ${c.brand} ${c.model}</p>
+                                <p><span class="material-icons">people</span> ${c.availableSeats} place${c.availableSeats > 1 ? 's' : ''} restante${c.availableSeats > 1 ? 's' : ''}</p>
                             </div>
+                            ${ecoBadge}
                             <div class="ride-actions">
                                 <a href="/trip/${c.tripId}" class="btn-primary">Voir détails</a>
                             </div>

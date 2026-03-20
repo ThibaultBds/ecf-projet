@@ -83,16 +83,21 @@ class TripRepository
         return Trip::hydrateAll($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    public function nearestDate(string $depart, string $arrivee): ?string
+    public function nearestDate(string $depart, string $arrivee, string $date = ''): ?string
     {
         $sql = "SELECT DATE(t.departure_datetime) AS nearest_date FROM trips t
                 JOIN cities cd ON t.city_depart_id = cd.city_id
                 JOIN cities ca ON t.city_arrival_id = ca.city_id
-                WHERE t.status = 'scheduled' AND t.available_seats > 0 AND t.departure_datetime > NOW()";
+                WHERE t.status = 'scheduled' AND t.available_seats > 0";
         $params = [];
         if ($depart !== '')  { $sql .= " AND cd.name LIKE ?"; $params[] = '%' . $depart . '%'; }
         if ($arrivee !== '') { $sql .= " AND ca.name LIKE ?"; $params[] = '%' . $arrivee . '%'; }
-        $sql .= " ORDER BY t.departure_datetime ASC LIMIT 1";
+        if ($date !== '') {
+            $sql .= " ORDER BY ABS(DATEDIFF(DATE(t.departure_datetime), ?)) ASC, t.departure_datetime ASC LIMIT 1";
+            $params[] = $date;
+        } else {
+            $sql .= " AND t.departure_datetime > NOW() ORDER BY t.departure_datetime ASC LIMIT 1";
+        }
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);

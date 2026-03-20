@@ -46,7 +46,7 @@ class TripService
         $nearestDate = null;
 
         if ($hasSearched && empty($trips)) {
-            $nearestDate = $this->tripRepository->nearestDate($filters['depart'], $filters['arrivee']);
+            $nearestDate = $this->tripRepository->nearestDate($filters['depart'], $filters['arrivee'], $filters['date']);
         }
 
         return ['hasSearched' => $hasSearched, 'trips' => $trips, 'nearestDate' => $nearestDate, 'filters' => $filters];
