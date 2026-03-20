@@ -157,13 +157,82 @@ $statusLabels = [
             </div>
         <?php endif; ?>
 
-        <?php if (!empty($past_participations)): ?>
+        <?php if (!empty($past_participations)):
+            $to_validate = array_values(array_filter($past_participations, fn($t) => ($t->participantStatus ?? '') === 'confirmed' && $t->status === 'completed'));
+            $historique  = array_values(array_filter($past_participations, fn($t) => !(($t->participantStatus ?? '') === 'confirmed' && $t->status === 'completed')));
+        ?>
+
+            <?php if (!empty($to_validate)): ?>
             <h3 class="section-title <?= !empty($upcoming_participations) ? 'section-title-gap' : 'section-title-no-gap' ?>">
+                <span class="material-icons section-icon-success">pending_actions</span>
+                Mes participations à valider
+            </h3>
+            <div class="trips-grid">
+                <?php foreach ($to_validate as $trajet): ?>
+                    <?php $pStatus = 'confirmed'; $hasReviewed = !empty($trajet->hasReviewed); ?>
+                    <div class="ride-card-history card-light ride-card-stack">
+                        <div class="ride-content">
+                            <p class="ride-title">
+                                <a href="/trip/<?= $trajet->tripId ?>" class="trip-link">
+                                    <span class="material-icons ride-icon">person</span>
+                                    <?= htmlspecialchars($trajet->villeDepart) ?> &rarr; <?= htmlspecialchars($trajet->villeArrivee) ?>
+                                </a>
+                            </p>
+                            <p class="small-muted">
+                                Départ : <?= date('d/m/Y H:i', strtotime($trajet->departureDatetime)) ?>
+                                | Conducteur : <?= htmlspecialchars($trajet->conducteur ?? '') ?>
+                                &mdash; Statut : <strong>Terminé</strong>
+                            </p>
+                        </div>
+                        <div class="trip-actions-column">
+                            <form method="POST" action="/my-trips" class="w-100">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                                <input type="hidden" name="trip_id" value="<?= $trajet->tripId ?>">
+                                <button type="submit" name="action" value="validate_trip" class="btn-primary btn-status-completed w-100">
+                                    <span class="material-icons trip-action-icon">check_circle</span> Tout s'est bien passé
+                                </button>
+                            </form>
+                            <details class="w-100">
+                                <summary class="trip-problem-summary">
+                                    <span class="material-icons trip-status-icon">report_problem</span> Signaler un problème
+                                </summary>
+                                <form method="POST" action="/my-trips" class="trip-problem-form">
+                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                                    <input type="hidden" name="trip_id" value="<?= $trajet->tripId ?>">
+                                    <textarea name="problem_comment" rows="3" required placeholder="Décrivez le problème..." class="trip-problem-textarea"></textarea>
+                                    <button type="submit" name="action" value="report_problem" class="btn-danger w-100">Envoyer le signalement</button>
+                                </form>
+                            </details>
+                            <?php if (!$hasReviewed): ?>
+                                <details class="details-compact trip-review-details">
+                                    <summary class="details-summary trip-review-summary">
+                                        <span class="material-icons trip-status-icon">star</span> Noter ce trajet
+                                    </summary>
+                                    <form action="/api/review" method="POST" class="form-container form-small form-compact trip-review-form">
+                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                                        <input type="hidden" name="trip_id" value="<?= $trajet->tripId ?>">
+                                        <input type="hidden" name="driver_id" value="<?= $trajet->chauffeurId ?? '' ?>">
+                                        <label>Note (1 à 5)</label>
+                                        <input type="number" name="rating" min="1" max="5" required>
+                                        <label>Commentaire</label>
+                                        <textarea name="comment" required></textarea>
+                                        <button type="submit" class="btn-primary">Envoyer</button>
+                                    </form>
+                                </details>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
+            <?php if (!empty($historique)): ?>
+            <h3 class="section-title section-title-gap">
                 <span class="material-icons section-icon-muted">history</span>
                 Mes participations passées
             </h3>
             <div class="trips-grid">
-                <?php foreach ($past_participations as $trajet): ?>
+                <?php foreach ($historique as $trajet): ?>
                     <?php
                     $pStatus     = $trajet->participantStatus ?? '';
                     $hasReviewed = !empty($trajet->hasReviewed);
