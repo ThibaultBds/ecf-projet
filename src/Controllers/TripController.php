@@ -38,9 +38,14 @@ class TripController extends BaseController
     {
         $filters      = $this->tripService->buildSearchFiltersFromQuery($_GET);
         $covoiturages = $this->tripService->searchTripsForApi($filters);
+        $nearestDate  = null;
+
+        if (empty($covoiturages)) {
+            $nearestDate = $this->tripService->searchTrips($filters)['nearestDate'];
+        }
 
         header('Content-Type: application/json');
-        echo json_encode($covoiturages);
+        echo json_encode(['trips' => $covoiturages, 'nearestDate' => $nearestDate]);
         exit;
     }
 

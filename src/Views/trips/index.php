@@ -210,9 +210,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch('/trips/search?' + params)
             .then(res => res.json())
-            .then(function(trajets) {
+            .then(function(data) {
+                const trajets = data.trips;
+                const nearestDate = data.nearestDate;
+
                 if (trajets.length === 0) {
-                    resultsContainer.innerHTML = '<p>Aucun trajet trouvé.</p>';
+                    let html = '<div class="trips-none-found"><span class="material-icons trips-none-icon">search_off</span><h3 class="trips-none-title">Aucun covoiturage trouvé</h3><p class="trips-none-text">Aucun trajet ne correspond à vos critères pour cette date.</p>';
+                    if (nearestDate) {
+                        const d = new Date(nearestDate);
+                        const formatted = d.toLocaleDateString('fr-FR');
+                        html += `<div class="trips-nearest-box"><p class="trips-nearest-text"><span class="material-icons trips-nearest-icon">event</span> Un trajet est disponible le ${formatted}</p><a href="/trips?depart=${encodeURIComponent(params.get('depart'))}&arrivee=${encodeURIComponent(params.get('arrivee'))}&date=${nearestDate}" class="trips-nearest-link">Voir ce trajet</a></div>`;
+                    }
+                    html += '</div>';
+                    resultsContainer.innerHTML = html;
                     return;
                 }
 
