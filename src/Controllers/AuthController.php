@@ -106,7 +106,7 @@ class AuthController extends BaseController
                 'is_passenger' => 1,
             ]);
 
-            $_SESSION['flash_success'] = 'Compte cree avec succes ! Connectez-vous.';
+            $_SESSION['flash_success'] = 'Compte créé avec succès ! Connectez-vous.';
             $redirectAfter = $_SESSION['intended_url'] ?? null;
             session_write_close();
             header('Location: /login' . ($redirectAfter ? '?redirect=' . urlencode($redirectAfter) : ''));

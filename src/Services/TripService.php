@@ -120,8 +120,7 @@ class TripService
             'status'             => 'scheduled',
         ]);
 
-        $this->userRepository->deductCredits($userId, (int) $data['price'], 'debit', 'Creation trajet', null);
-        $this->userRepository->deductCredits($userId, 2, 'platform_fee', 'Frais plateforme creation', null);
+        $this->userRepository->deductCredits($userId, 2, 'platform_fee', 'Frais plateforme création', null);
 
         $pdo->commit();
     }
@@ -286,7 +285,6 @@ class TripService
             if (!$this->userRepository->deductCredits($userId, $platformFee, 'platform_fee', 'Frais plateforme', $tripId)) {
                 throw new Exception("Erreur frais plateforme");
             }
-            $this->userRepository->addCredits($trip->chauffeurId, $tripPrice, 'credit', 'Revenu trajet', $tripId);
             $this->participantRepository->create(['trip_id' => $tripId, 'user_id' => $userId]);
             $stmt = $pdo->prepare("UPDATE trips SET available_seats = available_seats - 1 WHERE trip_id = ?");
             $stmt->execute([$tripId]);

@@ -40,7 +40,7 @@ class ContactController extends BaseController
 
         (new ContactRepository())->save($name, $email, $subject, $message);
 
-        $_SESSION['flash_success'] = 'Votre message a ete envoye avec succes.';
+        $_SESSION['flash_success'] = 'Votre message a été envoyé avec succès.';
         header('Location: /contact');
         exit;
     }

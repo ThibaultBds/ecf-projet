@@ -73,11 +73,53 @@
                             <span class="eco-badge eco-badge-inline">⚡ Écologique</span>
                         <?php endif; ?>
                     </div>
-                    <form method="POST" action="/driver/vehicles/delete" class="inline-form">
-                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
-                        <input type="hidden" name="vehicle_id" value="<?= $v->vehicleId ?>">
-                        <button type="submit" class="btn-danger" onclick="return confirm('Supprimer ce véhicule ?');">Supprimer</button>
-                    </form>
+                    <div class="inline-form">
+                        <button type="button" class="btn-secondary"
+                            onclick="document.getElementById('edit-vehicle-<?= $v->vehicleId ?>').classList.toggle('hidden')">
+                            Modifier
+                        </button>
+                        <form method="POST" action="/driver/vehicles/delete" class="inline-form" style="display:inline">
+                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                            <input type="hidden" name="vehicle_id" value="<?= $v->vehicleId ?>">
+                            <button type="submit" class="btn-danger" onclick="return confirm('Supprimer ce véhicule ?');">Supprimer</button>
+                        </form>
+                    </div>
+                    <div id="edit-vehicle-<?= $v->vehicleId ?>" class="hidden" style="margin-top:1rem">
+                        <form method="POST" action="/driver/vehicles/update" class="form-container">
+                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                            <input type="hidden" name="vehicle_id" value="<?= $v->vehicleId ?>">
+                            <div class="input-group">
+                                <label>Marque</label>
+                                <input type="text" name="brand" value="<?= htmlspecialchars($v->brand) ?>">
+                            </div>
+                            <div class="input-group">
+                                <label>Modèle</label>
+                                <input type="text" name="model" value="<?= htmlspecialchars($v->model) ?>">
+                            </div>
+                            <div class="input-group">
+                                <label>Couleur</label>
+                                <input type="text" name="color" value="<?= htmlspecialchars($v->color) ?>">
+                            </div>
+                            <div class="input-group">
+                                <label>Plaque (format: AB-123-CD)</label>
+                                <input type="text" name="license_plate" value="<?= htmlspecialchars($v->licensePlate) ?>"
+                                       pattern="[A-Z]{2}-[0-9]{3}-[A-Z]{2}" class="vehicle-plate-input">
+                            </div>
+                            <div class="input-group">
+                                <label>Type d'énergie</label>
+                                <select name="energy_type" class="select-field">
+                                    <option value="essence" <?= $v->energyType === 'essence' ? 'selected' : '' ?>>Essence</option>
+                                    <option value="diesel"  <?= $v->energyType === 'diesel'  ? 'selected' : '' ?>>Diesel</option>
+                                    <option value="electrique" <?= $v->energyType === 'electrique' ? 'selected' : '' ?>>Électrique</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Places disponibles (1-8)</label>
+                                <input type="number" name="seats_available" min="1" max="8" value="<?= $v->seatsAvailable ?>">
+                            </div>
+                            <button type="submit" class="btn-primary">Enregistrer</button>
+                        </form>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>

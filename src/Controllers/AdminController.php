@@ -65,7 +65,7 @@ class AdminController extends BaseController
         $userId = (int) ($_POST['user_id'] ?? 0);
         if ($userId > 0) {
             (new UserRepository())->update($userId, ['suspended' => 0]);
-            $_SESSION['flash_success'] = 'Utilisateur reactive.';
+            $_SESSION['flash_success'] = 'Utilisateur réactivé.';
         }
         header('Location: /admin');
         exit;
@@ -129,7 +129,7 @@ class AdminController extends BaseController
             'role'     => $role,
         ]);
 
-        $_SESSION['flash_success'] = "Compte {$role} cree avec succes !";
+        $_SESSION['flash_success'] = "Compte {$role} créé avec succès !";
         header('Location: /admin');
         exit;
     }

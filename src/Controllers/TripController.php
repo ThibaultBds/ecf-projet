@@ -104,7 +104,7 @@ class TripController extends BaseController
                 $this->tripService->reportProblem($tripId, $userId, $_POST['problem_comment'] ?? '');
             }
 
-            header('Location: /my-trips?success=Action effectuee avec succes');
+            header('Location: /my-trips?success=Action effectuée avec succès');
             exit;
         }
 

@@ -42,7 +42,7 @@ class DriverController extends BaseController
         $vehicleRepo = new VehicleRepository();
 
         $this->render('driver/create-trip', [
-            'title'    => 'Creer un trajet - EcoRide',
+            'title'    => 'Créer un trajet - EcoRide',
             'user'     => $userRepo->findById($userId),
             'vehicles' => $vehicleRepo->byUser($userId),
             'error'    => '',
@@ -53,7 +53,7 @@ class DriverController extends BaseController
     private function renderCreateTrip(User $user, array $vehicles, string $error = '')
     {
         return $this->render('driver/create-trip', [
-            'title'    => 'Creer un trajet - EcoRide',
+            'title'    => 'Créer un trajet - EcoRide',
             'user'     => $user,
             'vehicles' => $vehicles,
             'error'    => $error,
@@ -84,21 +84,21 @@ class DriverController extends BaseController
         }
 
         if ($price < 1 || $price > 100) {
-            return $this->renderCreateTrip($user, $vehicles, 'Le prix doit etre entre 1 et 100.');
+            return $this->renderCreateTrip($user, $vehicles, 'Le prix doit être entre 1 et 100.');
         }
 
         if ($seats < 1 || $seats > 4) {
-            return $this->renderCreateTrip($user, $vehicles, 'Le nombre de places doit etre entre 1 et 4.');
+            return $this->renderCreateTrip($user, $vehicles, 'Le nombre de places doit être entre 1 et 4.');
         }
 
         $departureDateTime = $departureDate . ' ' . $departureTime . ':00';
         if (strtotime($departureDateTime) <= time()) {
-            return $this->renderCreateTrip($user, $vehicles, 'La date de depart doit etre dans le futur.');
+            return $this->renderCreateTrip($user, $vehicles, 'La date de départ doit être dans le futur.');
         }
 
-        $totalCost = $price + 2;
+        $totalCost = 2;
         if ($user->credits < $totalCost) {
-            return $this->renderCreateTrip($user, $vehicles, "Credits insuffisants. Il faut {$totalCost} credits.");
+            return $this->renderCreateTrip($user, $vehicles, "Crédits insuffisants. Il faut {$totalCost} crédits.");
         }
 
         $vehicleId = (int) ($_POST['vehicle_id'] ?? 0);
@@ -109,14 +109,14 @@ class DriverController extends BaseController
         } else {
             $vehicle = $vehicleRepo->firstByUser($userId);
             if (!$vehicle) {
-                return $this->renderCreateTrip($user, [], 'Vous devez d abord ajouter un vehicule.');
+                return $this->renderCreateTrip($user, [], "Vous devez d'abord ajouter un véhicule.");
             }
             $vehicleId = $vehicle->vehicleId;
         }
 
         $arrivalDateTime = $departureDate . ' ' . $arrivalTime . ':00';
         if (strtotime($arrivalDateTime) <= strtotime($departureDateTime)) {
-            return $this->renderCreateTrip($user, $vehicles, 'L heure d arrivee doit etre apres l heure de depart.');
+            return $this->renderCreateTrip($user, $vehicles, "L'heure d'arrivée doit être après l'heure de départ.");
         }
 
         try {
@@ -145,7 +145,7 @@ class DriverController extends BaseController
         $prefs  = $mongo->findOne('driver_preferences', ['user_id' => $userId]);
 
         $this->render('driver/preferences', [
-            'title'   => 'Mes Preferences - EcoRide',
+            'title'   => 'Mes Préférences - EcoRide',
             'prefs'   => $prefs ?? [],
             'success' => $_SESSION['flash_success'] ?? '',
             'error'   => $_SESSION['flash_error'] ?? '',
@@ -174,7 +174,7 @@ class DriverController extends BaseController
         try {
             $mongo = MongoDB::getInstance();
             $mongo->upsert('driver_preferences', ['user_id' => $userId], $prefs);
-            $_SESSION['flash_success'] = 'Preferences sauvegardees avec succes.';
+            $_SESSION['flash_success'] = 'Préférences sauvegardées avec succès.';
         } catch (Exception $e) {
             error_log('Erreur MongoDB preferences : ' . $e->getMessage());
             $_SESSION['flash_error'] = 'Erreur lors de la sauvegarde des preferences.';

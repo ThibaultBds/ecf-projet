@@ -55,11 +55,11 @@ class ReviewApiController extends BaseController
                 'status'      => 'pending',
             ]);
 
-            header('Location: /my-trips?success=Avis envoye avec succes !');
+            header('Location: /my-trips?success=Avis envoyé avec succès !');
             exit;
         } catch (Exception $e) {
             error_log('Erreur soumission avis : ' . $e->getMessage());
-            $_SESSION['flash_error'] = 'Erreur lors de l envoi de l avis.';
+            $_SESSION['flash_error'] = "Erreur lors de l'envoi de l'avis.";
             header('Location: /my-trips');
             exit;
         }
