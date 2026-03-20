@@ -20,8 +20,7 @@
 
 <section class="covoiturages-list trips-list-wrap">
 
-    <?php if (!empty($hasSearched)): ?>
-    <div class="trips-advanced-wrap">
+    <div class="trips-advanced-wrap" id="filters-wrap" <?= empty($hasSearched) ? 'style="display:none"' : '' ?>>
         <button type="button" id="toggle-filters" class="trips-filter-toggle-btn">
             <span class="material-icons trips-filter-toggle-icon">tune</span> Filtres avancés
         </button>
@@ -77,7 +76,6 @@
             </form>
         </div>
     </div>
-    <?php endif; ?>
 
     <?php if (!empty($isDriver)): ?>
         <div class="trips-driver-cta">
@@ -102,6 +100,7 @@
         </div>
     <?php endif; ?>
 
+    <div id="trips-results">
     <?php if (empty($hasSearched)): ?>
         <div class="trips-empty-state">
             <span class="material-icons trips-empty-icon">travel_explore</span>
@@ -180,6 +179,7 @@
             </div>
         <?php endforeach; ?>
     <?php endif; ?>
+    </div><!-- #trips-results -->
 </section>
 
 <script>
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fetch search
     const form = document.querySelector('form.search-bar');
-    const resultsContainer = document.querySelector('.covoiturages-list');
+    const resultsContainer = document.getElementById('trips-results');
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -211,6 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/trips/search?' + params)
             .then(res => res.json())
             .then(function(data) {
+                document.getElementById('filters-wrap').style.display = '';
                 const trajets = data.trips;
                 const nearestDate = data.nearestDate;
 
