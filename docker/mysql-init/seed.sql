@@ -31,10 +31,10 @@ INSERT INTO vehicles (user_id, brand, model, color, license_plate, energy_type, 
 -- trajets à venir
 
 INSERT INTO trips (chauffeur_id, vehicle_id, city_depart_id, city_arrival_id, departure_datetime, arrival_datetime, price, available_seats, status) VALUES
-(1, 1, 1, 2, '2026-03-02 08:00:00', '2026-03-02 12:00:00', 15.00, 3, 'scheduled'),
-(1, 1, 2, 3, '2026-03-05 09:00:00', '2026-03-05 12:30:00', 20.00, 3, 'scheduled'),
-(2, 3, 1, 4, '2026-03-03 07:30:00', '2026-03-03 13:00:00', 25.00, 3, 'scheduled'),
-(1, 2, 3, 5, '2026-03-10 14:00:00', '2026-03-10 18:00:00', 18.00, 3, 'scheduled');
+(1, 1, 1, 2, '2026-04-18 08:00:00', '2026-04-18 12:00:00', 15.00, 3, 'scheduled'),
+(1, 1, 2, 3, '2026-04-22 09:00:00', '2026-04-22 12:30:00', 20.00, 3, 'scheduled'),
+(2, 3, 1, 4, '2026-04-25 07:30:00', '2026-04-25 13:00:00', 25.00, 3, 'scheduled'),
+(1, 2, 3, 5, '2026-04-29 14:00:00', '2026-04-29 18:00:00', 18.00, 3, 'scheduled');
 
 -- Trajet terminé (pour tester validation/avis)
 INSERT INTO trips (chauffeur_id, vehicle_id, city_depart_id, city_arrival_id, departure_datetime, arrival_datetime, price, available_seats, status) VALUES

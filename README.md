@@ -8,7 +8,7 @@ Objectif : promouvoir des déplacements responsables en favorisant le partage de
 
 Dépôt GitHub : <https://github.com/ThibaultBds/ecf-projet>
 
-Application déployée : <https://ecf-projet-production-5520.up.railway.app/>
+Application déployée : <https://ecoride-ecf-2026-bca191973793.herokuapp.com>
 
 ## Architecture
 
@@ -64,7 +64,7 @@ Le MVC personnalisé permet :
 ### Environnement
 
 - Docker (développement)
-- Railway (production)
+- Heroku (production)
 
 ## Gestion des emails
 
@@ -188,7 +188,7 @@ Un fichier `.env` est optionnel tant qu'il reprend exactement ces noms de variab
 
 ## Base de données (SQL fourni)
 
-Le fichier `ecoride.sql` contient le schéma MySQL et des données de démonstration (CREATE + INSERT).
+Le fichier `ecoride.sql` contient le schéma MySQL et des données de démonstration (CREATE + INSERT). Il inclut notamment les tables : `users`, `trips`, `vehicles`, `reviews`, `trip_participants`, `contact_messages`, `credit_logs`, `cities`.
 
 En environnement Docker, des scripts SQL sont aussi disponibles dans :
 
@@ -207,6 +207,7 @@ Import local :
 | `Annexe_Diagrammes_UML_MCD_EcoRide.pdf` | Diagrammes UML et MCD |
 | `Charte_Graphique.pdf` | Charte graphique |
 | `Documentation_Technique.pdf` | Documentation technique |
+| `Documentation_Gestion_Projet_Ecoride.pdf` | Gestion de projet (Kanban, Agile) |
 | `Manuel_d_Utilisation.pdf` | Manuel utilisateur |
 
 ## Initialisation MongoDB
@@ -217,18 +218,18 @@ Il n'y a pas de script de seed dédié dans ce dépôt : ces données sont cré�
 
 Note : les avis utilisateurs sont stockés en MySQL (table `reviews`), pas dans MongoDB.
 
-## Déploiement (Railway)
+## Déploiement (Heroku)
 
-1. Migrer la base MySQL
-2. Configurer les variables d'environnement sur Railway
+1. Migrer la base MySQL (JawsDB addon)
+2. Configurer les variables d'environnement sur Heroku
 3. Configurer Brevo (`BREVO_API_KEY`, `MAIL_FROM`)
 4. Vérifier l'envoi d'email réel
 5. Exécuter un test complet de l'application
 
-## Latence Railway
+## Latence Heroku
 
-Railway peut mettre l'application en veille après une période d'inactivité.
-Un délai de réveil (~60s) peut apparaître au premier accès.
+Heroku peut mettre l'application en veille après une période d'inactivité (plan gratuit).
+Un délai de réveil (~30s) peut apparaître au premier accès.
 
 ## Organisation Git
 
