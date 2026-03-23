@@ -284,6 +284,7 @@ main > .hero {
 .container-header + main .page-header {
   margin-top: 0;
   padding-top: 34px;
+  border-radius: 0;
 }
 
 
