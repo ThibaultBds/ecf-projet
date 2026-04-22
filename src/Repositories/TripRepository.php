@@ -69,15 +69,37 @@ class TripRepository
                 JOIN cities cd ON t.city_depart_id = cd.city_id
                 JOIN cities ca ON t.city_arrival_id = ca.city_id
                 WHERE t.status = 'scheduled' AND t.available_seats > 0 AND t.departure_datetime > NOW()";
+
         $params = [];
-        if (!empty($filters['depart']))    { $sql .= " AND cd.name LIKE ?"; $params[] = '%' . $filters['depart'] . '%'; }
-        if (!empty($filters['arrivee']))   { $sql .= " AND ca.name LIKE ?"; $params[] = '%' . $filters['arrivee'] . '%'; }
-        if (!empty($filters['date']))      { $sql .= " AND DATE(t.departure_datetime) = ?"; $params[] = $filters['date']; }
-        if (!empty($filters['prix_max']))  { $sql .= " AND t.price <= ?"; $params[] = (float) $filters['prix_max']; }
-        if (!empty($filters['ecologique'])){ $sql .= " AND v.energy_type = 'electrique'"; }
-        if (!empty($filters['duree_max'])) { $sql .= " AND TIMESTAMPDIFF(MINUTE, t.departure_datetime, t.arrival_datetime) <= ?"; $params[] = (int) $filters['duree_max'] * 60; }
-        if (!empty($filters['note_min']))  { $sql .= " HAVING note_conducteur >= ?"; $params[] = (float) $filters['note_min']; }
+        if (!empty($filters['depart'])) {
+            $sql .= " AND cd.name LIKE ?";
+            $params[] = '%' . $filters['depart'] . '%';
+        }
+        if (!empty($filters['arrivee'])) {
+            $sql .= " AND ca.name LIKE ?";
+            $params[] = '%' . $filters['arrivee'] . '%';
+        }
+        if (!empty($filters['date'])) {
+            $sql .= " AND DATE(t.departure_datetime) = ?";
+            $params[] = $filters['date'];
+        }
+        if (!empty($filters['prix_max'])) {
+            $sql .= " AND t.price <= ?";
+            $params[] = (float) $filters['prix_max'];
+        }
+        if (!empty($filters['ecologique'])) {
+            $sql .= " AND v.energy_type = 'electrique'";
+        }
+        if (!empty($filters['duree_max'])) {
+            $sql .= " AND TIMESTAMPDIFF(MINUTE, t.departure_datetime, t.arrival_datetime) <= ?";
+            $params[] = (int) $filters['duree_max'] * 60;
+        }
+        if (!empty($filters['note_min'])) {
+            $sql .= " HAVING note_conducteur >= ?";
+            $params[] = (float) $filters['note_min'];
+        }
         $sql .= " ORDER BY t.departure_datetime ASC";
+
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         return Trip::hydrateAll($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -90,8 +112,14 @@ class TripRepository
                 JOIN cities ca ON t.city_arrival_id = ca.city_id
                 WHERE t.status = 'scheduled' AND t.available_seats > 0";
         $params = [];
-        if ($depart !== '')  { $sql .= " AND cd.name LIKE ?"; $params[] = '%' . $depart . '%'; }
-        if ($arrivee !== '') { $sql .= " AND ca.name LIKE ?"; $params[] = '%' . $arrivee . '%'; }
+        if ($depart !== '') {
+            $sql .= " AND cd.name LIKE ?";
+            $params[] = '%' . $depart . '%';
+        }
+        if ($arrivee !== '') {
+            $sql .= " AND ca.name LIKE ?";
+            $params[] = '%' . $arrivee . '%';
+        }
         if ($date !== '') {
             $sql .= " ORDER BY ABS(DATEDIFF(DATE(t.departure_datetime), ?)) ASC, t.departure_datetime ASC LIMIT 1";
             $params[] = $date;
