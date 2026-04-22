@@ -3,6 +3,7 @@
 -- ==========================================
 
 DROP TABLE IF EXISTS php_sessions;
+DROP TABLE IF EXISTS rate_limits;
 DROP TABLE IF EXISTS login_attempts;
 DROP TABLE IF EXISTS credit_logs;
 DROP TABLE IF EXISTS reviews;
@@ -11,6 +12,24 @@ DROP TABLE IF EXISTS trips;
 DROP TABLE IF EXISTS vehicles;
 DROP TABLE IF EXISTS cities;
 DROP TABLE IF EXISTS users;
+
+-- ==========================================
+-- TABLE RATE LIMITS
+-- ==========================================
+
+CREATE TABLE rate_limits (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rate_key VARCHAR(64) NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    window_start INT NOT NULL,
+    hits INT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uniq_rate (rate_key, ip_address, window_start),
+    INDEX idx_rate_lookup (rate_key, ip_address),
+    INDEX idx_window_start (window_start)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ==========================================
 -- TABLE USERS

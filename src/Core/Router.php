@@ -125,39 +125,40 @@ class Router
             'guest' => \App\Middleware\GuestMiddleware::class,
             'role'  => \App\Middleware\RoleMiddleware::class,
             'csrf'  => \App\Middleware\CsrfMiddleware::class,
+            'rate'  => \App\Middleware\RateLimitMiddleware::class,
         ];
 
         return $middlewares[$name] ?? null;
     }
 
     private function callAction($action, $params = [])
-{
-    if (is_callable($action)) {
-        return call_user_func_array($action, array_values($params));
-    }
-
-    if (is_string($action)) {
-
-        list($controller, $method) = explode('@', $action);
-
-        $controllerClass = "App\\Controllers\\$controller";
-
-        if (!class_exists($controllerClass)) {
-            die("Classe de contrôleur non trouvée : $controllerClass");
+    {
+        if (is_callable($action)) {
+            return call_user_func_array($action, array_values($params));
         }
 
-        $controllerInstance = new $controllerClass();
+        if (is_string($action)) {
 
-        if (!method_exists($controllerInstance, $method)) {
-            die("Méthode non trouvée : $method dans $controllerClass");
+            list($controller, $method) = explode('@', $action);
+
+            $controllerClass = "App\\Controllers\\$controller";
+
+            if (!class_exists($controllerClass)) {
+                die("Classe de contrôleur non trouvée : $controllerClass");
+            }
+
+            $controllerInstance = new $controllerClass();
+
+            if (!method_exists($controllerInstance, $method)) {
+                die("Méthode non trouvée : $method dans $controllerClass");
+            }
+
+            return call_user_func_array(
+                [$controllerInstance, $method],
+                array_values($params)
+            );
         }
-
-        return call_user_func_array(
-            [$controllerInstance, $method],
-            array_values($params)
-        );
     }
-}
 
 
     private function render404()
