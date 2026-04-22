@@ -4,17 +4,18 @@ namespace App\Controllers;
 
 use App\Core\Auth\AuthManager;
 use App\Repositories\UserRepository;
-use App\Repositories\VehicleRepository;
+use App\Services\UserService;
 
 class UserController extends BaseController
 {
     public function profile()
     {
-        $userId   = AuthManager::id();
-        $userRepo = new UserRepository();
+        $userId      = AuthManager::id();
+        $userRepo    = new UserRepository();
+        $userService = new UserService($userRepo);
 
         $userData = $userRepo->findById($userId);
-        $myTrips  = $userRepo->recentTrips($userId, 10);
+        $myTrips  = $userService->recentTrips($userId, 10);
 
         $error   = $_SESSION['flash_error'] ?? '';
         $success = $_SESSION['flash_success'] ?? '';
@@ -31,43 +32,25 @@ class UserController extends BaseController
 
     public function update()
     {
-        $userId   = AuthManager::id();
-        $userRepo = new UserRepository();
-        $type     = $_POST['user_type'] ?? '';
+        $userId = AuthManager::id();
+        $type   = $_POST['user_type'] ?? '';
 
-        $isDriver    = false;
-        $isPassenger = false;
+        $result = (new UserService())->updateUserType($userId, $type);
 
-        if ($type === 'chauffeur') {
-            $isDriver = true;
-        } elseif ($type === 'passager') {
-            $isPassenger = true;
-        } elseif ($type === 'les_deux') {
-            $isDriver    = true;
-            $isPassenger = true;
-        } else {
-            $_SESSION['flash_error'] = 'Type invalide.';
+        if (!($result['success'] ?? false)) {
+            $_SESSION['flash_error'] = $result['message'] ?? 'Type invalide.';
             header('Location: /profile');
             exit;
         }
 
-        $userRepo->update($userId, [
-            'is_driver'    => $isDriver ? 1 : 0,
-            'is_passenger' => $isPassenger ? 1 : 0,
-        ]);
+        $_SESSION['user']['is_driver'] = $result['is_driver'];
+        $_SESSION['user']['is_passenger'] = $result['is_passenger'];
+        $_SESSION['flash_success'] = $result['success_message'];
 
-        $_SESSION['user']['is_driver']    = $isDriver;
-        $_SESSION['user']['is_passenger'] = $isPassenger;
-
-        $_SESSION['flash_success'] = 'Profil mis à jour avec succès !';
-
-        if ($isDriver) {
-            $vehicleRepo = new VehicleRepository();
-            if (empty($vehicleRepo->byUser($userId))) {
-                $_SESSION['flash_success'] = 'Profil mis à jour ! Veuillez maintenant ajouter un véhicule.';
-                header('Location: /driver/vehicles');
-                exit;
-            }
+        if ($result['needs_vehicle']) {
+            $_SESSION['flash_success'] = 'Profil mis a jour ! Veuillez maintenant ajouter un vehicule.';
+            header('Location: /driver/vehicles');
+            exit;
         }
 
         header('Location: /profile');
@@ -113,7 +96,7 @@ class UserController extends BaseController
 
         $userRepo->updatePhoto($userId, $newFileName);
 
-        $_SESSION['flash_success'] = "Photo mise à jour.";
+        $_SESSION['flash_success'] = "Photo mise a jour.";
         header('Location: /profile');
         exit;
     }
@@ -132,7 +115,7 @@ class UserController extends BaseController
             $userRepo->updatePhoto($userId, null);
         }
 
-        $_SESSION['flash_success'] = "Photo supprimée.";
+        $_SESSION['flash_success'] = "Photo supprimee.";
         header('Location: /profile');
         exit;
     }

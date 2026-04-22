@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\Auth\AuthManager;
-use App\Repositories\UserRepository;
+use App\Services\UserService;
 use Exception;
 
 class AuthController extends BaseController
@@ -67,53 +67,35 @@ class AuthController extends BaseController
 
     public function register()
     {
-        $userRepo = new UserRepository();
-
-        $username        = trim($_POST['username'] ?? '');
-        $email           = strtolower(trim($_POST['email'] ?? ''));
-        $password        = $_POST['password'] ?? '';
-        $passwordConfirm = $_POST['password_confirm'] ?? '';
-        $old             = ['username' => $username, 'email' => $email];
-
-        if (empty($username) || empty($email) || empty($password) || empty($passwordConfirm)) {
-            return $this->render('auth/register', ['title' => 'Inscription - EcoRide', 'error' => 'Veuillez remplir tous les champs.', 'success' => '', 'old' => $old]);
-        }
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return $this->render('auth/register', ['title' => 'Inscription - EcoRide', 'error' => 'Adresse email invalide.', 'success' => '', 'old' => $old]);
-        }
-
-        if (strlen($password) < 8) {
-            return $this->render('auth/register', ['title' => 'Inscription - EcoRide', 'error' => 'Le mot de passe doit contenir au moins 8 caracteres.', 'success' => '', 'old' => $old]);
-        }
-
-        if ($password !== $passwordConfirm) {
-            return $this->render('auth/register', ['title' => 'Inscription - EcoRide', 'error' => 'Les mots de passe ne correspondent pas.', 'success' => '', 'old' => $old]);
-        }
-
-        if ($userRepo->exists($email, $username)) {
-            return $this->render('auth/register', ['title' => 'Inscription - EcoRide', 'error' => 'Cet email ou ce pseudo est deja utilise.', 'success' => '', 'old' => $old]);
-        }
-
         try {
-            $userRepo->create([
-                'username'     => $username,
-                'email'        => $email,
-                'password'     => password_hash($password, PASSWORD_DEFAULT),
-                'credits'      => 20,
-                'role'         => 'user',
-                'is_driver'    => 0,
-                'is_passenger' => 1,
-            ]);
+            $result = (new UserService())->register($_POST);
 
-            $_SESSION['flash_success'] = 'Compte créé avec succès ! Connectez-vous.';
+            if (!($result['success'] ?? false)) {
+                return $this->render('auth/register', [
+                    'title' => 'Inscription - EcoRide',
+                    'error' => $result['message'] ?? 'Erreur lors de l inscription.',
+                    'success' => '',
+                    'old' => $result['old'] ?? [],
+                ]);
+            }
+
+            $_SESSION['flash_success'] = 'Compte cree avec succes ! Connectez-vous.';
             $redirectAfter = $_SESSION['intended_url'] ?? null;
             session_write_close();
             header('Location: /login' . ($redirectAfter ? '?redirect=' . urlencode($redirectAfter) : ''));
             exit;
         } catch (Exception $e) {
             error_log('Erreur inscription : ' . $e->getMessage());
-            return $this->render('auth/register', ['title' => 'Inscription - EcoRide', 'error' => 'Une erreur est survenue lors de l inscription.', 'success' => '', 'old' => $old]);
+
+            return $this->render('auth/register', [
+                'title' => 'Inscription - EcoRide',
+                'error' => 'Une erreur est survenue lors de l inscription.',
+                'success' => '',
+                'old' => [
+                    'username' => trim($_POST['username'] ?? ''),
+                    'email' => strtolower(trim($_POST['email'] ?? '')),
+                ],
+            ]);
         }
     }
 

@@ -49,11 +49,7 @@ class UserRepository
 
     public function exists(string $email, string $username): bool
     {
-        $stmt = $this->pdo->prepare(
-            "SELECT user_id FROM users WHERE email = ? OR username = ? LIMIT 1"
-        );
-        $stmt->execute([strtolower(trim($email)), trim($username)]);
-        return $stmt->fetch() !== false;
+        return $this->findByEmail($email) !== null || $this->findByUsername($username) !== null;
     }
 
     public function create(array $data): int
@@ -72,23 +68,19 @@ class UserRepository
         $stmt->execute([...array_values($data), $id]);
     }
 
-    public function deductCredits(int $userId, int $amount, string $type, ?string $reason = null, ?int $tripId = null): bool
+    public function decrementCreditsIfEnough(int $userId, int $amount): bool
     {
         $stmt = $this->pdo->prepare(
             "UPDATE users SET credits = credits - ? WHERE user_id = ? AND credits >= ?"
         );
         $stmt->execute([$amount, $userId, $amount]);
-        if ($stmt->rowCount() > 0) {
-            $this->logCredit($userId, -$amount, $type, $reason, $tripId);
-        }
         return $stmt->rowCount() > 0;
     }
 
-    public function addCredits(int $userId, int $amount, string $type, ?string $reason = null, ?int $tripId = null): void
+    public function incrementCredits(int $userId, int $amount): void
     {
         $stmt = $this->pdo->prepare("UPDATE users SET credits = credits + ? WHERE user_id = ?");
         $stmt->execute([$amount, $userId]);
-        $this->logCredit($userId, $amount, $type, $reason, $tripId);
     }
 
     public function logCredit(int $userId, int $amount, string $type, ?string $reason = null, ?int $tripId = null): void
