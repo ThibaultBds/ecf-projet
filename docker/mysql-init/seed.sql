@@ -36,6 +36,13 @@ INSERT INTO trips (chauffeur_id, vehicle_id, city_depart_id, city_arrival_id, de
 (2, 3, 1, 4, '2026-04-25 07:30:00', '2026-04-25 13:00:00', 25.00, 3, 'scheduled'),
 (1, 2, 3, 5, '2026-04-29 14:00:00', '2026-04-29 18:00:00', 18.00, 3, 'scheduled');
 
+-- trajets à venir (juin)
+
+INSERT INTO trips (chauffeur_id, vehicle_id, city_depart_id, city_arrival_id, departure_datetime, arrival_datetime, price, available_seats, status) VALUES
+(2, 3, 2, 1, '2026-06-04 08:15:00', '2026-06-04 12:05:00', 17.00, 3, 'scheduled'),
+(1, 1, 4, 2, '2026-06-12 07:45:00', '2026-06-12 11:50:00', 22.00, 2, 'scheduled'),
+(1, 2, 5, 3, '2026-06-21 15:30:00', '2026-06-21 19:20:00', 19.00, 3, 'scheduled');
+
 -- Trajet terminé (pour tester validation/avis)
 INSERT INTO trips (chauffeur_id, vehicle_id, city_depart_id, city_arrival_id, departure_datetime, arrival_datetime, price, available_seats, status) VALUES
 (1, 1, 1, 2, '2026-02-10 08:00:00', '2026-02-10 12:00:00', 15.00, 2, 'completed');
@@ -45,6 +52,15 @@ INSERT INTO trips (chauffeur_id, vehicle_id, city_depart_id, city_arrival_id, de
 INSERT INTO trip_participants (trip_id, user_id, status) VALUES
 (5, 2, 'confirmed'),
 (5, 3, 'confirmed');
+
+-- participants de trajets de juin
+
+INSERT INTO trip_participants (trip_id, user_id, status) VALUES
+(6, 1, 'confirmed'),
+(6, 3, 'confirmed'),
+(7, 2, 'confirmed'),
+(7, 3, 'confirmed'),
+(8, 2, 'confirmed');
 
 -- avis (à modérer)
 

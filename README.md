@@ -50,7 +50,7 @@ Le MVC personnalisé permet :
 
 ### Back-end
 
-- PHP 8
+- PHP 8.2
 - Composer
 
 ### Base relationnelle
@@ -214,7 +214,7 @@ Import local :
 
 MongoDB est utilisé pour les collections `driver_preferences` et `trip_incidents`.
 
-Il n'y a pas de script de seed dédié dans ce dépôt : ces données sont créées via l'application pendant les tests.
+Ces collections sont alimentées directement via l'application : créer un trajet, définir des préférences conducteur ou soumettre un incident suffit à les peupler. Aucun script de seed dédié n'est nécessaire.
 
 Note : les avis utilisateurs sont stockés en MySQL (table `reviews`), pas dans MongoDB.
 
@@ -237,9 +237,7 @@ Un délai de réveil (~30s) peut apparaître au premier accès.
 
 - `main` (production)
 - `develop` (intégration)
-- `refactor-mvc`
-- `hotfix/mongo-env`
-- `css/cleanup`
+- branches feature/fix dédiées
 
 ### Processus
 
@@ -257,9 +255,8 @@ Un délai de réveil (~30s) peut apparaître au premier accès.
 - Déploiement
 - Documentation
 
-## Améliorations futures
+## Pistes d'évolution
 
-- API REST
-- JWT
-- Tests unitaires
-- Optimisation des performances
+- Exposition d'une API REST publique
+- Notifications en temps réel
+- Application mobile
