@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Core\Auth\AuthManager;
 use App\Repositories\ReviewRepository;
 use App\Repositories\TripParticipantRepository;
+use App\Repositories\TripRepository;
 use Exception;
 
 class ReviewApiController extends BaseController
@@ -15,11 +16,13 @@ class ReviewApiController extends BaseController
         $userId          = AuthManager::id();
         $participantRepo = new TripParticipantRepository();
         $reviewRepo      = new ReviewRepository();
+        $tripRepo        = new TripRepository();
 
         $tripId  = (int) ($_POST['trip_id'] ?? 0);
-        $driverId = (int) ($_POST['driver_id'] ?? 0);
         $rating  = (int) ($_POST['rating'] ?? 0);
         $comment = trim($_POST['comment'] ?? '');
+        $trip    = $tripRepo->findById($tripId);
+        $driverId = $trip ? (int) $trip->chauffeurId : 0;
 
         if ($rating < 1 || $rating > 5) {
             $_SESSION['flash_error'] = 'La note doit etre entre 1 et 5.';
@@ -35,6 +38,12 @@ class ReviewApiController extends BaseController
 
         if (!$participantRepo->isParticipating($tripId, $userId)) {
             $_SESSION['flash_error'] = 'Vous ne participez pas a ce trajet.';
+            header('Location: /my-trips');
+            exit;
+        }
+
+        if (!$trip || $trip->status !== 'completed' || $driverId === $userId) {
+            $_SESSION['flash_error'] = 'Ce trajet ne peut pas etre note.';
             header('Location: /my-trips');
             exit;
         }

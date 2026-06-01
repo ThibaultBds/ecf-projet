@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/assets/css/pages.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <title><?= $title ?? 'EcoRide' ?></title>
+    <title><?= htmlspecialchars($title ?? 'EcoRide', ENT_QUOTES, 'UTF-8') ?></title>
 </head>
 <body>
 
@@ -60,7 +60,7 @@
     </form>
 </dialog>
 
-<script>
+<script nonce="<?= csp_nonce() ?>">
 <?php if (!empty($_SESSION['user'])): ?>
 window.ecorideUser = {
     id: <?= (int)$_SESSION['user']['id'] ?>,
@@ -71,12 +71,13 @@ window.ecorideUser = {
 <?php else: ?>
 window.ecorideUser = null;
 <?php endif; ?>
+window.ecorideCsrfToken = <?= json_encode($_SESSION['csrf_token'] ?? '') ?>;
 </script>
 
-<script src="/assets/js/navbar.js"></script>
-<script src="/assets/js/script.js"></script>
+<script src="/assets/js/navbar.js" nonce="<?= csp_nonce() ?>"></script>
+<script src="/assets/js/script.js" nonce="<?= csp_nonce() ?>"></script>
 
-<script>
+<script nonce="<?= csp_nonce() ?>">
 document.addEventListener('DOMContentLoaded', function(){
     var open = document.getElementById('openModalLegal');
     var dlg = document.getElementById('modal-legal');

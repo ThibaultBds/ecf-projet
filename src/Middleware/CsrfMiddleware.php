@@ -19,10 +19,21 @@ class CsrfMiddleware
 
         if (!$token || !hash_equals($_SESSION['csrf_token'], $token)) {
             $_SESSION['flash_error'] = 'Session expirée, veuillez réessayer.';
-            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/'));
+            header('Location: ' . $this->safeRedirectPath($_SERVER['HTTP_REFERER'] ?? '/'));
             exit;
         }
 
         return true;
+    }
+
+    private function safeRedirectPath(string $target): string
+    {
+        $path = parse_url($target, PHP_URL_PATH);
+        if (!is_string($path) || $path === '' || $path[0] !== '/') {
+            return '/';
+        }
+
+        $query = parse_url($target, PHP_URL_QUERY);
+        return $query ? $path . '?' . $query : $path;
     }
 }

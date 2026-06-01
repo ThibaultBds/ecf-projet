@@ -69,6 +69,12 @@ class UserController extends BaseController
         }
 
         $file     = $_FILES['photo'];
+        if (($file['size'] ?? 0) > 2 * 1024 * 1024) {
+            $_SESSION['flash_error'] = "Image trop lourde (2 Mo maximum).";
+            header('Location: /profile');
+            exit;
+        }
+
         $finfo    = new \finfo(FILEINFO_MIME_TYPE);
         $realType = $finfo->file($file['tmp_name']);
 
@@ -80,8 +86,14 @@ class UserController extends BaseController
             exit;
         }
 
+        if (@getimagesize($file['tmp_name']) === false) {
+            $_SESSION['flash_error'] = "Image invalide.";
+            header('Location: /profile');
+            exit;
+        }
+
         $extension   = $allowedTypes[$realType];
-        $newFileName = 'user_' . $userId . '_' . time() . '.' . $extension;
+        $newFileName = 'user_' . $userId . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
         $uploadDir   = __DIR__ . '/../../public/uploads';
 
         if (!is_dir($uploadDir)) {
@@ -108,7 +120,8 @@ class UserController extends BaseController
         $user     = $userRepo->findById($userId);
 
         if ($user && !empty($user->photo)) {
-            $filePath = __DIR__ . '/../../public/uploads/' . $user->photo;
+            $fileName = basename($user->photo);
+            $filePath = __DIR__ . '/../../public/uploads/' . $fileName;
             if (file_exists($filePath)) {
                 unlink($filePath);
             }

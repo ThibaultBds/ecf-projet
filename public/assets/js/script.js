@@ -8,10 +8,11 @@ function showToast(message, type) {
     type = type || 'success';
     const toast = document.createElement('div');
     toast.className = 'toast ' + type;
-    toast.innerHTML =
-        '<span class="material-icons toast-icon">' +
-        (type === 'success' ? 'check_circle' : 'error') +
-        '</span>' + message;
+    const icon = document.createElement('span');
+    icon.className = 'material-icons toast-icon';
+    icon.textContent = type === 'success' ? 'check_circle' : 'error';
+    toast.appendChild(icon);
+    toast.appendChild(document.createTextNode(String(message || '')));
 
     document.body.appendChild(toast);
     setTimeout(function() { toast.classList.add('show'); }, 100);

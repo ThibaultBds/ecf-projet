@@ -26,7 +26,7 @@ Router::group(['middleware' => ['csrf', 'rate']], function () {
     });
 
     Router::group(['middleware' => 'auth'], function () {
-        Router::get('/logout', 'AuthController@logout');
+        Router::post('/logout', 'AuthController@logout');
 
         Router::get('/profile', 'UserController@profile');
         Router::post('/profile/update', 'UserController@update');

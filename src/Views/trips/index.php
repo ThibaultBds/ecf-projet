@@ -182,8 +182,20 @@
     </div><!-- #trips-results -->
 </section>
 
-<script>
+<script nonce="<?= csp_nonce() ?>">
 document.addEventListener('DOMContentLoaded', function() {
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, function(char) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char];
+        });
+    }
+
     // Toggle filtres avancés
     const toggleBtn = document.getElementById('toggle-filters');
     const filtersBlock = document.getElementById('advanced-filters');
@@ -220,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (nearestDate) {
                         const d = new Date(nearestDate);
                         const formatted = d.toLocaleDateString('fr-FR');
-                        html += `<div class="trips-nearest-box"><p class="trips-nearest-text"><span class="material-icons trips-nearest-icon">event</span> Un trajet est disponible le ${formatted}</p><a href="/trips?depart=${encodeURIComponent(params.get('depart'))}&arrivee=${encodeURIComponent(params.get('arrivee'))}&date=${nearestDate}" class="trips-nearest-link">Voir ce trajet</a></div>`;
+                        html += `<div class="trips-nearest-box"><p class="trips-nearest-text"><span class="material-icons trips-nearest-icon">event</span> Un trajet est disponible le ${escapeHtml(formatted)}</p><a href="/trips?depart=${encodeURIComponent(params.get('depart'))}&arrivee=${encodeURIComponent(params.get('arrivee'))}&date=${encodeURIComponent(nearestDate)}" class="trips-nearest-link">Voir ce trajet</a></div>`;
                     }
                     html += '</div>';
                     resultsContainer.innerHTML = html;
@@ -230,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let html = '<p class="trips-count-text">' + trajets.length + ' trajet' + (trajets.length > 1 ? 's' : '') + ' trouvé' + (trajets.length > 1 ? 's' : '') + '</p>';
                 trajets.forEach(function(c) {
                     const photo = c.conducteurPhoto
-                        ? `<img src="/uploads/${c.conducteurPhoto}" alt="Photo" class="trips-driver-photo">`
+                        ? `<img src="/uploads/${encodeURIComponent(c.conducteurPhoto)}" alt="Photo" class="trips-driver-photo">`
                         : `<span class="material-icons trips-driver-fallback">account_circle</span>`;
                     const note = parseFloat(c.noteConducteur) > 0
                         ? `<span class="trips-driver-rating">&#9733; ${parseFloat(c.noteConducteur).toFixed(1)}/5</span>`
@@ -244,20 +256,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     html += `
                         <div class="ride-card">
                             <div class="ride-header">
-                                <h3>${c.villeDepart} &rarr; ${c.villeArrivee}</h3>
+                                <h3>${escapeHtml(c.villeDepart)} &rarr; ${escapeHtml(c.villeArrivee)}</h3>
                                 <div class="ride-price">${parseFloat(c.price).toFixed(2)}€</div>
                             </div>
                             <div class="ride-details">
                                 <p><span class="material-icons">schedule</span>
                                     ${c.departureDatetime.substring(0,10).split('-').reverse().join('/')} à ${c.departureDatetime.substring(11,16)}${arrival}
                                 </p>
-                                <p class="trips-driver-line">${photo} ${c.conducteur} ${note}</p>
-                                <p><span class="material-icons">directions_car</span> ${c.brand} ${c.model}</p>
+                                <p class="trips-driver-line">${photo} ${escapeHtml(c.conducteur)} ${note}</p>
+                                <p><span class="material-icons">directions_car</span> ${escapeHtml(c.brand)} ${escapeHtml(c.model)}</p>
                                 <p><span class="material-icons">people</span> ${c.availableSeats} place${c.availableSeats > 1 ? 's' : ''} restante${c.availableSeats > 1 ? 's' : ''}</p>
                             </div>
                             ${ecoBadge}
                             <div class="ride-actions">
-                                <a href="/trip/${c.tripId}" class="btn-primary">Voir détails</a>
+                                <a href="/trip/${encodeURIComponent(c.tripId)}" class="btn-primary">Voir détails</a>
                             </div>
                         </div>`;
                 });

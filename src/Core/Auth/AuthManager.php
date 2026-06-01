@@ -121,7 +121,7 @@ class AuthManager
             case 'employe':
                 return '/moderator';
             case 'chauffeur':
-                return '/driver';
+                return '/driver/dashboard';
             default:
                 return '/profile';
         }

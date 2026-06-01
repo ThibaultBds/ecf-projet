@@ -15,6 +15,10 @@ class DriverController extends BaseController
 {
     public function dashboard()
     {
+        if (!$this->ensureDriver()) {
+            return;
+        }
+
         $userId   = AuthManager::id();
         $userRepo = new UserRepository();
         $tripRepo = new TripRepository();
@@ -37,6 +41,10 @@ class DriverController extends BaseController
 
     public function createTrip()
     {
+        if (!$this->ensureDriver()) {
+            return;
+        }
+
         $userId      = AuthManager::id();
         $userRepo    = new UserRepository();
         $vehicleRepo = new VehicleRepository();
@@ -63,6 +71,10 @@ class DriverController extends BaseController
 
     public function storeTrip()
     {
+        if (!$this->ensureDriver()) {
+            return;
+        }
+
         $userId      = AuthManager::id();
         $userRepo    = new UserRepository();
         $vehicleRepo = new VehicleRepository();
@@ -140,6 +152,10 @@ class DriverController extends BaseController
 
     public function preferences()
     {
+        if (!$this->ensureDriver()) {
+            return;
+        }
+
         $userId = AuthManager::id();
         $mongo  = MongoDB::getInstance();
         $prefs  = $mongo->findOne('driver_preferences', ['user_id' => $userId]);
@@ -156,6 +172,10 @@ class DriverController extends BaseController
 
     public function savePreferences()
     {
+        if (!$this->ensureDriver()) {
+            return;
+        }
+
         $userId = AuthManager::id();
 
         $prefs = [
@@ -192,5 +212,16 @@ class DriverController extends BaseController
         } catch (Exception $e) {
             return [];
         }
+    }
+
+    private function ensureDriver(): bool
+    {
+        if (!empty($_SESSION['user']['is_driver'])) {
+            return true;
+        }
+
+        $_SESSION['flash_error'] = 'Activez le mode chauffeur pour acceder a cet espace.';
+        header('Location: /profile');
+        exit;
     }
 }

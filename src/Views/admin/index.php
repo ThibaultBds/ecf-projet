@@ -58,8 +58,8 @@ $roleLabels = [
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" nonce="<?= csp_nonce() ?>"></script>
+    <script nonce="<?= csp_nonce() ?>">
     document.addEventListener('DOMContentLoaded', function() {
         var tripsData = <?= json_encode($tripsPerDay ?? []) ?>;
         var creditsData = <?= json_encode($creditsPerDay ?? []) ?>;

@@ -9,6 +9,10 @@ class VehicleController extends BaseController
 {
     public function index()
     {
+        if (!$this->ensureDriver()) {
+            return;
+        }
+
         $userId      = AuthManager::id();
         $vehicleRepo = new VehicleRepository();
         $vehicles    = $vehicleRepo->byUser($userId);
@@ -24,6 +28,10 @@ class VehicleController extends BaseController
 
     public function store()
     {
+        if (!$this->ensureDriver()) {
+            return;
+        }
+
         $userId      = AuthManager::id();
         $vehicleRepo = new VehicleRepository();
 
@@ -77,6 +85,10 @@ class VehicleController extends BaseController
 
     public function update()
     {
+        if (!$this->ensureDriver()) {
+            return;
+        }
+
         $userId      = AuthManager::id();
         $vehicleRepo = new VehicleRepository();
         $vehicleId   = (int) ($_POST['vehicle_id'] ?? 0);
@@ -115,6 +127,10 @@ class VehicleController extends BaseController
 
     public function destroy()
     {
+        if (!$this->ensureDriver()) {
+            return;
+        }
+
         $userId      = AuthManager::id();
         $vehicleRepo = new VehicleRepository();
         $vehicleId   = (int) ($_POST['vehicle_id'] ?? 0);
@@ -128,6 +144,17 @@ class VehicleController extends BaseController
         $vehicleRepo->destroy($vehicleId);
         $_SESSION['flash_success'] = 'Véhicule supprimé.';
         header('Location: /driver/vehicles');
+        exit;
+    }
+
+    private function ensureDriver(): bool
+    {
+        if (!empty($_SESSION['user']['is_driver'])) {
+            return true;
+        }
+
+        $_SESSION['flash_error'] = 'Activez le mode chauffeur pour gerer vos vehicules.';
+        header('Location: /profile');
         exit;
     }
 }

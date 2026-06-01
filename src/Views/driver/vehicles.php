@@ -74,14 +74,13 @@
                         <?php endif; ?>
                     </div>
                     <div class="inline-form">
-                        <button type="button" class="btn-secondary"
-                            onclick="document.getElementById('edit-vehicle-<?= $v->vehicleId ?>').classList.toggle('hidden')">
+                        <button type="button" class="btn-secondary" data-toggle-vehicle="edit-vehicle-<?= $v->vehicleId ?>">
                             Modifier
                         </button>
                         <form method="POST" action="/driver/vehicles/delete" class="inline-form" style="display:inline">
                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                             <input type="hidden" name="vehicle_id" value="<?= $v->vehicleId ?>">
-                            <button type="submit" class="btn-danger" onclick="return confirm('Supprimer ce véhicule ?');">Supprimer</button>
+                            <button type="submit" class="btn-danger" data-confirm="Supprimer ce véhicule ?">Supprimer</button>
                         </form>
                     </div>
                     <div id="edit-vehicle-<?= $v->vehicleId ?>" class="hidden" style="margin-top:1rem">
@@ -131,3 +130,24 @@
         </a>
     </div>
 </main>
+
+<script nonce="<?= csp_nonce() ?>">
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-toggle-vehicle]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var target = document.getElementById(button.dataset.toggleVehicle);
+            if (target) {
+                target.classList.toggle('hidden');
+            }
+        });
+    });
+
+    document.querySelectorAll('[data-confirm]').forEach(function(button) {
+        button.addEventListener('click', function(event) {
+            if (!window.confirm(button.dataset.confirm)) {
+                event.preventDefault();
+            }
+        });
+    });
+});
+</script>

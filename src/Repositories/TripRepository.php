@@ -110,7 +110,7 @@ class TripRepository
         $sql = "SELECT DATE(t.departure_datetime) AS nearest_date FROM trips t
                 JOIN cities cd ON t.city_depart_id = cd.city_id
                 JOIN cities ca ON t.city_arrival_id = ca.city_id
-                WHERE t.status = 'scheduled' AND t.available_seats > 0";
+                WHERE t.status = 'scheduled' AND t.available_seats > 0 AND t.departure_datetime > NOW()";
         $params = [];
         if ($depart !== '') {
             $sql .= " AND cd.name LIKE ?";
@@ -124,7 +124,7 @@ class TripRepository
             $sql .= " ORDER BY ABS(DATEDIFF(DATE(t.departure_datetime), ?)) ASC, t.departure_datetime ASC LIMIT 1";
             $params[] = $date;
         } else {
-            $sql .= " AND t.departure_datetime > NOW() ORDER BY t.departure_datetime ASC LIMIT 1";
+            $sql .= " ORDER BY t.departure_datetime ASC LIMIT 1";
         }
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);

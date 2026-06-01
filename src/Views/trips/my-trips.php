@@ -58,16 +58,16 @@ $statusLabels = [
                             <input type="hidden" name="status" value="">
                             <?php if ($trajet->status === 'scheduled'): ?>
                                 <button type="submit" name="action" value="update_trip_status" class="btn-primary btn-status-started"
-                                        onclick="this.form.querySelector('[name=status]').value='started';">
+                                        data-trip-status="started">
                                     <span class="material-icons trip-action-icon">play_arrow</span> Démarrer
                                 </button>
                                 <button type="submit" name="action" value="update_trip_status" class="btn-danger"
-                                        onclick="this.form.querySelector('[name=status]').value='cancelled';">
+                                        data-trip-status="cancelled">
                                     Annuler
                                 </button>
                             <?php elseif ($trajet->status === 'started'): ?>
                                 <button type="submit" name="action" value="update_trip_status" class="btn-primary btn-status-completed"
-                                        onclick="this.form.querySelector('[name=status]').value='completed';">
+                                        data-trip-status="completed">
                                     <span class="material-icons trip-action-icon">flag</span> Arrivée à destination
                                 </button>
                             <?php endif; ?>
@@ -211,7 +211,6 @@ $statusLabels = [
                                     <form action="/api/review" method="POST" class="form-container form-small form-compact trip-review-form">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                         <input type="hidden" name="trip_id" value="<?= $trajet->tripId ?>">
-                                        <input type="hidden" name="driver_id" value="<?= $trajet->chauffeurId ?? '' ?>">
                                         <label>Note (1 à 5)</label>
                                         <input type="number" name="rating" min="1" max="5" required>
                                         <label>Commentaire</label>
@@ -313,7 +312,6 @@ $statusLabels = [
                                         <form action="/api/review" method="POST" class="form-container form-small form-compact trip-review-form">
                                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                             <input type="hidden" name="trip_id" value="<?= $trajet->tripId ?>">
-                                            <input type="hidden" name="driver_id" value="<?= $trajet->chauffeurId ?? '' ?>">
                                             <label for="rating-<?= $trajet->tripId ?>">Note (1 à 5)</label>
                                             <input type="number" id="rating-<?= $trajet->tripId ?>" name="rating" min="1" max="5" required>
                                             <label for="comment-<?= $trajet->tripId ?>">Commentaire</label>
@@ -353,3 +351,16 @@ $statusLabels = [
         </a>
     </div>
 </main>
+
+<script nonce="<?= csp_nonce() ?>">
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-trip-status]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var statusInput = button.form ? button.form.querySelector('[name="status"]') : null;
+            if (statusInput) {
+                statusInput.value = button.dataset.tripStatus;
+            }
+        });
+    });
+});
+</script>

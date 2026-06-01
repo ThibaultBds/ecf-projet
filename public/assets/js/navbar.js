@@ -5,6 +5,17 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function renderMenu(user) {
+    function escapeHtml(value) {
+        return String(value || '').replace(/[&<>"']/g, function(char) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char];
+        });
+    }
 
     const navInner = `
         <ul class="nav-links">
@@ -17,7 +28,7 @@ function renderMenu(user) {
             <a href="/profile" class="nav-profile-link">
                 <span class="material-icons nav-avatar">account_circle</span>
                 <span class="nav-username">
-                    ${user && user.pseudo ? user.pseudo : 'Profil'}
+                    ${user && user.pseudo ? escapeHtml(user.pseudo) : 'Profil'}
                 </span>
             </a>
             <a id="logout-link" href="/logout" class="nav-logout">Déconnexion</a>
@@ -61,7 +72,18 @@ function renderMenu(user) {
     if (logoutLink) {
         logoutLink.addEventListener('click', function (e) {
             e.preventDefault();
-            window.location.href = "/logout";
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/logout';
+
+            const token = document.createElement('input');
+            token.type = 'hidden';
+            token.name = 'csrf_token';
+            token.value = window.ecorideCsrfToken || '';
+            form.appendChild(token);
+
+            document.body.appendChild(form);
+            form.submit();
         });
     }
 }

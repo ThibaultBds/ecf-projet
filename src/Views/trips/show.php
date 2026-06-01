@@ -196,7 +196,7 @@
     </div>
 </dialog>
 
-<script>
+<script nonce="<?= csp_nonce() ?>">
 document.addEventListener('DOMContentLoaded', function() {
     var participateBtn = document.getElementById('participate-btn');
     var confirmModal = document.getElementById('confirm-modal');

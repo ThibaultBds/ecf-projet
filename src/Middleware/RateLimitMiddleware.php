@@ -8,9 +8,7 @@ class RateLimitMiddleware
 {
     public function handle($config = null)
     {
-        $key = 'general';
-        $max = 60;
-        $window = 60;
+        [$key, $max, $window] = $this->resolveLimit($config);
         $ip = $this->getClientIp();
         $now = time();
         $windowStart = intdiv($now, $window) * $window;
@@ -78,15 +76,31 @@ class RateLimitMiddleware
 
     private function getClientIp()
     {
-        $forwarded = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
-        if ($forwarded) {
-            $parts = array_map('trim', explode(',', $forwarded));
-            if (!empty($parts[0])) {
-                return $parts[0];
-            }
+        return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    }
+
+    private function resolveLimit($config): array
+    {
+        if (is_string($config) && preg_match('/^([a-z0-9_-]+):(\d+):(\d+)$/i', $config, $matches)) {
+            return [$matches[1], max(1, (int) $matches[2]), max(1, (int) $matches[3])];
         }
 
-        return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+        if ($path === '/login' && $method === 'POST') {
+            return ['login', 10, 900];
+        }
+
+        if ($path === '/contact' && $method === 'POST') {
+            return ['contact', 5, 300];
+        }
+
+        if (strpos($path, '/api/') === 0) {
+            return ['api:' . $path, 60, 60];
+        }
+
+        return ['page:' . $method . ':' . $path, 120, 60];
     }
 
     private function isApiRequest()

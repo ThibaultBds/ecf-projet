@@ -109,6 +109,18 @@ class AdminController extends BaseController
             exit;
         }
 
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['flash_error'] = 'Email invalide.';
+            header('Location: /admin');
+            exit;
+        }
+
+        if (strlen($password) < 8) {
+            $_SESSION['flash_error'] = 'Le mot de passe doit contenir au moins 8 caracteres.';
+            header('Location: /admin');
+            exit;
+        }
+
         if (!in_array($role, ['employe', 'user'], true)) {
             $_SESSION['flash_error'] = 'Role invalide.';
             header('Location: /admin');

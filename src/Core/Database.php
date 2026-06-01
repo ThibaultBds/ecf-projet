@@ -25,7 +25,8 @@ class Database {
             $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
         } catch (PDOException $e) {
-            throw new \RuntimeException("Erreur de connexion à la base de données : " . $e->getMessage(), 0, $e);
+            error_log("Erreur de connexion base de donnees : " . $e->getMessage());
+            throw new \RuntimeException("Erreur de connexion a la base de donnees.", 0, $e);
         }
     }
 

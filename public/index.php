@@ -27,6 +27,27 @@ if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+$GLOBALS['cspNonce'] = bin2hex(random_bytes(16));
+
+function csp_nonce(): string
+{
+    return htmlspecialchars($GLOBALS['cspNonce'] ?? '', ENT_QUOTES, 'UTF-8');
+}
+
+header(
+    "Content-Security-Policy: "
+    . "default-src 'self'; "
+    . "script-src 'self' 'nonce-{$GLOBALS['cspNonce']}' https://cdn.jsdelivr.net; "
+    . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+    . "font-src 'self' https://fonts.gstatic.com; "
+    . "img-src 'self' data:; "
+    . "connect-src 'self'; "
+    . "object-src 'none'; "
+    . "base-uri 'self'; "
+    . "form-action 'self'; "
+    . "frame-ancestors 'self'"
+);
+
 $router = new Router();
 
 // Charger les routes

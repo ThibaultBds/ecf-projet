@@ -26,7 +26,7 @@ $statusLabels = ['scheduled' => 'Planifié', 'started' => 'En cours', 'completed
                     <tr class="admin-trips-row <?= $i % 2 === 1 ? 'admin-trips-row-alt' : '' ?>">
                         <td><?= $trip->tripId ?></td>
                         <td>
-                            <a href="/covoiturages/<?= $trip->tripId ?>" class="admin-trips-trip-link">
+                            <a href="/trip/<?= $trip->tripId ?>" class="admin-trips-trip-link">
                                 <?= htmlspecialchars($trip->villeDepart) ?> → <?= htmlspecialchars($trip->villeArrivee) ?>
                             </a>
                         </td>

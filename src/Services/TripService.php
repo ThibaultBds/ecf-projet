@@ -112,23 +112,32 @@ class TripService
         $cityDepartId = $this->tripRepository->findOrCreateCity($data['city_depart']);
         $cityArrivalId = $this->tripRepository->findOrCreateCity($data['city_arrival']);
 
-        $pdo->beginTransaction();
+        try {
+            $pdo->beginTransaction();
 
-        $this->tripRepository->create([
-            'chauffeur_id' => $userId,
-            'vehicle_id' => $vehicleId,
-            'city_depart_id' => $cityDepartId,
-            'city_arrival_id' => $cityArrivalId,
-            'departure_datetime' => $data['departure_datetime'],
-            'arrival_datetime' => $data['arrival_datetime'],
-            'price' => $data['price'],
-            'available_seats' => $data['available_seats'],
-            'status' => 'scheduled',
-        ]);
+            $this->tripRepository->create([
+                'chauffeur_id' => $userId,
+                'vehicle_id' => $vehicleId,
+                'city_depart_id' => $cityDepartId,
+                'city_arrival_id' => $cityArrivalId,
+                'departure_datetime' => $data['departure_datetime'],
+                'arrival_datetime' => $data['arrival_datetime'],
+                'price' => $data['price'],
+                'available_seats' => $data['available_seats'],
+                'status' => 'scheduled',
+            ]);
 
-        $this->userService->debitCredits($userId, 2, 'platform_fee', 'Frais plateforme creation');
+            if (!$this->userService->debitCredits($userId, 2, 'platform_fee', 'Frais plateforme creation')) {
+                throw new Exception('Credits insuffisants pour creer le trajet.');
+            }
 
-        $pdo->commit();
+            $pdo->commit();
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
     public function cancelParticipation(int $tripId, int $userId): void
@@ -137,19 +146,39 @@ class TripService
 
         try {
             $pdo->beginTransaction();
-            $this->participantRepository->removeParticipation($tripId, $userId);
+
+            $stmt = $pdo->prepare(
+                "SELECT t.price, t.status, tp.status AS participant_status
+                 FROM trip_participants tp
+                 JOIN trips t ON t.trip_id = tp.trip_id
+                 WHERE tp.trip_id = ? AND tp.user_id = ?
+                 FOR UPDATE"
+            );
+            $stmt->execute([$tripId, $userId]);
+            $participation = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$participation || $participation['participant_status'] !== 'confirmed' || $participation['status'] !== 'scheduled') {
+                $pdo->rollBack();
+                return;
+            }
+
+            $stmt = $pdo->prepare("DELETE FROM trip_participants WHERE trip_id = ? AND user_id = ? AND status = 'confirmed'");
+            $stmt->execute([$tripId, $userId]);
+            if ($stmt->rowCount() !== 1) {
+                $pdo->rollBack();
+                return;
+            }
 
             $stmt = $pdo->prepare("UPDATE trips SET available_seats = available_seats + 1 WHERE trip_id = ?");
             $stmt->execute([$tripId]);
 
-            $trip = $this->tripRepository->findById($tripId);
-            if ($trip) {
-                $this->userService->creditCredits($userId, (int) $trip->price + 2, 'refund', 'Annulation participation', $tripId);
-            }
+            $this->userService->creditCredits($userId, (int) $participation['price'] + 2, 'refund', 'Annulation participation', $tripId);
 
             $pdo->commit();
         } catch (Exception $e) {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             error_log("Erreur annulation participation : " . $e->getMessage());
         }
     }
@@ -157,26 +186,40 @@ class TripService
     public function validateTrip(int $tripId, int $userId): void
     {
         $pdo = Database::getInstance()->getConnection();
-        $trip = $this->tripRepository->findById($tripId);
-        if (!$trip || $trip->status !== 'completed') {
-            return;
-        }
-        if (!$this->participantRepository->isParticipating($tripId, $userId)) {
-            return;
-        }
-
-        $participant = $this->participantRepository->find($tripId, $userId);
-        if (!$participant || $participant->status === 'validated') {
-            return;
-        }
 
         try {
             $pdo->beginTransaction();
-            $this->participantRepository->updateStatus($tripId, $userId, 'validated');
-            $this->userService->creditCredits($trip->chauffeurId, (int) $trip->price, 'credit', 'Validation trajet passager', $tripId);
+
+            $stmt = $pdo->prepare(
+                "SELECT t.chauffeur_id, t.price
+                 FROM trip_participants tp
+                 JOIN trips t ON t.trip_id = tp.trip_id
+                 WHERE tp.trip_id = ? AND tp.user_id = ? AND tp.status = 'confirmed' AND t.status = 'completed'
+                 FOR UPDATE"
+            );
+            $stmt->execute([$tripId, $userId]);
+            $trip = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if (!$trip) {
+                $pdo->rollBack();
+                return;
+            }
+
+            $stmt = $pdo->prepare(
+                "UPDATE trip_participants SET status = 'validated'
+                 WHERE trip_id = ? AND user_id = ? AND status = 'confirmed'"
+            );
+            $stmt->execute([$tripId, $userId]);
+            if ($stmt->rowCount() !== 1) {
+                $pdo->rollBack();
+                return;
+            }
+
+            $this->userService->creditCredits((int) $trip['chauffeur_id'], (int) $trip['price'], 'credit', 'Validation trajet passager', $tripId);
             $pdo->commit();
         } catch (Exception $e) {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             error_log("Erreur validation trajet : " . $e->getMessage());
         }
     }
@@ -205,18 +248,33 @@ class TripService
 
         try {
             $pdo->beginTransaction();
-            $this->tripRepository->update($tripId, ['status' => $newStatus]);
+
+            $expectedStatus = match ($newStatus) {
+                'started' => 'scheduled',
+                'completed' => 'started',
+                'cancelled' => $trip->status,
+                default => null,
+            };
+
+            $stmt = $pdo->prepare("UPDATE trips SET status = ? WHERE trip_id = ? AND status = ?");
+            $stmt->execute([$newStatus, $tripId, $expectedStatus]);
+            if ($stmt->rowCount() !== 1) {
+                $pdo->rollBack();
+                return;
+            }
+
             $participants = $this->participantRepository->byTrip($tripId);
 
             if ($newStatus === 'cancelled') {
                 foreach ($participants as $participant) {
-                    $this->userService->creditCredits($participant->userId, (int) $trip->price, 'refund', 'Remboursement annulation trajet', $tripId);
+                    $refund = (int) $trip->price + 2;
+                    $this->userService->creditCredits($participant->userId, $refund, 'refund', 'Remboursement annulation trajet', $tripId);
                     $passenger = $this->userRepository->findById($participant->userId);
                     if ($passenger) {
                         (new Mailer())->send(
                             $passenger->email,
                             "Trajet annule - EcoRide",
-                            "Bonjour {$passenger->username},\n\nLe trajet #{$tripId} a ete annule par le chauffeur.\nVous avez ete rembourse de {$trip->price} credits.\n\nEcoRide"
+                            "Bonjour {$passenger->username},\n\nLe trajet #{$tripId} a ete annule par le chauffeur.\nVous avez ete rembourse de {$refund} credits.\n\nEcoRide"
                         );
                     }
                 }
@@ -255,8 +313,21 @@ class TripService
         }
 
         $comment = trim($comment);
+        if ($comment === '' || strlen($comment) > 1000) {
+            return;
+        }
 
         try {
+            $pdo = Database::getInstance()->getConnection();
+            $stmt = $pdo->prepare(
+                "UPDATE trip_participants SET status = 'disputed'
+                 WHERE trip_id = ? AND user_id = ? AND status = 'confirmed'"
+            );
+            $stmt->execute([$tripId, $userId]);
+            if ($stmt->rowCount() !== 1) {
+                return;
+            }
+
             MongoDB::getInstance()->insertOne('trip_incidents', [
                 'trip_id' => $tripId,
                 'reporter_id' => $userId,
@@ -265,10 +336,6 @@ class TripService
                 'status' => 'pending',
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
-
-            $pdo = Database::getInstance()->getConnection();
-            $stmt = $pdo->prepare("UPDATE trip_participants SET status = 'disputed' WHERE trip_id = ? AND user_id = ?");
-            $stmt->execute([$tripId, $userId]);
         } catch (Exception $e) {
             error_log("Erreur signalement : " . $e->getMessage());
         }
@@ -279,29 +346,48 @@ class TripService
         $pdo = Database::getInstance()->getConnection();
 
         try {
-            $trip = $this->tripRepository->findById($tripId);
-            $user = $this->userRepository->findById($userId);
+            $stmt = $pdo->prepare(
+                "SELECT trip_id, chauffeur_id, price, available_seats, status
+                 FROM trips
+                 WHERE trip_id = ?
+                 FOR UPDATE"
+            );
+            $pdo->beginTransaction();
+            $stmt->execute([$tripId]);
+            $trip = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            $stmt = $pdo->prepare("SELECT user_id, credits FROM users WHERE user_id = ? FOR UPDATE");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$trip) {
+                $pdo->rollBack();
                 return ['success' => false, 'message' => 'Trajet non trouve.'];
             }
-            if ($trip->chauffeurId === $userId) {
+            if (!$user) {
+                $pdo->rollBack();
+                return ['success' => false, 'message' => 'Utilisateur introuvable.'];
+            }
+            if ((int) $trip['chauffeur_id'] === $userId) {
+                $pdo->rollBack();
                 return ['success' => false, 'message' => 'Vous ne pouvez pas participer a votre propre trajet.'];
             }
             if ($this->participantRepository->isParticipating($tripId, $userId)) {
+                $pdo->rollBack();
                 return ['success' => false, 'message' => 'Vous participez deja a ce trajet.'];
             }
-            if ($trip->availableSeats <= 0) {
+            if ($trip['status'] !== 'scheduled' || (int) $trip['available_seats'] <= 0) {
+                $pdo->rollBack();
                 return ['success' => false, 'message' => 'Plus de places disponibles.'];
             }
 
-            $tripPrice = (int) $trip->price;
+            $tripPrice = (int) $trip['price'];
             $platformFee = 2;
-            if ($user->credits < $tripPrice + $platformFee) {
+            if ((int) $user['credits'] < $tripPrice + $platformFee) {
+                $pdo->rollBack();
                 return ['success' => false, 'message' => 'Credits insuffisants.'];
             }
 
-            $pdo->beginTransaction();
             if (!$this->userService->debitCredits($userId, $tripPrice, 'debit', 'Participation au trajet', $tripId)) {
                 throw new Exception("Erreur debit prix");
             }
@@ -310,8 +396,11 @@ class TripService
             }
 
             $this->participantRepository->create(['trip_id' => $tripId, 'user_id' => $userId]);
-            $stmt = $pdo->prepare("UPDATE trips SET available_seats = available_seats - 1 WHERE trip_id = ?");
+            $stmt = $pdo->prepare("UPDATE trips SET available_seats = available_seats - 1 WHERE trip_id = ? AND available_seats > 0");
             $stmt->execute([$tripId]);
+            if ($stmt->rowCount() !== 1) {
+                throw new Exception("Plus de places disponibles");
+            }
             $pdo->commit();
 
             $updatedUser = $this->userRepository->findById($userId);
@@ -340,17 +429,24 @@ class TripService
             }
 
             $pdo->beginTransaction();
-            $this->tripRepository->update($tripId, ['status' => 'cancelled']);
+            $stmt = $pdo->prepare("UPDATE trips SET status = 'cancelled' WHERE trip_id = ? AND status = 'scheduled'");
+            $stmt->execute([$tripId]);
+            if ($stmt->rowCount() !== 1) {
+                $pdo->rollBack();
+                return ['success' => false, 'message' => 'Ce trajet ne peut plus etre annule.'];
+            }
+
             $participants = $this->participantRepository->byTrip($tripId);
 
             foreach ($participants as $participant) {
-                $this->userService->creditCredits($participant->userId, (int) $trip->price, 'refund', 'Remboursement annulation', $tripId);
+                $refund = (int) $trip->price + 2;
+                $this->userService->creditCredits($participant->userId, $refund, 'refund', 'Remboursement annulation', $tripId);
                 $passenger = $this->userRepository->findById($participant->userId);
                 if ($passenger) {
                     $mailer->send(
                         $passenger->email,
                         "Trajet annule - EcoRide",
-                        "Bonjour {$passenger->username},\n\nLe trajet #{$tripId} a ete annule par le chauffeur.\nVous avez ete rembourse de {$trip->price} credits.\n\nEcoRide"
+                        "Bonjour {$passenger->username},\n\nLe trajet #{$tripId} a ete annule par le chauffeur.\nVous avez ete rembourse de {$refund} credits.\n\nEcoRide"
                     );
                 }
             }
