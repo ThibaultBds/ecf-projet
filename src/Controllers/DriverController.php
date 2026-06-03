@@ -157,14 +157,22 @@ class DriverController extends BaseController
         }
 
         $userId = AuthManager::id();
-        $mongo  = MongoDB::getInstance();
-        $prefs  = $mongo->findOne('driver_preferences', ['user_id' => $userId]);
+        $prefs  = [];
+        $error  = $_SESSION['flash_error'] ?? '';
+
+        try {
+            $mongo = MongoDB::getInstance();
+            $prefs = $mongo->findOne('driver_preferences', ['user_id' => $userId]) ?? [];
+        } catch (Exception $e) {
+            error_log('MongoDB preferences error: ' . $e->getMessage());
+            $error = 'Impossible de charger vos préférences pour le moment.';
+        }
 
         $this->render('driver/preferences', [
             'title'   => 'Mes Préférences - EcoRide',
-            'prefs'   => $prefs ?? [],
+            'prefs'   => $prefs,
             'success' => $_SESSION['flash_success'] ?? '',
-            'error'   => $_SESSION['flash_error'] ?? '',
+            'error'   => $error,
         ]);
 
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);

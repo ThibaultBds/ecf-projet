@@ -15,7 +15,12 @@ class MongoDB
     private function __construct()
     {
         $mongoUri = getenv('MONGO_URL') ?: getenv('MONGO_URI') ?: 'mongodb://mongo:27017';
-        $this->manager = new Manager($mongoUri);
+        try {
+            $this->manager = new Manager($mongoUri);
+        } catch (\Throwable $e) {
+            error_log('MongoDB connection failed: ' . $e->getMessage());
+            throw new \RuntimeException('Could not connect to MongoDB. Check MONGO_URL/MONGO_URI.', 0, $e);
+        }
     }
 
     public static function getInstance(): self
